@@ -1,7 +1,6 @@
 # Teamprojekt
 
-
-* Inhalt
-* Grund
-* installation (TODO)
-* Beispiel (TODO)
+- Inhalt
+- Grund
+- installation (TODO)
+- Beispiel (TODO)

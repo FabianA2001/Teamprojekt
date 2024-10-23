@@ -1,0 +1,3 @@
+#!/bin/sh
+source bin/activate
+pre-commit run --all-files
