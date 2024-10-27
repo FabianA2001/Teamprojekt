@@ -14,7 +14,7 @@ class Img:
             "RGB", (height, width), color="white")
         self._draw = ImageDraw.Draw(self.img)
 
-        self.points = self.gernerte_point(count)
+        self.points = self.generate_point(count)
         for coord in self.points:
             self._draw_cross(coord)
 
@@ -22,7 +22,7 @@ class Img:
         for edge in self.edges:
             self._connect_points(edge)
 
-    def gernerte_point(self, count: int) -> list[Coord]:
+    def generate_point(self, count: int) -> list[Coord]:
         DISTANCE = 10
         list = []
         for _ in range(count):
