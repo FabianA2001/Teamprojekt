@@ -4,17 +4,22 @@ from CONST import Coord, Edge
 import random
 import solver
 import argparse
+import file
 
 
 class Img:
-    def __init__(self, height: int = CONST.SCREEN_HEIGHT, width: int = CONST.SCREEN_WIDTH, count: int = CONST.COUNT) -> None:
+    def __init__(self, height: int = CONST.SCREEN_HEIGHT, width: int = CONST.SCREEN_WIDTH, count: int = CONST.COUNT, points: list[Coord] = []) -> None:
         self.HEIGHT = height
         self.WIDTH = width
         self.img = Image.new(
             "RGB", (height, width), color="white")
         self._draw = ImageDraw.Draw(self.img)
 
-        self.points = self.gernerte_point(count)
+        if points == []:
+            self.points = self.gernerte_point(count)
+        else:
+            self.points = points
+
         for coord in self.points:
             self._draw_cross(coord)
 
@@ -38,7 +43,8 @@ class Img:
         self.img.show()
 
     def save(self, name: str):
-        self.img.save(name)
+        self.img.save(name+".jpg")
+        file.write(self.points, name)
 
     def _draw_point_debugg(self, x, y):
         self._draw.line((0, y, self.img.width, y), fill="red")
@@ -70,6 +76,9 @@ if __name__ == "__main__":
                         default=CONST.COUNT, help=f"anzahl der kreuze (Default {CONST.COUNT})")
     parser.add_argument("-name", "-n", type=str, metavar="STR",
                         default=CONST.DATEI_NAME, help=f"Name der output Datei (Default {CONST.DATEI_NAME})")
+    parser.add_argument("-file", "-f", type=str, metavar="STR",
+                        help=f"Name der input Datei")
+
     args = parser.parse_args()
 
     if args.height < 50:
@@ -80,6 +89,12 @@ if __name__ == "__main__":
         raise argparse.ArgumentTypeError("Bitte mehr als 2 Punkte")
     if args.name == "":
         raise argparse.ArgumentTypeError("Bitte keinene leeren Namen")
+    if args.file != None and args.file == "":
+        raise argparse.ArgumentTypeError("Bitte keinene leeren file Namen")
 
-    img = Img(args.height, args.width, args.count)
-    img.save(f"{args.name}.jpg")
+    points = []
+    if args.file != None:
+        points = file.read(args.file)
+
+    img = Img(args.height, args.width, args.count, points)
+    img.save(args.name)
