@@ -2,6 +2,19 @@ from PIL import Image, ImageDraw, ImageFont
 import CONST
 
 
+class Coord:
+    def __init__(self, x: int, y: int) -> None:
+        self.x = x
+        self.y = y
+
+
+class Edge:
+    def __init__(self, point1: Coord, point2: Coord, length: float) -> None:
+        self.point1 = point1
+        self.point2 = point2
+        self.length = length
+
+
 class Img:
     def __init__(self, height: int = CONST.SCREEN_HEIHT, width: int = CONST.SCREEN_WITH, count: int = CONST.COUNT) -> None:
         self.HEIGHT = height
