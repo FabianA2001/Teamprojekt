@@ -6,13 +6,17 @@ Dieses Temaprojekt beinhaltet einen Algorithmus für das Close-Enough Area Trave
 
 ## Installation
 auf MacOS und Linus ist es sinnvoll ein virtuelles environment zu haben um pip zu nutzen. 
-Diese kann mit `python3 -m venv .` im aktuzellen Ordner erzeugt werden
+Diese kann mit `python3 -m venv .` im aktuzellen Ordner erzeugt werden.
+
 Aktiviert für die aktuelle Konsole kann das environment mit folgendem befehl `source bin/active` 
 sollte die Konsole neugestartet werden muss das environment erneut aktiviert werden.
 
 
+
 alle benötigeten Pakete sind in der requirements.txt definiert
 dieses kann mit `pip install -r requirements.txt` genutzt werden
+
+
 
 das Programm kann standarmäßig mit `python3 main.py` gestartet werden, dann werden eine jpg mit den Koordinaten und eine csv datei mit den Koordiaten erstellt
 mit `python3 main.py -h` kann eine hilfe für die möglichen Arugmente angezeigt werden.
