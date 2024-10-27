@@ -5,6 +5,7 @@ import random
 import solver
 import argparse
 import file
+import math
 
 
 class Img:
@@ -27,14 +28,25 @@ class Img:
         for edge in self.edges:
             self._connect_points(edge)
 
+    def calculate_distance(self, point1: Coord, point2: Coord) -> float:
+        distance = math.sqrt(math.pow((point1.x - point2.x), 2) + math.pow((point1.y - point2.y), 2))
+        return distance
+
+
     def generate_point(self, count: int) -> list[Coord]:
-        DISTANCE = 10
         list = []
+
+        def enough_distance() -> bool:
+            for point in list:
+                if self.calculate_distance(coord, point) <= CONST.MIN_DISTANCE:
+                    return False
+            return True
+
         for _ in range(count):
-            while True:
+            for _ in range(100):             
                 coord = Coord(random.randint(0, self.HEIGHT),
                               random.randint(0, self.WIDTH))
-                if "genügend dis":
+                if enough_distance() == True:
                     break
             list.append(coord)
         return list
