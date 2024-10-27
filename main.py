@@ -17,14 +17,14 @@ class Edge:
 
 
 class Img:
-    def __init__(self, height: int = CONST.SCREEN_HEIHT, width: int = CONST.SCREEN_WITH, count: int = CONST.COUNT) -> None:
+    def __init__(self, height: int = CONST.SCREEN_HEIGHT, width: int = CONST.SCREEN_WIDTH, count: int = CONST.COUNT) -> None:
         self.HEIGHT = height
         self.WIDTH = width
         self.img = Image.new(
             "RGB", (height, width), color="white")
         self._draw = ImageDraw.Draw(self.img)
 
-        for x, y in self.gernerte_point(CONST.SCREEN_HEIHT, CONST.SCREEN_WITH, count):
+        for x, y in self.gernerte_point(CONST.SCREEN_HEIGHT, CONST.SCREEN_WIDTH, count):
             self._draw_cross(x, y)
 
         # self._connect_points(100, 200, 200, 600)
