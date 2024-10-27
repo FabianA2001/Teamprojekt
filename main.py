@@ -3,6 +3,7 @@ import CONST
 from CONST import Coord, Edge
 import random
 import solver
+import argparse
 
 
 class Img:
@@ -60,5 +61,25 @@ class Img:
 
 
 if __name__ == "__main__":
-    img = Img()
-    img.save("Test.jpg")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-height", "-he", type=int, metavar="INT",
+                        default=CONST.SCREEN_HEIGHT, help=f"int als Höhe (Default {CONST.SCREEN_HEIGHT})")
+    parser.add_argument("-width", "-w", type=int, metavar="INT",
+                        default=CONST.SCREEN_WIDTH, help=f"int als Breite (Default {CONST.SCREEN_WIDTH})")
+    parser.add_argument("-count", "-c", type=int, metavar="INT",
+                        default=CONST.COUNT, help=f"anzahl der kreuze (Default {CONST.COUNT})")
+    parser.add_argument("-name", "-n", type=str, metavar="STR",
+                        default=CONST.DATEI_NAME, help=f"Name der output Datei (Default {CONST.DATEI_NAME})")
+    args = parser.parse_args()
+
+    if args.height < 50:
+        raise argparse.ArgumentTypeError("Bitte eine größere Höhe")
+    if args.width < 50:
+        raise argparse.ArgumentTypeError("Bitte eine größere Breite")
+    if args.count <= 2:
+        raise argparse.ArgumentTypeError("Bitte mehr als 2 Punkte")
+    if args.name == "":
+        raise argparse.ArgumentTypeError("Bitte keinene leeren Namen")
+
+    img = Img(args.height, args.width, args.count)
+    img.save(f"{args.name}.jpg")
