@@ -5,10 +5,10 @@
 Dieses Temaprojekt beinhaltet einen Algorithmus für das Close-Enough Area Travelling Salesman Problem inklusiver Turn-Costs. Der Algorithmus erhält eine Menge an Flächen und muss in möglichst kurzer Zeit eine möglichst kurze Rundreise finden, die alle Flächen besucht und dabei möglichst kleine Abbiegewinkel nutzt.
 
 ## Installation
-auf MacOS und Linus ist es sinnvoll ein virtuelles environment zu haben um pip zu nutzen. 
+auf MacOS und Linux ist es sinnvoll ein virtuelles environment zu haben um pip zu nutzen. 
 Diese kann mit `python3 -m venv .` im aktuzellen Ordner erzeugt werden.
 
-Aktiviert für die aktuelle Konsole kann das environment mit folgendem befehl `source bin/active`.
+Aktiviert werden für die aktuelle Konsole, kann das environment mit folgendem befehl `source bin/active`.
 sollte die Konsole neugestartet werden, muss das environment erneut aktiviert werden.
 
 alle benötigeten Pakete sind in der requirements.txt definiert
