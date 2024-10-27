@@ -1,19 +1,8 @@
 from PIL import Image, ImageDraw
 import CONST
+from CONST import Coord, Edge
 import random
-
-
-class Coord:
-    def __init__(self, x: int, y: int) -> None:
-        self.x = x
-        self.y = y
-
-
-class Edge:
-    def __init__(self, point1: Coord, point2: Coord, length: float) -> None:
-        self.point1 = point1
-        self.point2 = point2
-        self.length = length
+import solver
 
 
 class Img:
@@ -24,10 +13,13 @@ class Img:
             "RGB", (height, width), color="white")
         self._draw = ImageDraw.Draw(self.img)
 
-        for coord in self.gernerte_point(count):
-            self._draw_cross(coord.x, coord.y)
+        self.points = self.gernerte_point(count)
+        for coord in self.points:
+            self._draw_cross(coord)
 
-        # self._connect_points(100, 200, 200, 600)
+        self.edges = solver.solver(self.points)
+        for edge in self.edges:
+            self._connect_points(edge)
 
     def gernerte_point(self, count: int) -> list[Coord]:
         DISTANCE = 10
@@ -41,28 +33,32 @@ class Img:
             list.append(coord)
         return list
 
+    def show(self):
+        self.img.show()
+
+    def save(self, name: str):
+        self.img.save(name)
+
     def _draw_point_debugg(self, x, y):
         self._draw.line((0, y, self.img.width, y), fill="red")
         self._draw.line((x, 0, x, self.img.height), fill="red")
 
-    def _draw_cross(self, x: int, y: int) -> None:
+    def _draw_cross(self, coord: Coord) -> None:
         LINE_COLOR = "black"
         LINE_WIDTH = 2
         SIZE = 10//2
-        self._draw.line((x-SIZE, y-SIZE, x + SIZE, y+SIZE),
+        self._draw.line((coord.x-SIZE, coord.y-SIZE, coord.x + SIZE, coord.y+SIZE),
                         fill=LINE_COLOR, width=LINE_WIDTH)
-        self._draw.line((x-SIZE, y+SIZE, x + SIZE, y-SIZE),
+        self._draw.line((coord.x-SIZE, coord.y+SIZE, coord.x + SIZE, coord.y-SIZE),
                         fill=LINE_COLOR, width=LINE_WIDTH)
 
-    # def _draw_cross(self, coord: Coord) -> None:
-    #     self._draw_cross(coord.x, coord.y)
-
-    def _connect_points(self, x1: int, y1: int, x2: int, y2: int) -> None:
+    def _connect_points(self, edge: Edge) -> None:
         LINE_COLOR = "black"
         LINE_WIDTH = 2
-        self._draw.line((x1, y1, x2, y2), fill=LINE_COLOR, width=LINE_WIDTH)
+        self._draw.line((edge.point1.x, edge.point1.y, edge.point2.x,
+                        edge.point2.y), fill=LINE_COLOR, width=LINE_WIDTH)
 
 
 if __name__ == "__main__":
     img = Img()
-    img.img.save("Test.jpg")
+    img.save("Test.jpg")
