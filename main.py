@@ -1,5 +1,6 @@
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 import CONST
+import random
 
 
 class Coord:
@@ -26,10 +27,15 @@ class Img:
         for x, y in self.gernerte_point(CONST.SCREEN_HEIHT, CONST.SCREEN_WITH, count):
             self._draw_cross(x, y)
 
-        self._connect_points(100, 200, 200, 600)
+        # self._connect_points(100, 200, 200, 600)
 
-    def gernerte_point(self, height, withe, count) -> list[tuple[int, int]]:
-        return [(100, 200), (200, 600)]
+    def gernerte_point(self, height, width, count) -> list[tuple[int, int]]:
+        list = []
+        for x in range(count):
+            list.append((random.randint(0, height),
+                        random.randint(0, width)))
+        print(list)
+        return list
 
     def _draw_point_debugg(self, x, y):
         self._draw.line((0, y, self.img.width, y), fill="red")
