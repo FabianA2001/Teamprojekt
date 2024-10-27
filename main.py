@@ -24,17 +24,21 @@ class Img:
             "RGB", (height, width), color="white")
         self._draw = ImageDraw.Draw(self.img)
 
-        for x, y in self.gernerte_point(CONST.SCREEN_HEIGHT, CONST.SCREEN_WIDTH, count):
-            self._draw_cross(x, y)
+        for coord in self.gernerte_point(count):
+            self._draw_cross(coord.x, coord.y)
 
         # self._connect_points(100, 200, 200, 600)
 
-    def gernerte_point(self, height, width, count) -> list[tuple[int, int]]:
+    def gernerte_point(self, count: int) -> list[Coord]:
+        DISTANCE = 10
         list = []
-        for x in range(count):
-            list.append((random.randint(0, height),
-                        random.randint(0, width)))
-        print(list)
+        for _ in range(count):
+            while True:
+                coord = Coord(random.randint(0, self.HEIGHT),
+                              random.randint(0, self.WIDTH))
+                if "genügend dis":
+                    break
+            list.append(coord)
         return list
 
     def _draw_point_debugg(self, x, y):
@@ -49,6 +53,9 @@ class Img:
                         fill=LINE_COLOR, width=LINE_WIDTH)
         self._draw.line((x-SIZE, y+SIZE, x + SIZE, y-SIZE),
                         fill=LINE_COLOR, width=LINE_WIDTH)
+
+    # def _draw_cross(self, coord: Coord) -> None:
+    #     self._draw_cross(coord.x, coord.y)
 
     def _connect_points(self, x1: int, y1: int, x2: int, y2: int) -> None:
         LINE_COLOR = "black"
