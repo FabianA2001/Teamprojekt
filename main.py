@@ -16,7 +16,7 @@ class Img:
         self._draw = ImageDraw.Draw(self.img)
 
         if points == []:
-            self.points = self.gernerte_point(count)
+            self.points = self.generate_point(count)
         else:
             self.points = points
 
@@ -27,7 +27,7 @@ class Img:
         for edge in self.edges:
             self._connect_points(edge)
 
-    def gernerte_point(self, count: int) -> list[Coord]:
+    def generate_point(self, count: int) -> list[Coord]:
         DISTANCE = 10
         list = []
         for _ in range(count):
