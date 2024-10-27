@@ -1,21 +1,33 @@
 from PIL import Image, ImageDraw, ImageFont
+import CONST
 
 
 class Img:
-    def __init__(self) -> None:
-        self.img = Image.new("RGB", (1700, 1700), color="white")
+    def __init__(self, height: int = CONST.SCREEN_HEIHT, width: int = CONST.SCREEN_WITH, count: int = CONST.COUNT) -> None:
+        self.HEIGHT = height
+        self.WIDTH = width
+        self.img = Image.new(
+            "RGB", (height, width), color="white")
         self._draw = ImageDraw.Draw(self.img)
-        width, height = 200, 200
-        line_color = "black"
-        line_width = 5
-        self._draw.line((width // 2, 0, width // 2, height),
-                        fill=line_color, width=line_width)
-        # Horizontal line
-        self._draw.line((0, height // 2, width, height // 2),
-                        fill=line_color, width=line_width)
+
+        for x, y in self.gernerte_point(CONST.SCREEN_HEIHT, CONST.SCREEN_WITH, count):
+            self._draw_cross(x, y)
 
     def gernerte_point(self, height, withe, count) -> list[tuple[int, int]]:
-        return [(1, 2), (2, 3)]
+        return [(100, 200), (200, 600)]
+
+    def _draw_point_debugg(self, x, y):
+        self._draw.line((0, y, self.img.width, y), fill="red")
+        self._draw.line((x, 0, x, self.img.height), fill="red")
+
+    def _draw_cross(self, x: int, y: int) -> None:
+        LINE_COLOR = "black"
+        LINE_WIDTH = 2
+        SIZE = 10//2
+        self._draw.line((x-SIZE, y-SIZE, x + SIZE, y+SIZE),
+                        fill=LINE_COLOR, width=LINE_WIDTH)
+        self._draw.line((x-SIZE, y+SIZE, x + SIZE, y-SIZE),
+                        fill=LINE_COLOR, width=LINE_WIDTH)
 
 
 if __name__ == "__main__":
