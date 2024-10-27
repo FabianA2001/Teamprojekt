@@ -13,6 +13,8 @@ class Img:
         for x, y in self.gernerte_point(CONST.SCREEN_HEIHT, CONST.SCREEN_WITH, count):
             self._draw_cross(x, y)
 
+        self._connect_points(100, 200, 200, 600)
+
     def gernerte_point(self, height, withe, count) -> list[tuple[int, int]]:
         return [(100, 200), (200, 600)]
 
@@ -28,6 +30,11 @@ class Img:
                         fill=LINE_COLOR, width=LINE_WIDTH)
         self._draw.line((x-SIZE, y+SIZE, x + SIZE, y-SIZE),
                         fill=LINE_COLOR, width=LINE_WIDTH)
+
+    def _connect_points(self, x1: int, y1: int, x2: int, y2: int) -> None:
+        LINE_COLOR = "black"
+        LINE_WIDTH = 2
+        self._draw.line((x1, y1, x2, y2), fill=LINE_COLOR, width=LINE_WIDTH)
 
 
 if __name__ == "__main__":
