@@ -33,16 +33,14 @@ def farthest_insertion(points):
     # 1. Starte mit den beiden am weitesten entfernten Knoten
     max_dist = 0
     start_pair = ((), ())
-
+    edges = []
     for i in range(n):
         for j in range(i + 1, n):
             if distance_matrix[i][j] > max_dist:
                 max_dist = distance_matrix[i][j]
                 start_pair = (points[i], points[j])
-
     # Initialisiere die Tour mit den beiden am weitesten entfernten Knoten
     tour = [start_pair[0], start_pair[1], start_pair[0]]
-
     # Liste der restlichen Knoten
     unvisited = set(points)
     unvisited.remove(start_pair[0])
@@ -83,4 +81,47 @@ def farthest_insertion(points):
         # Markiere den Knoten als besucht
         unvisited.remove(farthest_node)
 
+    for i in range(len(tour)):
+        edges.append(Edge(tour[i], tour[(i+1) % len(tour)],
+                     calculate_distance(tour[i], tour[(i+1) % len(tour)])))
+    summ = 0
+    for edge in edges:
+        summ += edge.length
+    print("Gesamtlänge der Tour: ", summ)
+
+    # Berechne die Abbiegewinkel für den Pfad
+    turn_angles = calculate_turn_angles(tour)
+    summ = 0
+    for angle in turn_angles:
+        summ += angle
+
+    print("Gesamtwinkel: ", summ)
     return tour
+
+
+def calculate_turn_angles(path):
+    angles = []
+    for i in range(1, len(path) - 1):
+        # Hole Koordinaten der drei aufeinanderfolgenden Punkte
+        p1, p2, p3 = path[i-1], path[i], path[i+1]
+
+        # Berechne die Vektoren zwischen den Punkten
+        vec_a = (p2.x - p1.x, p2.y - p1.y)
+        vec_b = (p3.x - p2.x, p3.y - p2.y)
+
+        # Berechne die Länge der Vektoren
+        mag_a = math.sqrt(vec_a[0]**2 + vec_a[1]**2)
+        mag_b = math.sqrt(vec_b[0]**2 + vec_b[1]**2)
+
+        # Berechne den Winkel zwischen den Vektoren
+        dot_product = vec_a[0] * vec_b[0] + vec_a[1] * vec_b[1]
+        cos_theta = dot_product / (mag_a * mag_b)
+
+        # Begrenze cos_theta auf den Bereich [-1, 1] um Rundungsfehler zu vermeiden
+        cos_theta = max(-1, min(1, cos_theta))
+
+        # Berechne den Winkel in Radiant und konvertiere zu Grad
+        theta = math.acos(cos_theta) * (180 / math.pi)
+
+        angles.append(theta)
+    return angles
