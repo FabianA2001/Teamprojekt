@@ -95,14 +95,16 @@ def farthest_insertion(points):
     for angle in turn_angles:
         print(angle)
         summ += angle
-
+    print("anzahl:", len(turn_angles))
+    print("tour:", len(tour))
     print("Gesamtwinkel: ", summ)
     return tour
 
 
 def calculate_turn_angles(path):
+    print(path)
     angles = []
-    for i in range(1, len(path) - 1):
+    for i in range(1, len(path)-1):
         # Hole Koordinaten der drei aufeinanderfolgenden Punkte
         p1, p2, p3 = path[i-1], path[i], path[i+1]
 
