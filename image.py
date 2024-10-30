@@ -1,4 +1,3 @@
-
 from PIL import Image, ImageDraw, ImageFont
 import random
 import solver
@@ -10,15 +9,21 @@ import CONST
 
 
 class Img:
-    def __init__(self, height: int = CONST.SCREEN_HEIGHT, width: int = CONST.SCREEN_WIDTH, count: int = CONST.COUNT, points: list[Coord] = []) -> None:
+    def __init__(
+        self,
+        height: int = CONST.SCREEN_HEIGHT,
+        width: int = CONST.SCREEN_WIDTH,
+        count: int = CONST.COUNT,
+        points: list[Coord] = [],
+    ) -> None:
         self.HEIGHT = height * CONST.ANTIALIAS_FACTOR
         self.WIDTH = width * CONST.ANTIALIAS_FACTOR
         self.HEIGHT_ORGINAL = height
         self.WIDTH_ORGINAL = width
         self.font = ImageFont.truetype(
-            "LEMONMILK-Regular.otf", CONST.FONT_SIZE * CONST.ANTIALIAS_FACTOR)
-        self.img = Image.new(
-            "RGB", (self.HEIGHT, self.WIDTH), color="white")
+            "LEMONMILK-Regular.otf", CONST.FONT_SIZE * CONST.ANTIALIAS_FACTOR
+        )
+        self.img = Image.new("RGB", (self.HEIGHT, self.WIDTH), color="white")
         self._draw = ImageDraw.Draw(self.img)
 
         if points == []:
@@ -32,7 +37,8 @@ class Img:
 
     def calculate_distance(self, point1: Coord, point2: Coord) -> float:
         distance = math.sqrt(
-            math.pow((point1.x - point2.x), 2) + math.pow((point1.y - point2.y), 2))
+            math.pow((point1.x - point2.x), 2) + math.pow((point1.y - point2.y), 2)
+        )
         return distance
 
     def generate_point(self, count: int) -> list[Coord]:
@@ -41,14 +47,19 @@ class Img:
 
         def enough_distance() -> bool:
             for point in list:
-                if self.calculate_distance(coord, point) <= CONST.MIN_DISTANCE * CONST.ANTIALIAS_FACTOR:
+                if (
+                    self.calculate_distance(coord, point)
+                    <= CONST.MIN_DISTANCE * CONST.ANTIALIAS_FACTOR
+                ):
                     return False
             return True
 
         for _ in range(count):
             for _ in range(100):
-                coord = Coord(random.randint(OFFSET, self.HEIGHT-OFFSET),
-                              random.randint(OFFSET, self.WIDTH-OFFSET))
+                coord = Coord(
+                    random.randint(OFFSET, self.HEIGHT - OFFSET),
+                    random.randint(OFFSET, self.WIDTH - OFFSET),
+                )
                 if enough_distance() == True:
                     break
             list.append(coord)
@@ -58,10 +69,10 @@ class Img:
         self.img.show()
 
     def save(self, name: str):
-
         self.img = self.img.resize(
-            (self.HEIGHT_ORGINAL, self.WIDTH_ORGINAL), Image.LANCZOS)
-        self.img.save(name+".jpg")
+            (self.HEIGHT_ORGINAL, self.WIDTH_ORGINAL), Image.LANCZOS
+        )
+        self.img.save(name + ".jpg")
         file.write(self.points, name)
 
     def _draw_image(self):
@@ -72,7 +83,7 @@ class Img:
             self._draw_ellipse(coord)
 
         for i, coord in enumerate(self.edges):
-            if i == len(self.edges)-1:
+            if i == len(self.edges) - 1:
                 continue
             self._draw_number(coord.point1, i)
 
@@ -81,27 +92,38 @@ class Img:
         self._draw.line((x, 0, x, self.img.height), fill="red")
 
     def _draw_number(self, coord: Coord, nummer: int):
-        self._draw.text((coord.x, coord.y), str(
-            nummer), fill="red", font=self.font)
+        self._draw.text((coord.x, coord.y), str(nummer), fill="red", font=self.font)
 
     def _draw_cross(self, coord: Coord) -> None:
         LINE_COLOR = "black"
         LINE_WIDTH = 4 * CONST.ANTIALIAS_FACTOR
-        SIZE = 20//2
-        self._draw.line((coord.x-SIZE, coord.y-SIZE, coord.x + SIZE, coord.y+SIZE),
-                        fill=LINE_COLOR, width=LINE_WIDTH)
-        self._draw.line((coord.x-SIZE, coord.y+SIZE, coord.x + SIZE, coord.y-SIZE),
-                        fill=LINE_COLOR, width=LINE_WIDTH)
+        SIZE = 20 // 2
+        self._draw.line(
+            (coord.x - SIZE, coord.y - SIZE, coord.x + SIZE, coord.y + SIZE),
+            fill=LINE_COLOR,
+            width=LINE_WIDTH,
+        )
+        self._draw.line(
+            (coord.x - SIZE, coord.y + SIZE, coord.x + SIZE, coord.y - SIZE),
+            fill=LINE_COLOR,
+            width=LINE_WIDTH,
+        )
 
     def _draw_ellipse(self, coord: Coord) -> None:
         LINE_COLOR = "red"
         LINE_WIDTH = 4 * CONST.ANTIALIAS_FACTOR
-        SIZE = (10 * CONST.ANTIALIAS_FACTOR)//2
-        self._draw.ellipse((coord.x-SIZE, coord.y-SIZE, coord.x + SIZE, coord.y+SIZE),
-                           fill=LINE_COLOR, width=LINE_WIDTH)
+        SIZE = (10 * CONST.ANTIALIAS_FACTOR) // 2
+        self._draw.ellipse(
+            (coord.x - SIZE, coord.y - SIZE, coord.x + SIZE, coord.y + SIZE),
+            fill=LINE_COLOR,
+            width=LINE_WIDTH,
+        )
 
     def _connect_points(self, edge: Edge) -> None:
         LINE_COLOR = "black"
         LINE_WIDTH = 7 * CONST.ANTIALIAS_FACTOR
-        self._draw.line((edge.point1.x, edge.point1.y, edge.point2.x,
-                        edge.point2.y), fill=LINE_COLOR, width=LINE_WIDTH)
+        self._draw.line(
+            (edge.point1.x, edge.point1.y, edge.point2.x, edge.point2.y),
+            fill=LINE_COLOR,
+            width=LINE_WIDTH,
+        )

@@ -7,7 +7,7 @@ def solver(points: list[Coord]) -> list[Edge]:
     # result.append(Edge(Coord(100, 100), Coord(200, 200),))
     coords = farthest_insertion(points)
     for i in range(len(coords)):
-        result.append(Edge(coords[i], coords[(i+1) % len(coords)]))
+        result.append(Edge(coords[i], coords[(i + 1) % len(coords)]))
     return result
 
 
@@ -27,8 +27,7 @@ def farthest_insertion(points):
     n = len(points)
 
     # Distanzmatrix vorbereiten (für schnelle Zugriffe auf Distanzen)
-    distance_matrix = [
-        [calculate_distance(i, j) for j in points] for i in points]
+    distance_matrix = [[calculate_distance(i, j) for j in points] for i in points]
 
     # 1. Starte mit den beiden am weitesten entfernten Knoten
     max_dist = 0
@@ -54,21 +53,24 @@ def farthest_insertion(points):
 
         for node in unvisited:
             min_dist_to_tour = min(
-                distance_matrix[points.index(node)][points.index(tour_node)] for tour_node in tour)
+                distance_matrix[points.index(node)][points.index(tour_node)]
+                for tour_node in tour
+            )
             if min_dist_to_tour > max_dist_to_tour:
                 max_dist_to_tour = min_dist_to_tour
                 farthest_node = node
 
         # Finde die beste Position, um den Knoten in die Tour einzufügen
         best_position = 0
-        best_increase = float('inf')
+        best_increase = float("inf")
 
         for i in range(len(tour) - 1):
             current_increase = (
-                distance_matrix[points.index(tour[i])][points.index(farthest_node)] +
-                distance_matrix[points.index(farthest_node)][points.index(tour[i + 1])] -
-                distance_matrix[points.index(
-                    tour[i])][points.index(tour[i + 1])]
+                distance_matrix[points.index(tour[i])][points.index(farthest_node)]
+                + distance_matrix[points.index(farthest_node)][
+                    points.index(tour[i + 1])
+                ]
+                - distance_matrix[points.index(tour[i])][points.index(tour[i + 1])]
             )
 
             if current_increase < best_increase:
@@ -82,8 +84,13 @@ def farthest_insertion(points):
         unvisited.remove(farthest_node)
 
     for i in range(len(tour)):
-        edges.append(Edge(tour[i], tour[(i+1) % len(tour)],
-                     calculate_distance(tour[i], tour[(i+1) % len(tour)])))
+        edges.append(
+            Edge(
+                tour[i],
+                tour[(i + 1) % len(tour)],
+                calculate_distance(tour[i], tour[(i + 1) % len(tour)]),
+            )
+        )
     summ = 0
     for edge in edges:
         summ += edge.length
@@ -103,17 +110,17 @@ def farthest_insertion(points):
 
 def calculate_turn_angles(path):
     angles = []
-    for i in range(1, len(path)-1):
+    for i in range(1, len(path) - 1):
         # Hole Koordinaten der drei aufeinanderfolgenden Punkte
-        p1, p2, p3 = path[i-1], path[i], path[i+1]
+        p1, p2, p3 = path[i - 1], path[i], path[i + 1]
 
         # Berechne die Vektoren zwischen den Punkten
         vec_a = (p2.x - p1.x, p2.y - p1.y)
         vec_b = (p3.x - p2.x, p3.y - p2.y)
 
         # Berechne die Länge der Vektoren
-        mag_a = math.sqrt(vec_a[0]**2 + vec_a[1]**2)
-        mag_b = math.sqrt(vec_b[0]**2 + vec_b[1]**2)
+        mag_a = math.sqrt(vec_a[0] ** 2 + vec_a[1] ** 2)
+        mag_b = math.sqrt(vec_b[0] ** 2 + vec_b[1] ** 2)
 
         # Berechne den Winkel zwischen den Vektoren
         dot_product = vec_a[0] * vec_b[0] + vec_a[1] * vec_b[1]
