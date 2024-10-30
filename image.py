@@ -66,12 +66,18 @@ class Img:
         for edge in self.edges:
             self._connect_points(edge)
 
-        for coord in self.points:
-            self._draw_ellipse(coord)
+        # for coord in self.points:
+        #     self._draw_ellipse(coord)
+
+        for i, coord in enumerate(self.points):
+            self._draw_number(coord, i)
 
     def _draw_point_debugg(self, x, y):
         self._draw.line((0, y, self.img.width, y), fill="red")
         self._draw.line((x, 0, x, self.img.height), fill="red")
+
+    def _draw_number(self, coord: Coord, nummer: int):
+        self._draw.text((coord.x, coord.y), str(nummer), fill="red")
 
     def _draw_cross(self, coord: Coord) -> None:
         LINE_COLOR = "black"
