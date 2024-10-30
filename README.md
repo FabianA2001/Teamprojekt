@@ -1,6 +1,7 @@
 # Teamprojekt
 
-##Inhalt Dieses Temaprojekt beinhaltet einen Algorithmus für das Close-Enough
+##Inhalt
+Dieses Temaprojekt beinhaltet einen Algorithmus für das Close-Enough
 Area Travelling Salesman Problem inklusiver Turn-Costs. Der Algorithmus erhält
 eine Menge an Flächen und muss in möglichst kurzer Zeit eine möglichst kurze
 Rundreise finden, die alle Flächen besucht und dabei möglichst kleine
@@ -23,6 +24,3 @@ das Programm kann standarmäßig mit `python3 main.py` gestartet werden, dann
 werden eine jpg mit den Koordinaten und eine csv datei mit den Koordiaten
 erstellt mit `python3 main.py -h` kann eine hilfe für die möglichen Arugmente
 angezeigt werden.
-
-- Guidelines
-- Beispiel (TODO)
