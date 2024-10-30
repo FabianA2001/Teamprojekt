@@ -93,6 +93,7 @@ def farthest_insertion(points):
     turn_angles = calculate_turn_angles(tour)
     summ = 0
     for angle in turn_angles:
+        print(angle)
         summ += angle
 
     print("Gesamtwinkel: ", summ)
