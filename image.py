@@ -1,5 +1,5 @@
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import random
 import solver
 import math
@@ -69,8 +69,8 @@ class Img:
         # for coord in self.points:
         #     self._draw_ellipse(coord)
 
-        for i, coord in enumerate(self.points):
-            self._draw_number(coord, i)
+        for i, coord in enumerate(self.edges):
+            self._draw_number(coord.point1, i)
 
     def _draw_point_debugg(self, x, y):
         self._draw.line((0, y, self.img.width, y), fill="red")
