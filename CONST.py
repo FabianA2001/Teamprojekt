@@ -4,6 +4,8 @@ COUNT = 50
 MIN_DISTANCE = 50
 DATEI_NAME = "test"
 
+ANTIALIAS_FACTOR = 4
+
 
 class Coord:
     def __init__(self, x: int, y: int) -> None:
