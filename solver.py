@@ -92,17 +92,16 @@ def farthest_insertion(points):
     # Berechne die Abbiegewinkel für den Pfad
     turn_angles = calculate_turn_angles(tour)
     summ = 0
-    for angle in turn_angles:
-        print(angle)
+    for i, angle in enumerate(turn_angles):
+        print(f"an Winkel {i+1}: {round(angle, 2)}°")
         summ += angle
-    print("anzahl:", len(turn_angles))
+    print("anzahl Winkel:", len(turn_angles))
     print("tour:", len(tour))
     print("Gesamtwinkel: ", summ)
     return tour
 
 
 def calculate_turn_angles(path):
-    print(path)
     angles = []
     for i in range(1, len(path)-1):
         # Hole Koordinaten der drei aufeinanderfolgenden Punkte

@@ -15,6 +15,8 @@ class Img:
         self.WIDTH = width * CONST.ANTIALIAS_FACTOR
         self.HEIGHT_ORGINAL = height
         self.WIDTH_ORGINAL = width
+        self.font = ImageFont.truetype(
+            "LEMONMILK-Regular.otf", CONST.FONT_SIZE * CONST.ANTIALIAS_FACTOR)
         self.img = Image.new(
             "RGB", (self.HEIGHT, self.WIDTH), color="white")
         self._draw = ImageDraw.Draw(self.img)
@@ -34,12 +36,12 @@ class Img:
         return distance
 
     def generate_point(self, count: int) -> list[Coord]:
-        OFFSET = 20 * CONST.ANTIALIAS_FACTOR
+        OFFSET = CONST.OFFSET * CONST.ANTIALIAS_FACTOR
         list = []
 
         def enough_distance() -> bool:
             for point in list:
-                if self.calculate_distance(coord, point) <= CONST.MIN_DISTANCE:
+                if self.calculate_distance(coord, point) <= CONST.MIN_DISTANCE * CONST.ANTIALIAS_FACTOR:
                     return False
             return True
 
@@ -66,10 +68,12 @@ class Img:
         for edge in self.edges:
             self._connect_points(edge)
 
-        # for coord in self.points:
-        #     self._draw_ellipse(coord)
+        for coord in self.points:
+            self._draw_ellipse(coord)
 
         for i, coord in enumerate(self.edges):
+            if i == len(self.edges)-1:
+                continue
             self._draw_number(coord.point1, i)
 
     def _draw_point_debugg(self, x, y):
@@ -77,7 +81,8 @@ class Img:
         self._draw.line((x, 0, x, self.img.height), fill="red")
 
     def _draw_number(self, coord: Coord, nummer: int):
-        self._draw.text((coord.x, coord.y), str(nummer), fill="red")
+        self._draw.text((coord.x, coord.y), str(
+            nummer), fill="red", font=self.font)
 
     def _draw_cross(self, coord: Coord) -> None:
         LINE_COLOR = "black"
@@ -91,7 +96,7 @@ class Img:
     def _draw_ellipse(self, coord: Coord) -> None:
         LINE_COLOR = "red"
         LINE_WIDTH = 4 * CONST.ANTIALIAS_FACTOR
-        SIZE = (20 * CONST.ANTIALIAS_FACTOR)//2
+        SIZE = (10 * CONST.ANTIALIAS_FACTOR)//2
         self._draw.ellipse((coord.x-SIZE, coord.y-SIZE, coord.x + SIZE, coord.y+SIZE),
                            fill=LINE_COLOR, width=LINE_WIDTH)
 
