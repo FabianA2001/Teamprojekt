@@ -38,6 +38,8 @@ if __name__ == "__main__":
         default=CONST.DATEI_NAME,
         help=f"Name der output Datei (Default {CONST.DATEI_NAME})",
     )
+    parser.add_argument("-opt", "-o", action="store_false",
+                        help="Ob eine 2-OPT verbesserung vorgenommen werden soll")
     parser.add_argument(
         "-file", "-f", type=str, metavar="STR", help="Name der input Datei"
     )
@@ -59,5 +61,5 @@ if __name__ == "__main__":
     if args.file != None:
         points = file.read(args.file)
 
-    img = Img(args.height, args.width, args.count, points)
+    img = Img(args.height, args.width, args.count, points, args.opt)
     img.save(args.name)

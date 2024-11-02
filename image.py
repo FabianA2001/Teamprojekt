@@ -15,6 +15,7 @@ class Img:
         width: int = CONST.SCREEN_WIDTH,
         count: int = CONST.COUNT,
         points: list[Coord] = [],
+        opt: bool = False
     ) -> None:
         self.HEIGHT = height * CONST.ANTIALIAS_FACTOR
         self.WIDTH = width * CONST.ANTIALIAS_FACTOR
@@ -25,19 +26,21 @@ class Img:
         )
         self.img = Image.new("RGB", (self.HEIGHT, self.WIDTH), color="white")
         self._draw = ImageDraw.Draw(self.img)
+        self.opt = opt
 
         if points == []:
             self.points = self.generate_point(count)
         else:
             self.points = points
 
-        self.edges = solver.solver(self.points)
+        self.edges = solver.solver(self.points, self.opt)
 
         self._draw_image()
 
     def calculate_distance(self, point1: Coord, point2: Coord) -> float:
         distance = math.sqrt(
-            math.pow((point1.x - point2.x), 2) + math.pow((point1.y - point2.y), 2)
+            math.pow((point1.x - point2.x), 2) +
+            math.pow((point1.y - point2.y), 2)
         )
         return distance
 
@@ -92,7 +95,8 @@ class Img:
         self._draw.line((x, 0, x, self.img.height), fill="red")
 
     def _draw_number(self, coord: Coord, nummer: int):
-        self._draw.text((coord.x, coord.y), str(nummer), fill="red", font=self.font)
+        self._draw.text((coord.x, coord.y), str(
+            nummer), fill="red", font=self.font)
 
     def _draw_cross(self, coord: Coord) -> None:
         LINE_COLOR = "black"
