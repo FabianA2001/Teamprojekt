@@ -1,13 +1,18 @@
 from CONST import Coord, Edge
 import math
+import random
 
 
 def solver(points: list[Coord]) -> list[Edge]:
     result = []
     # result.append(Edge(Coord(100, 100), Coord(200, 200),))
     coords = farthest_insertion(points)
+    coords = ruin_and_recreate(coords)[0]
+    # print("---------------")
+    # print(coords)
     for i in range(len(coords)):
         result.append(Edge(coords[i], coords[(i + 1) % len(coords)]))
+
     return result
 
 
@@ -27,7 +32,8 @@ def farthest_insertion(points):
     n = len(points)
 
     # Distanzmatrix vorbereiten (für schnelle Zugriffe auf Distanzen)
-    distance_matrix = [[calculate_distance(i, j) for j in points] for i in points]
+    distance_matrix = [
+        [calculate_distance(i, j) for j in points] for i in points]
 
     # 1. Starte mit den beiden am weitesten entfernten Knoten
     max_dist = 0
@@ -66,7 +72,8 @@ def farthest_insertion(points):
 
         for i in range(len(tour) - 1):
             current_increase = (
-                distance_matrix[points.index(tour[i])][points.index(farthest_node)]
+                distance_matrix[points.index(
+                    tour[i])][points.index(farthest_node)]
                 + distance_matrix[points.index(farthest_node)][
                     points.index(tour[i + 1])
                 ]
@@ -113,7 +120,7 @@ def calculate_turn_angles(path):
     for i in range(1, len(path) - 1):
         # Hole Koordinaten der drei aufeinanderfolgenden Punkte
         p1, p2, p3 = path[i - 1], path[i], path[i + 1]
-
+        # print(p1, p2, p3)
         # Berechne die Vektoren zwischen den Punkten
         vec_a = (p2.x - p1.x, p2.y - p1.y)
         vec_b = (p3.x - p2.x, p3.y - p2.y)
@@ -134,3 +141,60 @@ def calculate_turn_angles(path):
 
         angles.append(theta)
     return angles
+
+
+def ruin(tour, ruin_fraction=0.3):
+    """Randomly removes a subset of cities from the tour."""
+    n = len(tour)
+    num_remove = int(n * ruin_fraction)
+    to_remove = random.sample(tour, num_remove)
+    new_tour = [city for city in tour if city not in to_remove]
+    return new_tour, to_remove
+
+
+def recreate(tour, removed_cities):
+    """Recreates the tour by reinserting removed cities in the best positions."""
+    for city in removed_cities:
+        best_position = None
+        best_cost = float('inf')
+
+        for i in range(len(tour) + 1):
+            # Try inserting city at position i
+            if (tour[:i] != [city]):
+                new_tour = tour[:i] + [city] + tour[i:]
+                cost = sum(calculate_turn_angles(new_tour))
+                if cost < best_cost:
+                    best_cost = cost
+                    best_position = i
+
+        # Insert city at the best position found
+        tour.insert(best_position, city)
+
+    return tour
+
+
+def ruin_and_recreate(tour, iterations=10, ruin_fraction=0.3):
+    """Ruin and Recreate algorithm for TSP with turn costs."""
+    # Initial tour (simple sequence of cities)
+    # tour = list(range(len(cities)))
+    # random.shuffle(tour)
+
+    best_tour = tour
+    best_cost = sum(calculate_turn_angles(tour))
+
+    for _ in range(iterations):
+        # Ruin phase: Remove a subset of cities
+        ruined_tour, removed_cities = ruin(best_tour, ruin_fraction)
+
+        # Recreate phase: Reinsert removed cities
+        new_tour = recreate(ruined_tour, removed_cities)
+
+        # Calculate cost of the recreated tour
+        new_cost = sum(calculate_turn_angles(new_tour))
+
+        # Update best solution if new tour is better
+        if new_cost < best_cost:
+            best_tour = new_tour
+            best_cost = new_cost
+    print("best: ", best_cost)
+    return best_tour, best_cost
