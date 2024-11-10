@@ -8,6 +8,8 @@ def solver(points: list[Coord]) -> list[Edge]:
     # result.append(Edge(Coord(100, 100), Coord(200, 200),))
     coords = farthest_insertion(points)
     coords = ruin_and_recreate(coords)[0]
+    dist = calculate_tour_distance(coords)
+    print("neue dist: ", dist)
     # print("---------------")
     # print(coords)
     for i in range(len(coords)):
@@ -107,12 +109,19 @@ def farthest_insertion(points):
     turn_angles = calculate_turn_angles(tour)
     summ = 0
     for i, angle in enumerate(turn_angles):
-        print(f"an Winkel {i+1}: {round(angle, 2)}°")
+       # print(f"an Winkel {i+1}: {round(angle, 2)}°")
         summ += angle
     print("anzahl Winkel:", len(turn_angles))
     print("tour:", len(tour))
     print("Gesamtwinkel: ", summ)
     return tour
+
+
+def calculate_tour_distance(tour):
+    summ = 0
+    for i, t in enumerate(tour):
+        summ += calculate_distance(t, tour[(i+1) % len(tour)])
+    return summ
 
 
 def calculate_turn_angles(path):
@@ -156,13 +165,21 @@ def recreate(tour, removed_cities):
     """Recreates the tour by reinserting removed cities in the best positions."""
     for city in removed_cities:
         best_position = None
-        best_cost = float('inf')
+        best_cost = float('inf')+calculate_tour_distance(tour)
 
         for i in range(len(tour) + 1):
             # Try inserting city at position i
             if (tour[:i] != [city]):
                 new_tour = tour[:i] + [city] + tour[i:]
-                cost = sum(calculate_turn_angles(new_tour))
+               # print("t", tour[i:])
+               # print("t", tour[i-1])
+                dist = calculate_tour_distance(tour[:i])+calculate_distance(
+                    tour[i-1], city)
+                if i < len(tour):
+                    dist = dist + \
+                        calculate_distance(
+                            city, tour[i])+calculate_tour_distance(tour[i:])
+                cost = sum(calculate_turn_angles(new_tour))+dist
                 if cost < best_cost:
                     best_cost = cost
                     best_position = i
