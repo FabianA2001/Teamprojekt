@@ -137,6 +137,18 @@ def calculate_turn_angles(path):
         # Berechne die Länge der Vektoren
         mag_a = math.sqrt(vec_a[0] ** 2 + vec_a[1] ** 2)
         mag_b = math.sqrt(vec_b[0] ** 2 + vec_b[1] ** 2)
+        if mag_a == 0 or mag_b == 0:
+            print("-----------------------")
+            print(f"mag_a: {mag_a}")
+            print(f"mag_b: {mag_b}")
+            print(f"vec_a: {vec_a}")
+            print(f"veg_b: {vec_b}")
+            print(f"p1: {p1}")
+            print(f"p2: {p2}")
+            print(f"p3: {p3}")
+            print(f"length: {len(path)}")
+            print(path)
+            quit()
 
         # Berechne den Winkel zwischen den Vektoren
         dot_product = vec_a[0] * vec_b[0] + vec_a[1] * vec_b[1]
@@ -155,8 +167,11 @@ def calculate_turn_angles(path):
 def ruin(tour, ruin_fraction=0.3):
     """Randomly removes a subset of cities from the tour."""
     n = len(tour)
+    first_city = tour[0]
     num_remove = int(n * ruin_fraction)
     to_remove = random.sample(tour, num_remove)
+    while first_city in to_remove:
+        to_remove = random.sample(tour, num_remove)
     new_tour = [city for city in tour if city not in to_remove]
     return new_tour, to_remove
 
@@ -165,24 +180,15 @@ def recreate(tour, removed_cities):
     """Recreates the tour by reinserting removed cities in the best positions."""
     for city in removed_cities:
         best_position = None
-        best_cost = float('inf')+calculate_tour_distance(tour)
+        best_cost = float('inf')
 
-        for i in range(len(tour) + 1):
+        for i in range(1,len(tour)):
             # Try inserting city at position i
-            if (tour[:i] != [city]):
-                new_tour = tour[:i] + [city] + tour[i:]
-               # print("t", tour[i:])
-               # print("t", tour[i-1])
-                dist = calculate_tour_distance(tour[:i])+calculate_distance(
-                    tour[i-1], city)
-                if i < len(tour):
-                    dist = dist + \
-                        calculate_distance(
-                            city, tour[i])+calculate_tour_distance(tour[i:])
-                cost = sum(calculate_turn_angles(new_tour))+dist
-                if cost < best_cost:
-                    best_cost = cost
-                    best_position = i
+            new_tour = tour[:i] + [city] + tour[i:]
+            cost = sum(calculate_turn_angles(new_tour))
+            if cost < best_cost:
+                best_cost = cost
+                best_position = i
 
         # Insert city at the best position found
         tour.insert(best_position, city)
@@ -190,16 +196,17 @@ def recreate(tour, removed_cities):
     return tour
 
 
-def ruin_and_recreate(tour, iterations=10, ruin_fraction=0.3):
+def ruin_and_recreate(tour, iterations=2000, ruin_fraction=0.3, distance_mul=1.2):
     """Ruin and Recreate algorithm for TSP with turn costs."""
     # Initial tour (simple sequence of cities)
     # tour = list(range(len(cities)))
     # random.shuffle(tour)
 
     best_tour = tour
-    best_cost = sum(calculate_turn_angles(tour))
+    best_angles_cost = sum(calculate_turn_angles(tour))
+    best_distance_cost = calculate_tour_distance(tour)
 
-    for _ in range(iterations):
+    for i in range(iterations):
         # Ruin phase: Remove a subset of cities
         ruined_tour, removed_cities = ruin(best_tour, ruin_fraction)
 
@@ -207,11 +214,19 @@ def ruin_and_recreate(tour, iterations=10, ruin_fraction=0.3):
         new_tour = recreate(ruined_tour, removed_cities)
 
         # Calculate cost of the recreated tour
-        new_cost = sum(calculate_turn_angles(new_tour))
+        new_angles_cost = sum(calculate_turn_angles(new_tour))
+        new_distance_cost = calculate_tour_distance(new_tour)
 
         # Update best solution if new tour is better
-        if new_cost < best_cost:
+        if new_angles_cost < best_angles_cost and new_distance_cost < distance_mul * best_distance_cost:
+        # if new_angles_cost < best_angles_cost:
+            print(f"[{i}]:  better angle")
+            if new_distance_cost < best_distance_cost:
+                print("     better distance")
+                best_distance_cost = new_distance_cost
             best_tour = new_tour
-            best_cost = new_cost
-    print("best: ", best_cost)
-    return best_tour, best_cost
+            best_angles_cost = new_angles_cost
+        else:
+            print(f"[{i}]:  -")
+    print("best: ", best_angles_cost)
+    return best_tour, best_angles_cost
