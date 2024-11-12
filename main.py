@@ -16,7 +16,7 @@ def calculate_distance(point1: Coord, point2: Coord) -> float:
     return distance
 
 
-def generate_point(count: int, height: int, width: int) -> list[Coord]:
+def generate_points(count: int, height: int, width: int) -> list[Coord]:
     OFFSET = CONST.OFFSET * CONST.ANTIALIAS_FACTOR
     list = []
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     height = args.height * CONST.ANTIALIAS_FACTOR
     width = args.width * CONST.ANTIALIAS_FACTOR
 
-    points = generate_point(args.count, height, width)
+    points = generate_points(args.count, height, width)
     points = solver.farthest_insertion(points)
     img = Img(points, args.height, args.width)
     img.save(args.name+"farthest")
