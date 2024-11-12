@@ -41,7 +41,8 @@ def generate_point(count: int, height: int, width: int) -> list[Coord]:
     return list
 
 
-if __name__ == "__main__":
+def parse_args():
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-height",
@@ -80,9 +81,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-file", "-f", type=str, metavar="STR", help="Name der input Datei"
     )
-
     args = parser.parse_args()
-
     if args.height < 50:
         raise argparse.ArgumentTypeError("Bitte eine größere Höhe")
     if args.width < 50:
@@ -94,19 +93,34 @@ if __name__ == "__main__":
     if args.file != None and args.file == "":
         raise argparse.ArgumentTypeError("Bitte keinene leeren file Namen")
 
-    points = []
+    return args
+
+
+def prints_stats(name: str, points: list[Coord]):
+    dis, angle = solver.calculate_dis_angle(points)
+    print(f"Distance: {round(dis, 2)}\tAngle: {round(angle, 2)}\t{name}")
+
+
+if __name__ == "__main__":
+    args = parse_args()
     if args.file != None:
         points = file.read(args.file)
 
     height = args.height * CONST.ANTIALIAS_FACTOR
     width = args.width * CONST.ANTIALIAS_FACTOR
+
     points = generate_point(args.count, height, width)
     points = solver.farthest_insertion(points)
     img = Img(points, args.height, args.width)
     img.save(args.name+"farthest")
+    prints_stats("farthest", points)
+
     points = solver.ruin_and_recreate(points)[0]
     img = Img(points, args.height, args.width)
     img.save(args.name+"ruin")
+    prints_stats("ruin", points)
+
     points = solver.two_opt(points)
     img = Img(points, args.height, args.width)
     img.save(args.name+"two opt")
+    prints_stats("two opt", points)

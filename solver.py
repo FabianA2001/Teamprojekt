@@ -4,18 +4,6 @@ import math
 import random
 
 
-def solver(points: list[Coord], opt) -> list[Edge]:
-    coords = farthest_insertion(points)
-    if opt:
-        coords = ruin_and_recreate(coords)[0]
-    coords = two_opt(coords)
-    dist = calculate_tour_distance(coords)
-    angles = calculate_turn_angles(coords)
-    print("neue dist: ", dist)
-    print("neue angles: ", sum(angles))
-    return make_edges(coords)
-
-
 def make_edges(points: list[Coord]) -> list[Edge]:
     result = []
     for i in range(len(points)):
@@ -56,7 +44,7 @@ def two_opt(tour: list[Coord]) -> list[Coord]:
                     tour[i+1:j+1] = reversed(tour[i+1:j+1])
                     count += 1
                     improvement_found = True
-    print("Anzahl der Veränderungen", count)
+    # print("Anzahl der Veränderungen in two opt", count)
     tour.append(tour[0])
     return tour
 
@@ -144,7 +132,7 @@ def farthest_insertion(points) -> list[Coord]:
     summ = 0
     for edge in edges:
         summ += edge.length
-    print("Gesamtlänge der Tour: ", summ)
+    # print("Gesamtlänge der Tour: ", summ)
 
     # Berechne die Abbiegewinkel für den Pfad
     turn_angles = calculate_turn_angles(tour)
@@ -152,9 +140,9 @@ def farthest_insertion(points) -> list[Coord]:
     for i, angle in enumerate(turn_angles):
        # print(f"an Winkel {i+1}: {round(angle, 2)}°")
         summ += angle
-    print("anzahl Winkel:", len(turn_angles))
-    print("tour:", len(tour))
-    print("Gesamtwinkel: ", summ)
+    # print("anzahl Winkel:", len(turn_angles))
+    # print("tour:", len(tour))
+    # print("Gesamtwinkel: ", summ)
     return tour
 
 
@@ -165,45 +153,6 @@ def calculate_tour_distance(tour):
     return summ
 
 
-# def calculate_turn_angles(path):
-#     angles = []
-#     for i in range(1, len(path) - 1):
-#         # Hole Koordinaten der drei aufeinanderfolgenden Punkte
-#         p1, p2, p3 = path[i - 1], path[i], path[i + 1]
-#         # print(p1, p2, p3)
-#         # Berechne die Vektoren zwischen den Punkten
-#         vec_a = (p2.x - p1.x, p2.y - p1.y)
-#         vec_b = (p3.x - p2.x, p3.y - p2.y)
-
-#         # Berechne die Länge der Vektoren
-#         mag_a = math.sqrt(vec_a[0] ** 2 + vec_a[1] ** 2)
-#         mag_b = math.sqrt(vec_b[0] ** 2 + vec_b[1] ** 2)
-#         if mag_a == 0 or mag_b == 0:
-#             print("-----------------------")
-#             print(f"mag_a: {mag_a}")
-#             print(f"mag_b: {mag_b}")
-#             print(f"vec_a: {vec_a}")
-#             print(f"veg_b: {vec_b}")
-#             print(f"p1: {p1}")
-#             print(f"p2: {p2}")
-#             print(f"p3: {p3}")
-#             print(f"length: {len(path)}")
-#             print(path)
-#             quit()
-
-#         # Berechne den Winkel zwischen den Vektoren
-#         dot_product = vec_a[0] * vec_b[0] + vec_a[1] * vec_b[1]
-#         cos_theta = dot_product / (mag_a * mag_b)
-
-#         # Begrenze cos_theta auf den Bereich [-1, 1] um Rundungsfehler zu vermeiden
-#         cos_theta = max(-1, min(1, cos_theta))
-
-#         # Berechne den Winkel in Radiant und konvertiere zu Grad
-#         theta = math.acos(cos_theta) * (180 / math.pi)
-
-#         angles.append(theta)
-#     return angles
-
 def calculate_turn_angles(path):
     angles = []
     for i in range(1, len(path) - 1):
@@ -212,6 +161,10 @@ def calculate_turn_angles(path):
 
         angles.append(caluculate_angle(p1, p2, p3))
     return angles
+
+
+def calculate_dis_angle(points: list[Coord]):
+    return calculate_tour_distance(points), sum(calculate_turn_angles(points))
 
 
 def caluculate_angle(p1, p2, p3):
@@ -293,13 +246,8 @@ def ruin_and_recreate(tour, iterations=2000, ruin_fraction=0.3, distance_mul=1.2
         # Update best solution if new tour is better
         if new_angles_cost < best_angles_cost and new_distance_cost < distance_mul * best_distance_cost:
             # if new_angles_cost < best_angles_cost:
-            # print(f"[{i}]:  better angle")
             if new_distance_cost < best_distance_cost:
-                # print("     better distance")
                 best_distance_cost = new_distance_cost
             best_tour = new_tour
             best_angles_cost = new_angles_cost
-        # else:
-            # print(f"[{i}]:  -")
-    print("best: ", best_angles_cost)
     return best_tour, best_angles_cost
