@@ -2,9 +2,47 @@ import CONST
 from image import Img
 import argparse
 import file
+import random
+from CONST import Coord, Edge
+import math
+import solver
 
 
-if __name__ == "__main__":
+def calculate_distance(point1: Coord, point2: Coord) -> float:
+    distance = math.sqrt(
+        math.pow((point1.x - point2.x), 2) +
+        math.pow((point1.y - point2.y), 2)
+    )
+    return distance
+
+
+def generate_point(count: int, height: int, width: int) -> list[Coord]:
+    OFFSET = CONST.OFFSET * CONST.ANTIALIAS_FACTOR
+    list = []
+
+    def enough_distance() -> bool:
+        for point in list:
+            if (
+                calculate_distance(coord, point)
+                <= CONST.MIN_DISTANCE * CONST.ANTIALIAS_FACTOR
+            ):
+                return False
+        return True
+
+    for _ in range(count):
+        for _ in range(100):
+            coord = Coord(
+                random.randint(OFFSET, height - OFFSET),
+                random.randint(OFFSET, width - OFFSET),
+            )
+            if enough_distance() == True:
+                break
+        list.append(coord)
+    return list
+
+
+def parse_args():
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-height",
@@ -38,12 +76,12 @@ if __name__ == "__main__":
         default=CONST.DATEI_NAME,
         help=f"Name der output Datei (Default {CONST.DATEI_NAME})",
     )
+    parser.add_argument("-opt", "-o", action="store_false",
+                        help="Ob keine Ruin und Create verbesserung vorgenommen werden soll")
     parser.add_argument(
         "-file", "-f", type=str, metavar="STR", help="Name der input Datei"
     )
-
     args = parser.parse_args()
-
     if args.height < 50:
         raise argparse.ArgumentTypeError("Bitte eine größere Höhe")
     if args.width < 50:
@@ -55,9 +93,34 @@ if __name__ == "__main__":
     if args.file != None and args.file == "":
         raise argparse.ArgumentTypeError("Bitte keinene leeren file Namen")
 
-    points = []
+    return args
+
+
+def prints_stats(name: str, points: list[Coord]):
+    dis, angle = solver.calculate_dis_angle(points)
+    print(f"Distance: {round(dis, 2)}\tAngle: {round(angle, 2)}\t{name}")
+
+
+if __name__ == "__main__":
+    args = parse_args()
     if args.file != None:
         points = file.read(args.file)
 
-    img = Img(args.height, args.width, args.count, points)
-    img.save(args.name)
+    height = args.height * CONST.ANTIALIAS_FACTOR
+    width = args.width * CONST.ANTIALIAS_FACTOR
+
+    points = generate_point(args.count, height, width)
+    points = solver.farthest_insertion(points)
+    img = Img(points, args.height, args.width)
+    img.save(args.name+"farthest")
+    prints_stats("farthest", points)
+
+    points = solver.ruin_and_recreate(points)[0]
+    img = Img(points, args.height, args.width)
+    img.save(args.name+"ruin")
+    prints_stats("ruin", points)
+
+    points = solver.two_opt(points)
+    img = Img(points, args.height, args.width)
+    img.save(args.name+"two opt")
+    prints_stats("two opt", points)

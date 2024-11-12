@@ -8,6 +8,8 @@ ANTIALIAS_FACTOR = 4
 FONT_SIZE = 20
 OFFSET = 30
 
+OPT_TURN_COST = True
+
 
 class Coord:
     def __init__(self, x: int, y: int) -> None:
