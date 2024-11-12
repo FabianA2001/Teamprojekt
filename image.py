@@ -1,7 +1,5 @@
 from PIL import Image, ImageDraw, ImageFont
-import random
 import solver
-import math
 from CONST import Coord, Edge
 
 import file
@@ -11,11 +9,9 @@ import CONST
 class Img:
     def __init__(
         self,
+        points: list[Coord],
         height: int = CONST.SCREEN_HEIGHT,
-        width: int = CONST.SCREEN_WIDTH,
-        count: int = CONST.COUNT,
-        points: list[Coord] = [],
-        opt: bool = False
+        width: int = CONST.SCREEN_WIDTH
     ) -> None:
         self.HEIGHT = height * CONST.ANTIALIAS_FACTOR
         self.WIDTH = width * CONST.ANTIALIAS_FACTOR
@@ -26,47 +22,10 @@ class Img:
         )
         self.img = Image.new("RGB", (self.HEIGHT, self.WIDTH), color="white")
         self._draw = ImageDraw.Draw(self.img)
-        self.opt = opt
-
-        if points == []:
-            self.points = self.generate_point(count)
-        else:
-            self.points = points
-
-        self.edges = solver.solver(self.points, self.opt)
+        self.points = points
+        self.edges = solver.make_edges(points)
 
         self._draw_image()
-
-    def calculate_distance(self, point1: Coord, point2: Coord) -> float:
-        distance = math.sqrt(
-            math.pow((point1.x - point2.x), 2) +
-            math.pow((point1.y - point2.y), 2)
-        )
-        return distance
-
-    def generate_point(self, count: int) -> list[Coord]:
-        OFFSET = CONST.OFFSET * CONST.ANTIALIAS_FACTOR
-        list = []
-
-        def enough_distance() -> bool:
-            for point in list:
-                if (
-                    self.calculate_distance(coord, point)
-                    <= CONST.MIN_DISTANCE * CONST.ANTIALIAS_FACTOR
-                ):
-                    return False
-            return True
-
-        for _ in range(count):
-            for _ in range(100):
-                coord = Coord(
-                    random.randint(OFFSET, self.HEIGHT - OFFSET),
-                    random.randint(OFFSET, self.WIDTH - OFFSET),
-                )
-                if enough_distance() == True:
-                    break
-            list.append(coord)
-        return list
 
     def show(self):
         self.img.show()

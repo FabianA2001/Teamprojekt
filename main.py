@@ -2,6 +2,43 @@ import CONST
 from image import Img
 import argparse
 import file
+import random
+from CONST import Coord, Edge
+import math
+import solver
+
+
+def calculate_distance(point1: Coord, point2: Coord) -> float:
+    distance = math.sqrt(
+        math.pow((point1.x - point2.x), 2) +
+        math.pow((point1.y - point2.y), 2)
+    )
+    return distance
+
+
+def generate_point(count: int, height: int, width: int) -> list[Coord]:
+    OFFSET = CONST.OFFSET * CONST.ANTIALIAS_FACTOR
+    list = []
+
+    def enough_distance() -> bool:
+        for point in list:
+            if (
+                calculate_distance(coord, point)
+                <= CONST.MIN_DISTANCE * CONST.ANTIALIAS_FACTOR
+            ):
+                return False
+        return True
+
+    for _ in range(count):
+        for _ in range(100):
+            coord = Coord(
+                random.randint(OFFSET, height - OFFSET),
+                random.randint(OFFSET, width - OFFSET),
+            )
+            if enough_distance() == True:
+                break
+        list.append(coord)
+    return list
 
 
 if __name__ == "__main__":
@@ -61,5 +98,15 @@ if __name__ == "__main__":
     if args.file != None:
         points = file.read(args.file)
 
-    img = Img(args.height, args.width, args.count, points, args.opt)
-    img.save(args.name)
+    height = args.height * CONST.ANTIALIAS_FACTOR
+    width = args.width * CONST.ANTIALIAS_FACTOR
+    points = generate_point(args.count, height, width)
+    points = solver.farthest_insertion(points)
+    img = Img(points, args.height, args.width)
+    img.save(args.name+"farthest")
+    points = solver.ruin_and_recreate(points)[0]
+    img = Img(points, args.height, args.width)
+    img.save(args.name+"ruin")
+    points = solver.two_opt(points)
+    img = Img(points, args.height, args.width)
+    img.save(args.name+"two opt")

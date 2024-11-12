@@ -5,9 +5,7 @@ import random
 
 
 def solver(points: list[Coord], opt) -> list[Edge]:
-    result = []
-    # result.append(Edge(Coord(100, 100), Coord(200, 200),))
-    coords = farthest_insertion(points, opt)
+    coords = farthest_insertion(points)
     if opt:
         coords = ruin_and_recreate(coords)[0]
     coords = two_opt(coords)
@@ -15,10 +13,13 @@ def solver(points: list[Coord], opt) -> list[Edge]:
     angles = calculate_turn_angles(coords)
     print("neue dist: ", dist)
     print("neue angles: ", sum(angles))
-    # print("---------------")
-    # print(coords)
-    for i in range(len(coords)):
-        result.append(Edge(coords[i], coords[(i + 1) % len(coords)]))
+    return make_edges(coords)
+
+
+def make_edges(points: list[Coord]) -> list[Edge]:
+    result = []
+    for i in range(len(points)):
+        result.append(Edge(points[i], points[(i + 1) % len(points)]))
 
     return result
 
@@ -65,7 +66,7 @@ def calculate_distance(point1: Coord, point2: Coord):
     return math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2)
 
 
-def farthest_insertion(points, opt) -> list[Edge]:
+def farthest_insertion(points) -> list[Coord]:
     """
     Implementiert den Farthest Insertion Algorithmus zur Lösung des TSP-Problems.
 
@@ -81,7 +82,6 @@ def farthest_insertion(points, opt) -> list[Edge]:
 
     # 1. Starte mit den beiden am weitesten entfernten Knoten
     max_dist = 0
-    start_pair = ((), ())
     edges = []
     for i in range(n):
         for j in range(i + 1, n):
@@ -89,7 +89,7 @@ def farthest_insertion(points, opt) -> list[Edge]:
                 max_dist = distance_matrix[i][j]
                 start_pair = (points[i], points[j])
     # Initialisiere die Tour mit den beiden am weitesten entfernten Knoten
-    tour = [start_pair[0], start_pair[1], start_pair[0]]
+    tour: list[Coord] = [start_pair[0], start_pair[1], start_pair[0]]
     # Liste der restlichen Knoten
     unvisited = set(points)
     unvisited.remove(start_pair[0])
@@ -98,7 +98,6 @@ def farthest_insertion(points, opt) -> list[Edge]:
     # 2. Wiederhole, bis alle Knoten in der Tour enthalten sind
     while unvisited:
         # Finde den am weitesten entfernten Knoten von der aktuellen Tour
-        farthest_node = None
         max_dist_to_tour = -1
 
         for node in unvisited:
