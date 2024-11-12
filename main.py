@@ -110,6 +110,7 @@ if __name__ == "__main__":
     width = args.width * CONST.ANTIALIAS_FACTOR
 
     points = generate_point(args.count, height, width)
+    file.write(points, args.name)
     points = solver.farthest_insertion(points)
     img = Img(points, args.height, args.width)
     img.save(args.name+"farthest")
@@ -122,5 +123,5 @@ if __name__ == "__main__":
 
     points = solver.two_opt(points)
     img = Img(points, args.height, args.width)
-    img.save(args.name+"two opt")
+    img.save(args.name+"two_opt")
     prints_stats("two opt", points)

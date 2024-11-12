@@ -35,7 +35,6 @@ class Img:
             (self.HEIGHT_ORGINAL, self.WIDTH_ORGINAL), Image.LANCZOS
         )
         self.img.save(name + ".jpg")
-        file.write(self.points, name)
 
     def _draw_image(self):
         for edge in self.edges:
