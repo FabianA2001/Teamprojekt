@@ -105,11 +105,11 @@ if __name__ == "__main__":
     args = parse_args()
     if args.file != None:
         points = file.read(args.file)
+    else:
+        height = args.height * CONST.ANTIALIAS_FACTOR
+        width = args.width * CONST.ANTIALIAS_FACTOR
+        points = generate_points(args.count, height, width)
 
-    height = args.height * CONST.ANTIALIAS_FACTOR
-    width = args.width * CONST.ANTIALIAS_FACTOR
-
-    points = generate_points(args.count, height, width)
     points = solver.farthest_insertion(points)
     img = Img(points, args.height, args.width)
     img.save(args.name+"farthest")
