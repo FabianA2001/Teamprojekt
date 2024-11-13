@@ -20,7 +20,7 @@ def generate_points(count: int, height: int, width: int) -> list[Coord]:
     OFFSET = CONST.OFFSET * CONST.ANTIALIAS_FACTOR
     list = []
 
-    def enough_distance() -> bool:
+    def enough_distancee() -> bool:
         for point in list:
             if (
                 calculate_distance(coord, point)
@@ -35,10 +35,70 @@ def generate_points(count: int, height: int, width: int) -> list[Coord]:
                 random.randint(OFFSET, height - OFFSET),
                 random.randint(OFFSET, width - OFFSET),
             )
-            if enough_distance() == True:
+            if enough_distancee() == True:
                 break
         list.append(coord)
     return list
+
+
+def enough_distance(coord1: Coord, coord2: Coord, distance: int) -> bool:
+    if calculate_distance(coord1, coord2) >= distance:
+        return True
+    return False
+
+
+def generate_areas(count: int, height: int, width: int) -> list[Coord]:
+    OFFSET = (CONST.OFFSET + CONST.CLUSTER_RADUIS) * CONST.ANTIALIAS_FACTOR
+    areas_list = []
+    verifier = True
+
+    for _ in range(count):
+        for attempt in range(100):
+            area_location = Coord(
+                random.randint(OFFSET, height - OFFSET),
+                random.randint(OFFSET, width - OFFSET),
+            )
+            for location in areas_list:
+                if attempt == 0:
+                    continue
+                if enough_distance(area_location, location, CONST.MIN_DISTANCE_AREA):
+                    verifier = True
+                else:
+                    verifier = False
+                    break
+            if verifier == True:
+                cluster = generate_cluster(CONST.CLUSTER_SIZE, area_location)
+                areas_list.append(cluster)
+                break
+    return areas_list
+          
+
+def generate_cluster(count: int, center: Coord) -> list[Coord]:
+    cluster_list = []
+    verifier = True
+
+    for _ in range(count):
+        for attempt in range(100):
+            cluster_point = Coord(
+                random.randint(center.x - CONST.CLUSTER_RADUIS, center.x + CONST.CLUSTER_RADUIS),
+                random.randint(center.y - CONST.CLUSTER_RADUIS, center.y + CONST.CLUSTER_RADUIS),
+            )
+            for point in cluster_list:
+                if attempt == 0:
+                    continue
+                if enough_distance(cluster_point, point, CONST.MIN_DISTANCE_CLUSTER):
+                    verifier = True
+                else:
+                    verifier = False
+                    break
+            if verifier == True:
+                cluster_list.append(cluster_point)
+                break
+    return cluster_list
+
+
+
+
 
 
 def parse_args():
@@ -65,8 +125,8 @@ def parse_args():
         "-c",
         type=int,
         metavar="INT",
-        default=CONST.COUNT,
-        help=f"anzahl der kreuze (Default {CONST.COUNT})",
+        default=CONST.AREA_COUNT,
+        help=f"anzahl der kreuze (Default {CONST.AREA_COUNT})",
     )
     parser.add_argument(
         "-name",
@@ -108,8 +168,13 @@ if __name__ == "__main__":
     else:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
-        points = generate_points(args.count, height, width)
+        points = generate_areas(args.count, height, width)
 
+    img = Img(points, args.height, args.width)
+    img.save(args.name+"points")
+    
+
+    """
     points = solver.farthest_insertion(points)
     img = Img(points, args.height, args.width)
     img.save(args.name+"farthest")
@@ -124,3 +189,4 @@ if __name__ == "__main__":
     img = Img(points, args.height, args.width)
     img.save(args.name+"two opt")
     prints_stats("two opt", points)
+    """

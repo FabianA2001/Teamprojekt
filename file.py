@@ -1,14 +1,16 @@
 import csv
+import CONST
 from CONST import Coord
 
 
-def write(points: list[Coord], name: str) -> None:
+def write(points: list[list[Coord]], name: str) -> None:
     with open(f"{name}.csv", mode="w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=["x", "y"], delimiter=";")
         writer.writeheader()  # Kopfzeile schreiben
-        for coord in points:
-            point = {"x": coord.x, "y": coord.y}
-            writer.writerow(point)
+        for i in range(CONST.AREA_COUNT):
+            for j in range(CONST.CLUSTER_SIZE):
+                point = {"x": points[i][j].x, "y": points[i][j].y}
+                writer.writerow(point)
 
 
 def read(name: str) -> list[Coord]:

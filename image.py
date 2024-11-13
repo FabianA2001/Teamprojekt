@@ -9,7 +9,7 @@ import CONST
 class Img:
     def __init__(
         self,
-        points: list[Coord],
+        points: list[list[Coord]],
         height: int = CONST.SCREEN_HEIGHT,
         width: int = CONST.SCREEN_WIDTH
     ) -> None:
@@ -25,7 +25,8 @@ class Img:
         self.points = points
         self.edges = solver.make_edges(points)
 
-        self._draw_image()
+        #self._draw_image()
+        self._draw_points()
 
     def show(self):
         self.img.show()
@@ -48,6 +49,11 @@ class Img:
             if i == len(self.edges) - 1:
                 continue
             self._draw_number(coord.point1, i)
+
+    def _draw_points(self):
+        for i in range(CONST.AREA_COUNT):
+            for j in range(CONST.CLUSTER_SIZE):
+                self._draw_ellipse(self.points[i][j])
 
     def _draw_point_debugg(self, x, y):
         self._draw.line((0, y, self.img.width, y), fill="red")
@@ -75,7 +81,7 @@ class Img:
     def _draw_ellipse(self, coord: Coord) -> None:
         LINE_COLOR = "red"
         LINE_WIDTH = 4 * CONST.ANTIALIAS_FACTOR
-        SIZE = (10 * CONST.ANTIALIAS_FACTOR) // 2
+        SIZE = (20 * CONST.ANTIALIAS_FACTOR) // 2
         self._draw.ellipse(
             (coord.x - SIZE, coord.y - SIZE, coord.x + SIZE, coord.y + SIZE),
             fill=LINE_COLOR,
