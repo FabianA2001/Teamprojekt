@@ -16,32 +16,7 @@ def calculate_distance(point1: Coord, point2: Coord) -> float:
     return distance
 
 
-def generate_points(count: int, height: int, width: int) -> list[Coord]:
-    OFFSET = CONST.OFFSET * CONST.ANTIALIAS_FACTOR
-    list = []
-
-    def enough_distancee() -> bool:
-        for point in list:
-            if (
-                calculate_distance(coord, point)
-                <= CONST.MIN_DISTANCE * CONST.ANTIALIAS_FACTOR
-            ):
-                return False
-        return True
-
-    for _ in range(count):
-        for _ in range(100):
-            coord = Coord(
-                random.randint(OFFSET, height - OFFSET),
-                random.randint(OFFSET, width - OFFSET),
-            )
-            if enough_distancee() == True:
-                break
-        list.append(coord)
-    return list
-
-
-def enough_distance(coord1: Coord, coord2: Coord, distance: int) -> bool:
+def is_enough_distance(coord1: Coord, coord2: Coord, distance: int) -> bool:
     if calculate_distance(coord1, coord2) >= distance:
         return True
     return False
@@ -61,7 +36,7 @@ def generate_areas(count: int, height: int, width: int) -> list[Coord]:
             for location in areas_list:
                 if attempt == 0:
                     continue
-                if enough_distance(area_location, location, CONST.MIN_DISTANCE_AREA):
+                if is_enough_distance(area_location, location, CONST.MIN_DISTANCE_AREA):
                     verifier = True
                 else:
                     verifier = False
@@ -86,7 +61,7 @@ def generate_cluster(count: int, center: Coord) -> list[Coord]:
             for point in cluster_list:
                 if attempt == 0:
                     continue
-                if enough_distance(cluster_point, point, CONST.MIN_DISTANCE_CLUSTER):
+                if is_enough_distance(cluster_point, point, CONST.MIN_DISTANCE_CLUSTER):
                     verifier = True
                 else:
                     verifier = False
@@ -95,10 +70,6 @@ def generate_cluster(count: int, center: Coord) -> list[Coord]:
                 cluster_list.append(cluster_point)
                 break
     return cluster_list
-
-
-
-
 
 
 def parse_args():
