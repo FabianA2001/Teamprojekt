@@ -30,7 +30,7 @@ def generate_areas(count: int, height: int, width: int) -> list[list[Coord]]:
     :param int height: Die Höhe des Bereiches in dem die Positionen generiert werden können.
     :param int width: Die Breite des Bereiches in dem die Positionen generiert werden können.
     
-    :return list[list[Coord]]: Eine zweidimensonale Liste mit Koordinaten, wobei jede Zeile einem Punkte- Cluster entspricht.
+    :return list[list[Coord]]: Eine zweidimensonale Liste mit Koordinaten, wobei jede Zeile einem Punkte-Cluster entspricht.
     """
     OFFSET = (CONST.OFFSET + CONST.CLUSTER_RADUIS) * CONST.ANTIALIAS_FACTOR
     areas_list = []
@@ -44,7 +44,7 @@ def generate_areas(count: int, height: int, width: int) -> list[list[Coord]]:
             )
             for location in areas_list:
                 if attempt == 0:
-                    continue
+                    continue    # Beim ersten Punkt wird nicht verglichen, um das Vergleichen mit einer leeren Liste zuverhindern.
                 if is_enough_distance(area_location, location, CONST.MIN_DISTANCE_AREA):
                     verifier = True
                 else:
@@ -59,7 +59,7 @@ def generate_areas(count: int, height: int, width: int) -> list[list[Coord]]:
 
 def generate_cluster(count: int, center: Coord) -> list[Coord]:
     """
-    Generiert ein Punkte-Cluster in einem Raduis um einen übergebenen Punkt.
+    Generiert ein Punkte-Cluster in einem Radius um einen übergebenen Punkt.
 
     :param int count: Die Anzahl an Punkten die ein Cluster enthält.
     :param Coord center: Die Koordinaten des Mittelpunktes des Cluster ("center" ist selbst kein Punkt im Cluster).
@@ -72,12 +72,12 @@ def generate_cluster(count: int, center: Coord) -> list[Coord]:
     for _ in range(count):
         for attempt in range(100):
             cluster_point = Coord(
-                random.randint(center.x - CONST.CLUSTER_RADUIS, center.x + CONST.CLUSTER_RADUIS),
-                random.randint(center.y - CONST.CLUSTER_RADUIS, center.y + CONST.CLUSTER_RADUIS),
+                random.randint(center.x - CONST.CLUSTER_RADIUS, center.x + CONST.CLUSTER_RADIUS),
+                random.randint(center.y - CONST.CLUSTER_RADIUS, center.y + CONST.CLUSTER_RADIUS),
             )
             for point in cluster_list:
                 if attempt == 0:
-                    continue
+                    continue    # Beim ersten Punkt wird nicht verglichen, um das Vergleichen mit einer leeren Liste zuverhindern.
                 if is_enough_distance(cluster_point, point, CONST.MIN_DISTANCE_CLUSTER):
                     verifier = True
                 else:
