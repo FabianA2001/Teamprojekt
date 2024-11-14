@@ -22,7 +22,16 @@ def is_enough_distance(coord1: Coord, coord2: Coord, distance: int) -> bool:
     return False
 
 
-def generate_areas(count: int, height: int, width: int) -> list[Coord]:
+def generate_areas(count: int, height: int, width: int) -> list[list[Coord]]:
+    """
+    Generiert zufällige Positionen, an denen mit "generate_cluster()" ein Punkte-Cluster erzeugt wird.
+    
+    :param int count: Die Anzahl an Clustern die insgesamt generiert werden sollen.
+    :param int height: Die Höhe des Bereiches in dem die Positionen generiert werden können.
+    :param int width: Die Breite des Bereiches in dem die Positionen generiert werden können.
+    
+    :return list[list[Coord]]: Eine zweidimensonale Liste mit Koordinaten, wobei jede Zeile einem Punkte- Cluster entspricht.
+    """
     OFFSET = (CONST.OFFSET + CONST.CLUSTER_RADUIS) * CONST.ANTIALIAS_FACTOR
     areas_list = []
     verifier = True
@@ -49,6 +58,14 @@ def generate_areas(count: int, height: int, width: int) -> list[Coord]:
           
 
 def generate_cluster(count: int, center: Coord) -> list[Coord]:
+    """
+    Generiert ein Punkte-Cluster in einem Raduis um einen übergebenen Punkt.
+
+    :param int count: Die Anzahl an Punkten die ein Cluster enthält.
+    :param Coord center: Die Koordinaten des Mittelpunktes des Cluster ("center" ist selbst kein Punkt im Cluster).
+
+    return list[Coord]: Eine Liste die die Koordinaten der Punkte im Cluster enthält.
+    """
     cluster_list = []
     verifier = True
 
