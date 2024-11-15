@@ -32,7 +32,7 @@ def generate_areas(count: int, height: int, width: int) -> list[list[Coord]]:
     
     :return list[list[Coord]]: Eine zweidimensonale Liste mit Koordinaten, wobei jede Zeile einem Punkte-Cluster entspricht.
     """
-    OFFSET = (CONST.OFFSET + CONST.CLUSTER_RADUIS) * CONST.ANTIALIAS_FACTOR
+    OFFSET = (CONST.OFFSET + CONST.CLUSTER_RADIUS) * CONST.ANTIALIAS_FACTOR
     areas_list = []
     verifier = True
 
