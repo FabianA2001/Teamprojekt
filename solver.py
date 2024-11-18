@@ -3,14 +3,6 @@ import math
 import random
 
 
-def make_edges(points: list[Coord]) -> list[Edge]:
-    result = []
-    for i in range(len(points)):
-        result.append(Edge(points[i], points[(i + 1) % len(points)]))
-
-    return result
-
-
 def two_opt(tour: list[Coord]) -> list[Coord]:
     tour = tour[0:-1]
     improvement_found = True

@@ -1,5 +1,5 @@
 import random
-from CONST import Coord
+from CONST import Coord, Edge
 import math
 import CONST
 
@@ -83,3 +83,9 @@ def generate_cluster(count: int, center: Coord) -> list[Coord]:
                 cluster_list.append(cluster_point)
                 break
     return cluster_list
+
+def make_edges(points: list[Coord]) -> list[Edge]:
+    result = []
+    for i in range(len(points)):
+        result.append(Edge(points[i], points[(i + 1) % len(points)]))
+    return result
