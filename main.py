@@ -69,16 +69,16 @@ def prints_stats(name: str, points: list[Coord]):
 
 if __name__ == "__main__":
     args = parse_args()
+    height = args.height * CONST.ANTIALIAS_FACTOR
+    width = args.width * CONST.ANTIALIAS_FACTOR
+
     if args.file != None:
         points = file.read(args.file)
     else:
-        height = args.height * CONST.ANTIALIAS_FACTOR
-        width = args.width * CONST.ANTIALIAS_FACTOR
         points = generate_areas(args.count, height, width)
 
     img = Img(points, args.height, args.width)
     img.save(args.name+"points")
-    
 
     """
     points = solver.farthest_insertion(points)
