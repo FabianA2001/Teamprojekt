@@ -1,20 +1,32 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <vector>
+#include <utility>
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
-int add(int i, int j)
+typedef std::pair<int, int> coord;
+typedef std::vector<coord> tour;
+
+tour two_opt(tour points)
 {
-    return i + j + 4;
+    return points;
 }
 
+tour farthest_insertion(tour points)
+{
+    return points;
+}
+tour ruin_and_recreate(tour points)
+{
+    return points;
+}
 namespace py = pybind11;
 
 PYBIND11_MODULE(cpp_wrapper, m)
 {
-    m.def("add", &add, R"pbdoc(
-        Add two numbers
-
-        Some other explanation about the add function.
-    )pbdoc");
+    m.def("two_opt", &two_opt);
+    m.def("farthest_insertion", &farthest_insertion);
+    m.def("ruin_and_recreate", &ruin_and_recreate);
 }

@@ -22,6 +22,10 @@ class Coord:
     def __repr__(self) -> str:
         return str(self)
 
+    def __iter__(self):
+        # Define the order of attributes when converted to tuple
+        return iter((self.x, self.y))
+
 
 class Edge:
     def __init__(self, point1: Coord, point2: Coord, length: float = 0) -> None:
