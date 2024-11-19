@@ -1,15 +1,8 @@
 import random
-from CONST import Coord, Edge
+from CONST import Coord
 import math
 import CONST
 
-
-
-def make_edges(points: list[Coord]) -> list[Edge]:
-    result = []
-    for i in range(len(points)):
-        result.append(Edge(points[i], points[(i + 1) % len(points)]))
-    return result
 
 
 def calculate_distance(point1: Coord, point2: Coord) -> float:

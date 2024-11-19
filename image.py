@@ -1,7 +1,5 @@
 from PIL import Image, ImageDraw, ImageFont
-import generate
 from CONST import Coord, Edge
-
 import file
 import CONST
 
@@ -25,7 +23,7 @@ class Img:
         )
         self.img = Image.new("RGB", (self.HEIGHT, self.WIDTH), color="white")
         self._draw = ImageDraw.Draw(self.img)
-        self.edges = generate.make_edges(self.points_in_route)
+        self.edges = CONST.make_edges(self.points_in_route)
 
         self._draw_points()
         self._draw_route()

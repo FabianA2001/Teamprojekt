@@ -37,3 +37,10 @@ class Edge:
 
     def __repr__(self) -> str:
         return str(self)
+
+
+def make_edges(points: list[Coord]) -> list[Edge]:
+    result = []
+    for i in range(len(points)):
+        result.append(Edge(points[i], points[(i + 1) % len(points)]))
+    return result
