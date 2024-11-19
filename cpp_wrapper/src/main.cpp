@@ -18,6 +18,28 @@ using namespace std;
 typedef std::pair<int, int> coord;
 typedef std::vector<coord> tour;
 
+double calculate_distance(const coord &a, const coord &b)
+{
+    return sqrt(pow(a.first - b.first, 2) + pow(a.second - b.second, 2));
+}
+
+double calculate_angle(const coord &p1, const coord &p2, const coord &p3)
+{
+    double vec_a_x = p2.first - p1.first, vec_a_y = p2.second - p1.second;
+    double vec_b_x = p3.first - p2.first, vec_b_y = p3.second - p2.second;
+
+    double mag_a = sqrt(vec_a_x * vec_a_x + vec_a_y * vec_a_y);
+    double mag_b = sqrt(vec_b_x * vec_b_x + vec_b_y * vec_b_y);
+    if (mag_a == 0 || mag_b == 0)
+        return 0;
+
+    double dot_product = vec_a_x * vec_b_x + vec_a_y * vec_b_y;
+    double cos_theta = dot_product / (mag_a * mag_b);
+    cos_theta = max(-1.0, min(1.0, cos_theta));
+
+    return acos(cos_theta) * (180.0 / M_PI);
+}
+
 tour two_opt(tour tour)
 {
     tour.pop_back(); // Entferne den letzten Punkt (Tour wird geschlossen)
@@ -136,7 +158,7 @@ tour farthest_insertion(tour &points)
 
     return tour;
 }
-tour ruin_and_recreate(vector<Coord> tour, int iterations = 2000, double ruin_fraction = 0.3)
+tour ruin_and_recreate(tour tour, int iterations = 2000, double ruin_fraction = 0.3)
 {
     auto best_tour = tour;
     double best_cost = calculate_distance(tour[0], tour.back());
@@ -146,7 +168,7 @@ tour ruin_and_recreate(vector<Coord> tour, int iterations = 2000, double ruin_fr
 
     for (int i = 0; i < iterations; ++i)
     {
-        vector<Coord> ruined_tour = tour;
+        vector<coord> ruined_tour = tour;
         size_t num_remove = static_cast<size_t>(ruin_fraction * tour.size());
         for (size_t j = 0; j < num_remove; ++j)
         {
@@ -163,7 +185,7 @@ tour ruin_and_recreate(vector<Coord> tour, int iterations = 2000, double ruin_fr
         }
     }
 
-    return {best_tour, best_cost};
+    return best_tour;
 }
 namespace py = pybind11;
 
@@ -172,4 +194,6 @@ PYBIND11_MODULE(cpp_wrapper, m)
     m.def("two_opt", &two_opt);
     m.def("farthest_insertion", &farthest_insertion);
     m.def("ruin_and_recreate", &ruin_and_recreate);
+    m.def("calculate_distance", &calculate_distance);
+    m.def("calculate_angle", &calculate_angle);
 }
