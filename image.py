@@ -9,7 +9,8 @@ import CONST
 class Img:
     def __init__(
         self,
-        points: list[list[Coord]],
+        all_points: list[list[Coord]],
+        needed_points: list[Coord],
         height: int = CONST.SCREEN_HEIGHT,
         width: int = CONST.SCREEN_WIDTH
     ) -> None:
@@ -22,11 +23,12 @@ class Img:
         )
         self.img = Image.new("RGB", (self.HEIGHT, self.WIDTH), color="white")
         self._draw = ImageDraw.Draw(self.img)
-        self.points = points
-        self.edges = generate.make_edges(points)
+        self.all_points = all_points
+        self.needed_points = needed_points
+        self.edges = generate.make_edges(self.needed_points)
 
         self._draw_points()
-        #self._draw_image()
+        self._draw_image()
 
 
 
@@ -38,21 +40,21 @@ class Img:
             (self.HEIGHT_ORGINAL, self.WIDTH_ORGINAL), Image.LANCZOS
         )
         self.img.save(name + ".jpg")
-        file.write(self.points, name)
+        file.write(self.all_points, name)
 
 
 
     def _draw_points(self):
         for i in range(CONST.AREA_COUNT):
             for j in range(CONST.CLUSTER_SIZE):
-                self._draw_ellipse(self.points[i][j])
+                self._draw_ellipse(self.all_points[i][j], "blue")
 
     def _draw_image(self):
         for edge in self.edges:
             self._draw_edge(edge)
 
-        for coord in self.points:
-            self._draw_ellipse(coord)
+        for coord in self.needed_points:
+            self._draw_ellipse(coord, "red")
 
         for i, coord in enumerate(self.edges):
             if i == len(self.edges) - 1:
@@ -65,8 +67,8 @@ class Img:
         self._draw.text((coord.x, coord.y), str(
             nummer), fill="red", font=self.font)
 
-    def _draw_ellipse(self, coord: Coord) -> None:
-        LINE_COLOR = "red"
+    def _draw_ellipse(self, coord: Coord, color: str) -> None:
+        LINE_COLOR = color
         LINE_WIDTH = 4 * CONST.ANTIALIAS_FACTOR
         SIZE = (20 * CONST.ANTIALIAS_FACTOR) // 2
         self._draw.ellipse(

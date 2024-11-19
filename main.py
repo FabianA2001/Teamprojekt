@@ -4,7 +4,7 @@ import argparse
 import file
 from CONST import Coord
 import solver
-from generate import generate_areas
+from generate import generate_areas, get_point_from_cluster
 
 
 def parse_args():
@@ -73,26 +73,36 @@ if __name__ == "__main__":
     width = args.width * CONST.ANTIALIAS_FACTOR
 
     if args.file != None:
-        points = file.read(args.file)
+        all_points = file.read(args.file)
     else:
-        points = generate_areas(args.count, height, width)
+        all_points = generate_areas(args.count, height, width)
 
-    img = Img(points, args.height, args.width)
+
+    needed_points = get_point_from_cluster(all_points)
+
+
+    #Erstellt ein Bild nur mit den Punkten
+    img = Img(all_points,[], args.height, args.width)
     img.save(args.name+"points")
+    
 
-    """
-    points = solver.farthest_insertion(points)
-    img = Img(points, args.height, args.width)
+    #Erstellte ein Bild mit der Route nach farthest insertion
+    needed_points = solver.farthest_insertion(needed_points)
+    img = Img(all_points,needed_points, args.height, args.width)
     img.save(args.name+"farthest")
-    prints_stats("farthest", points)
+    prints_stats("farthest", needed_points)
 
-    points = solver.ruin_and_recreate(points)[0]
-    img = Img(points, args.height, args.width)
+
+    #Erstellt ein Bild mit der Route nach R&R
+    needed_points = solver.ruin_and_recreate(needed_points)[0]
+    img = Img(all_points,needed_points, args.height, args.width)
     img.save(args.name+"ruin")
-    prints_stats("ruin", points)
+    prints_stats("ruin", needed_points)
 
-    points = solver.two_opt(points)
-    img = Img(points, args.height, args.width)
+
+    #Erstellt ein Bild mit der Route nach Two Opt
+    needed_points = solver.two_opt(needed_points)
+    img = Img(all_points,needed_points, args.height, args.width)
     img.save(args.name+"two opt")
-    prints_stats("two opt", points)
-    """
+    prints_stats("two opt", needed_points)
+    
