@@ -4,6 +4,12 @@ COUNT = 50
 MIN_DISTANCE = 50
 DATEI_NAME = "test"
 
+ANTIALIAS_FACTOR = 4
+FONT_SIZE = 20
+OFFSET = 30
+
+OPT_TURN_COST = True
+
 
 class Coord:
     def __init__(self, x: int, y: int) -> None:
@@ -15,6 +21,10 @@ class Coord:
 
     def __repr__(self) -> str:
         return str(self)
+
+    def __iter__(self):
+        # Define the order of attributes when converted to tuple
+        return iter((self.x, self.y))
 
 
 class Edge:

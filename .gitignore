@@ -33,6 +33,9 @@ lib64
 *.jpg
 *.png
 *.csv
+!standard_test.csv
+
+.vscode/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
