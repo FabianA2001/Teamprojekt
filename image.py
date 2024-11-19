@@ -10,10 +10,12 @@ class Img:
     def __init__(
         self,
         all_points: list[list[Coord]],
-        needed_points: list[Coord],
+        points_in_route: list[Coord],
         height: int = CONST.SCREEN_HEIGHT,
         width: int = CONST.SCREEN_WIDTH
     ) -> None:
+        self.all_points = all_points
+        self.points_in_route = points_in_route
         self.HEIGHT = height * CONST.ANTIALIAS_FACTOR
         self.WIDTH = width * CONST.ANTIALIAS_FACTOR
         self.HEIGHT_ORGINAL = height
@@ -23,12 +25,10 @@ class Img:
         )
         self.img = Image.new("RGB", (self.HEIGHT, self.WIDTH), color="white")
         self._draw = ImageDraw.Draw(self.img)
-        self.all_points = all_points
-        self.needed_points = needed_points
-        self.edges = generate.make_edges(self.needed_points)
+        self.edges = generate.make_edges(self.points_in_route)
 
         self._draw_points()
-        self._draw_image()
+        self._draw_route()
 
 
 
@@ -49,11 +49,11 @@ class Img:
             for j in range(CONST.CLUSTER_SIZE):
                 self._draw_ellipse(self.all_points[i][j], "blue")
 
-    def _draw_image(self):
+    def _draw_route(self):
         for edge in self.edges:
             self._draw_edge(edge)
 
-        for coord in self.needed_points:
+        for coord in self.points_in_route:
             self._draw_ellipse(coord, "red")
 
         for i, coord in enumerate(self.edges):

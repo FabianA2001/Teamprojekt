@@ -78,31 +78,32 @@ if __name__ == "__main__":
         all_points = generate_areas(args.count, height, width)
 
 
-    needed_points = get_point_from_cluster(all_points)
+    points_in_route = get_point_from_cluster(all_points)
 
 
     #Erstellt ein Bild nur mit den Punkten
     img = Img(all_points,[], args.height, args.width)
     img.save(args.name+"points")
+    print("Points generated")
     
 
     #Erstellte ein Bild mit der Route nach farthest insertion
-    needed_points = solver.farthest_insertion(needed_points)
-    img = Img(all_points,needed_points, args.height, args.width)
+    points_in_route = solver.farthest_insertion(points_in_route)
+    img = Img(all_points,points_in_route, args.height, args.width)
     img.save(args.name+"farthest")
-    prints_stats("farthest", needed_points)
+    prints_stats("farthest", points_in_route)
 
 
     #Erstellt ein Bild mit der Route nach R&R
-    needed_points = solver.ruin_and_recreate(needed_points)[0]
-    img = Img(all_points,needed_points, args.height, args.width)
+    points_in_route = solver.ruin_and_recreate(points_in_route)[0]
+    img = Img(all_points,points_in_route, args.height, args.width)
     img.save(args.name+"ruin")
-    prints_stats("ruin", needed_points)
+    prints_stats("ruin", points_in_route)
 
 
     #Erstellt ein Bild mit der Route nach Two Opt
-    needed_points = solver.two_opt(needed_points)
-    img = Img(all_points,needed_points, args.height, args.width)
+    points_in_route = solver.two_opt(points_in_route)
+    img = Img(all_points,points_in_route, args.height, args.width)
     img.save(args.name+"two opt")
-    prints_stats("two opt", needed_points)
+    prints_stats("two opt", points_in_route)
     
