@@ -104,6 +104,6 @@ if __name__ == "__main__":
     #Erstellt ein Bild mit der Route nach Two Opt
     points_in_route = solver.two_opt(points_in_route)
     img = Img(all_points,points_in_route, args.height, args.width)
-    img.save(args.name+"two opt")
+    img.save(args.name+"two_opt")
     prints_stats("two opt", points_in_route)
     
