@@ -2,6 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 from CONST import Coord, Edge
 import file
 import CONST
+import random
 
 
 class Img:
@@ -44,9 +45,18 @@ class Img:
 
 
     def _draw_points(self) -> None:
+        def random_blue():
+            blue = random.randint(100, 255)
+            red = random.randint(0, 50)
+            green = random.randint(0, 50)
+    
+            color = "#{:02x}{:02x}{:02x}".format(red, green, blue)
+            return color
+        
         for i in range(CONST.AREA_COUNT):
+            cluster_color = random_blue()
             for j in range(CONST.CLUSTER_SIZE):
-                self._draw_ellipse(self.all_points[i][j], "blue")
+                self._draw_ellipse(self.all_points[i][j], cluster_color)
 
 
     def _draw_route(self) -> None:
