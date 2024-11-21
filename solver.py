@@ -117,7 +117,6 @@ def farthest_insertion(points) -> list[Coord]:
             Edge(
                 tour[i],
                 tour[(i + 1) % len(tour)],
-                calculate_distance(tour[i], tour[(i + 1) % len(tour)]),
             )
         )
     summ = 0

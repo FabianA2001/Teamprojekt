@@ -1,20 +1,11 @@
 import random
 from CONST import Coord
-import math
 import CONST
 
 
 
-def calculate_distance(point1: Coord, point2: Coord) -> float:
-    distance = math.sqrt(
-        math.pow((point1.x - point2.x), 2) +
-        math.pow((point1.y - point2.y), 2)
-    )
-    return distance
-
-
 def is_enough_distance(coord1: Coord, coord2: Coord, distance: int) -> bool:
-    if calculate_distance(coord1, coord2) >= distance:
+    if CONST.calculate_distance(coord1, coord2) >= distance:
         return True
     return False
 

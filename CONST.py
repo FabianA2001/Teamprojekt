@@ -1,5 +1,7 @@
-SCREEN_HEIGHT = 6000
-SCREEN_WIDTH = 6000
+import math
+
+SCREEN_HEIGHT = 5000
+SCREEN_WIDTH = 5000
 AREA_COUNT = 60
 CLUSTER_SIZE = 10
 MIN_DISTANCE_AREA = 1500
@@ -27,10 +29,10 @@ class Coord:
 
 
 class Edge:
-    def __init__(self, point1: Coord, point2: Coord, length: float = 0) -> None:
+    def __init__(self, point1: Coord, point2: Coord) -> None:
         self.point1 = point1
         self.point2 = point2
-        self.length = length
+        self.length = calculate_distance(point1, point2)
 
     def __str__(self) -> str:
         return f"{self.point1}{self.point2} der Länge: {self.length}"
@@ -44,3 +46,11 @@ def make_edges(points: list[Coord]) -> list[Edge]:
     for i in range(len(points)):
         result.append(Edge(points[i], points[(i + 1) % len(points)]))
     return result
+
+
+def calculate_distance(point1: Coord, point2: Coord) -> float:
+    distance = math.sqrt(
+        math.pow((point1.x - point2.x), 2) +
+        math.pow((point1.y - point2.y), 2)
+    )
+    return distance

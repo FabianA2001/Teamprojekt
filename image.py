@@ -30,10 +30,11 @@ class Img:
 
 
 
-    def show(self):
+    def show(self) -> None:
         self.img.show()
 
-    def save(self, name: str):
+
+    def save(self, name: str) -> None:
         self.img = self.img.resize(
             (self.HEIGHT_ORGINAL, self.WIDTH_ORGINAL), Image.LANCZOS
         )
@@ -42,14 +43,15 @@ class Img:
 
 
 
-    def _draw_points(self):
+    def _draw_points(self) -> None:
         for i in range(CONST.AREA_COUNT):
             for j in range(CONST.CLUSTER_SIZE):
                 self._draw_ellipse(self.all_points[i][j], "blue")
 
-    def _draw_route(self):
+
+    def _draw_route(self) -> None:
         for edge in self.edges:
-            self._draw_edge(edge)
+            self._draw_edge(edge, "black")
 
         for coord in self.points_in_route:
             self._draw_ellipse(coord, "red")
@@ -57,13 +59,14 @@ class Img:
         for i, coord in enumerate(self.edges):
             if i == len(self.edges) - 1:
                 continue
-            self._draw_number(coord.point1, i)
+            self._draw_number(coord.point1, i, "red")
 
     
 
-    def _draw_number(self, coord: Coord, nummer: int):
+    def _draw_number(self, coord: Coord, number: int, color: str) -> None:
         self._draw.text((coord.x, coord.y), str(
-            nummer), fill="red", font=self.font)
+            number), fill=color, font=self.font)
+
 
     def _draw_ellipse(self, coord: Coord, color: str) -> None:
         LINE_COLOR = color
@@ -75,8 +78,9 @@ class Img:
             width=LINE_WIDTH,
         )
 
-    def _draw_edge(self, edge: Edge) -> None:
-        LINE_COLOR = "black"
+
+    def _draw_edge(self, edge: Edge, color: str) -> None:
+        LINE_COLOR = color
         LINE_WIDTH = 7 * CONST.ANTIALIAS_FACTOR
         self._draw.line(
             (edge.point1.x, edge.point1.y, edge.point2.x, edge.point2.y),
@@ -86,12 +90,13 @@ class Img:
 
 
 
-    def _draw_point_debugg(self, x, y):
-        self._draw.line((0, y, self.img.width, y), fill="red")
-        self._draw.line((x, 0, x, self.img.height), fill="red")
+    def _draw_point_debugg(self, x, y, color: str) -> None:
+        self._draw.line((0, y, self.img.width, y), fill=color)
+        self._draw.line((x, 0, x, self.img.height), fill=color)
 
-    def _draw_cross(self, coord: Coord) -> None:
-        LINE_COLOR = "black"
+
+    def _draw_cross(self, coord: Coord, color: str) -> None:
+        LINE_COLOR = color
         LINE_WIDTH = 4 * CONST.ANTIALIAS_FACTOR
         SIZE = 20 // 2
         self._draw.line(

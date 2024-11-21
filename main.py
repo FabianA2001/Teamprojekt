@@ -62,7 +62,7 @@ def parse_args():
     return args
 
 
-def prints_stats(name: str, points: list[Coord]):
+def prints_stats(name: str, points: list[Coord]) -> None:
     dis, angle = solver.calculate_dis_angle(points)
     print(f"Distance: {round(dis, 2)}\tAngle: {round(angle, 2)}\t{name}")
 
@@ -83,27 +83,27 @@ if __name__ == "__main__":
 
     #Erstellt ein Bild nur mit den Punkten
     img = Img(all_points,[], args.height, args.width)
-    img.save(args.name+"points")
+    img.save(args.name + "00points")
     print("Points generated")
     
 
     #Erstellte ein Bild mit der Route nach farthest insertion
     points_in_route = solver.farthest_insertion(points_in_route)
     img = Img(all_points,points_in_route, args.height, args.width)
-    img.save(args.name+"farthest")
-    prints_stats("farthest", points_in_route)
+    img.save(args.name+"01farthest_insertion")
+    prints_stats("farthest insertion", points_in_route)
 
-
+    """
     #Erstellt ein Bild mit der Route nach R&R
     points_in_route = solver.ruin_and_recreate(points_in_route)[0]
     img = Img(all_points,points_in_route, args.height, args.width)
-    img.save(args.name+"ruin")
-    prints_stats("ruin", points_in_route)
-
+    img.save(args.name+"02ruin&recreate")
+    prints_stats("ruin & recreate", points_in_route)
+    """
 
     #Erstellt ein Bild mit der Route nach Two Opt
     points_in_route = solver.two_opt(points_in_route)
     img = Img(all_points,points_in_route, args.height, args.width)
-    img.save(args.name+"two_opt")
+    img.save(args.name+"03two_opt")
     prints_stats("two opt", points_in_route)
     
