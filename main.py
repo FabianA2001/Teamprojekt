@@ -93,13 +93,13 @@ if __name__ == "__main__":
     img.save(args.name+"01farthest_insertion")
     prints_stats("farthest insertion", points_in_route)
 
-    """
+    
     #Erstellt ein Bild mit der Route nach R&R
     points_in_route = solver.ruin_and_recreate(points_in_route)[0]
     img = Img(all_points,points_in_route, args.height, args.width)
     img.save(args.name+"02ruin&recreate")
     prints_stats("ruin & recreate", points_in_route)
-    """
+    
 
     #Erstellt ein Bild mit der Route nach Two Opt
     points_in_route = solver.two_opt(points_in_route)
