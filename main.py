@@ -6,6 +6,7 @@ import random
 from CONST import Coord, Edge
 import math
 import solver
+import cpp_wrapper
 
 
 def calculate_distance(point1: Coord, point2: Coord) -> float:
@@ -14,6 +15,13 @@ def calculate_distance(point1: Coord, point2: Coord) -> float:
         math.pow((point1.y - point2.y), 2)
     )
     return distance
+
+
+def to_coord(tuples):
+    coords = []
+    for tuple in tuples:
+        coords.append(Coord(tuple[0], tuple[1]))
+    return coords
 
 
 def generate_point(count: int, height: int, width: int) -> list[Coord]:
@@ -111,17 +119,21 @@ if __name__ == "__main__":
 
     points = generate_point(args.count, height, width)
     file.write(points, args.name)
-    points = solver.farthest_insertion(points)
+    points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
+    points = to_coord(points)
     img = Img(points, args.height, args.width)
     img.save(args.name+"farthest")
     prints_stats("farthest", points)
 
-    points = solver.ruin_and_recreate(points)[0]
+    points = cpp_wrapper.ruin_and_recreate(
+        [(int(i.x), int(i.y)) for i in points], 3000, 0.3)
+    points = to_coord(points)
     img = Img(points, args.height, args.width)
     img.save(args.name+"ruin")
     prints_stats("ruin", points)
 
-    points = solver.two_opt(points)
+    points = cpp_wrapper.two_opt([tuple(i) for i in points])
+    points = to_coord(points)
     img = Img(points, args.height, args.width)
     img.save(args.name+"two_opt")
     prints_stats("two opt", points)
