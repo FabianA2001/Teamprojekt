@@ -53,9 +53,9 @@ def parse_args():
         "-f",
         type = str,
         metavar = "STR",
-        help = "Name der input Datei"
+        help = "Name der input Datei",
     )
-    
+
     args = parser.parse_args()
     if args.height < 50:
         raise argparse.ArgumentTypeError("Bitte eine größere Höhe")
