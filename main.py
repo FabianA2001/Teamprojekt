@@ -77,7 +77,6 @@ if __name__ == "__main__":
     else:
         all_points = generate_areas(args.count, height, width)
 
-
     points_in_route = get_point_from_cluster(all_points)
 
 
@@ -90,20 +89,20 @@ if __name__ == "__main__":
     #Erstellte ein Bild mit der Route nach farthest insertion
     points_in_route = solver.farthest_insertion(points_in_route)
     img = Img(all_points,points_in_route, args.height, args.width)
-    img.save(args.name+"01farthest_insertion")
+    img.save(args.name + "01farthest_insertion")
     prints_stats("farthest insertion", points_in_route)
 
     #"""
     #Erstellt ein Bild mit der Route nach R&R
     points_in_route = solver.ruin_and_recreate(points_in_route)[0]
     img = Img(all_points,points_in_route, args.height, args.width)
-    img.save(args.name+"02ruin&recreate")
+    img.save(args.name + "02ruin&recreate")
     prints_stats("ruin & recreate", points_in_route)
     #"""
 
     #Erstellt ein Bild mit der Route nach Two Opt
     points_in_route = solver.two_opt(points_in_route)
     img = Img(all_points,points_in_route, args.height, args.width)
-    img.save(args.name+"03two_opt")
+    img.save(args.name + "03two_opt")
     prints_stats("two opt", points_in_route)
     

@@ -46,10 +46,9 @@ class Img:
 
     def _draw_points(self) -> None:
         def random_blue():
-            blue = random.randint(100, 255)
             red = random.randint(0, 50)
             green = random.randint(0, 100)
-    
+            blue = random.randint(100, 255)  
             color = "#{:02x}{:02x}{:02x}".format(red, green, blue)
             return color
         
@@ -74,8 +73,11 @@ class Img:
     
 
     def _draw_number(self, coord: Coord, number: int, color: str) -> None:
-        self._draw.text((coord.x, coord.y), str(
-            number), fill=color, font=self.font)
+        self._draw.text((coord.x, coord.y),
+            str(number),
+            fill = color,
+            font = self.font,
+            )
 
 
     def _draw_ellipse(self, coord: Coord, color: str) -> None:
@@ -84,8 +86,8 @@ class Img:
         SIZE = (20 * CONST.ANTIALIAS_FACTOR) // 2
         self._draw.ellipse(
             (coord.x - SIZE, coord.y - SIZE, coord.x + SIZE, coord.y + SIZE),
-            fill=LINE_COLOR,
-            width=LINE_WIDTH,
+            fill = LINE_COLOR,
+            width = LINE_WIDTH,
         )
 
 
@@ -94,15 +96,19 @@ class Img:
         LINE_WIDTH = 7 * CONST.ANTIALIAS_FACTOR
         self._draw.line(
             (edge.point1.x, edge.point1.y, edge.point2.x, edge.point2.y),
-            fill=LINE_COLOR,
-            width=LINE_WIDTH,
+            fill = LINE_COLOR,
+            width = LINE_WIDTH,
         )
 
 
 
     def _draw_point_debugg(self, x, y, color: str) -> None:
-        self._draw.line((0, y, self.img.width, y), fill=color)
-        self._draw.line((x, 0, x, self.img.height), fill=color)
+        self._draw.line((0, y, self.img.width, y),
+            fill = color,
+        )
+        self._draw.line((x, 0, x, self.img.height),
+            fill = color,
+        )
 
 
     def _draw_cross(self, coord: Coord, color: str) -> None:
@@ -111,11 +117,11 @@ class Img:
         SIZE = 20 // 2
         self._draw.line(
             (coord.x - SIZE, coord.y - SIZE, coord.x + SIZE, coord.y + SIZE),
-            fill=LINE_COLOR,
-            width=LINE_WIDTH,
+            fill = LINE_COLOR,
+            width = LINE_WIDTH,
         )
         self._draw.line(
             (coord.x - SIZE, coord.y + SIZE, coord.x + SIZE, coord.y - SIZE),
-            fill=LINE_COLOR,
-            width=LINE_WIDTH,
+            fill = LINE_COLOR,
+            width = LINE_WIDTH,
         )
