@@ -48,7 +48,7 @@ class Img:
         def random_blue():
             blue = random.randint(100, 255)
             red = random.randint(0, 50)
-            green = random.randint(0, 50)
+            green = random.randint(0, 100)
     
             color = "#{:02x}{:02x}{:02x}".format(red, green, blue)
             return color
