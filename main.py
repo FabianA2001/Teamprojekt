@@ -13,40 +13,49 @@ def parse_args():
     parser.add_argument(
         "-height",
         "-he",
-        type=int,
-        metavar="INT",
-        default=CONST.SCREEN_HEIGHT,
-        help=f"int als Höhe (Default {CONST.SCREEN_HEIGHT})",
+        type = int,
+        metavar = "INT",
+        default = CONST.SCREEN_HEIGHT,
+        help = f"int als Höhe (Default {CONST.SCREEN_HEIGHT})",
     )
     parser.add_argument(
         "-width",
         "-w",
-        type=int,
-        metavar="INT",
-        default=CONST.SCREEN_WIDTH,
-        help=f"int als Breite (Default {CONST.SCREEN_WIDTH})",
+        type = int,
+        metavar = "INT",
+        default = CONST.SCREEN_WIDTH,
+        help = f"int als Breite (Default {CONST.SCREEN_WIDTH})",
     )
     parser.add_argument(
         "-count",
         "-c",
-        type=int,
-        metavar="INT",
-        default=CONST.AREA_COUNT,
-        help=f"anzahl der kreuze (Default {CONST.AREA_COUNT})",
+        type = int,
+        metavar = "INT",
+        default = CONST.AREA_COUNT,
+        help = f"anzahl der kreuze (Default {CONST.AREA_COUNT})",
     )
     parser.add_argument(
         "-name",
         "-n",
-        type=str,
-        metavar="STR",
-        default=CONST.DATEI_NAME,
-        help=f"Name der output Datei (Default {CONST.DATEI_NAME})",
+        type = str,
+        metavar = "STR",
+        default = CONST.DATEI_NAME,
+        help = f"Name der output Datei (Default {CONST.DATEI_NAME})",
     )
-    parser.add_argument("-opt", "-o", action="store_false",
-                        help="Ob keine Ruin und Create verbesserung vorgenommen werden soll")
     parser.add_argument(
-        "-file", "-f", type=str, metavar="STR", help="Name der input Datei"
+        "-opt",
+        "-o",
+        action = "store_false",
+        help = "Ob keine Ruin und Create verbesserung vorgenommen werden soll",
     )
+    parser.add_argument(
+        "-file",
+        "-f",
+        type = str,
+        metavar = "STR",
+        help = "Name der input Datei"
+    )
+    
     args = parser.parse_args()
     if args.height < 50:
         raise argparse.ArgumentTypeError("Bitte eine größere Höhe")
