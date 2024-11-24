@@ -126,7 +126,7 @@ if __name__ == "__main__":
     prints_stats("farthest", points)
 
     points = cpp_wrapper.ruin_and_recreate(
-        [(int(i.x), int(i.y)) for i in points], 3000, 0.3)
+        [tuple(i) for i in points], 3000, 0.3, 1.2)
     points = to_coord(points)
     img = Img(points, args.height, args.width)
     img.save(args.name+"ruin")

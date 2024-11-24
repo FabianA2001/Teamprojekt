@@ -158,7 +158,137 @@ tour farthest_insertion(tour &points)
 
     return tour;
 }
-tour ruin_and_recreate(tour tour, int iterations = 2000, double ruin_fraction = 0.3)
+
+std::vector<double> calculate_turn_angles(const tour &path)
+{
+    std::vector<double> angles;
+
+    // Schleife von Index 1 bis path.size() - 2, da drei Punkte benötigt werden
+    for (size_t i = 1; i < path.size() - 1; ++i)
+    {
+        const coord &p1 = path[i - 1]; // Vorheriger Punkt
+        const coord &p2 = path[i];     // Aktueller Punkt
+        const coord &p3 = path[i + 1]; // Nächster Punkt
+
+        // Berechne den Winkel zwischen den Punkten und füge ihn zur Liste hinzu
+        double angle = calculate_angle(p1, p2, p3); // Annahme: `calculate_angle` existiert
+        angles.push_back(angle);
+    }
+
+    return angles;
+}
+double calculate_tour_distance(const tour &tour)
+{
+    double total_distance = 0.0;
+
+    for (size_t i = 0; i < tour.size(); ++i)
+    {
+        const coord &current = tour[i];
+        const coord &next = tour[(i + 1) % tour.size()];     // Zyklisch zur ersten Stadt
+        total_distance += calculate_distance(current, next); // Annahme: Funktion existiert
+    }
+
+    return total_distance;
+}
+tuple<tour, tour> ruin(::tour tour, double ruin_fraction = 0.3)
+{
+    size_t n = tour.size();
+    coord first_city = tour.at(0);
+    size_t num_remove = static_cast<size_t>(n * ruin_fraction);
+    ::tour to_remove;
+    ::tour new_tour = tour;
+    // Zufällige Auswahl der zu entfernenden Städte
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::sample(tour.begin(), tour.end(), std::back_inserter(to_remove), num_remove, gen);
+
+    // Sicherstellen, dass die Startstadt nicht entfernt wird
+    while (std::find(to_remove.begin(), to_remove.end(), first_city) != to_remove.end())
+    {
+        to_remove.clear();
+        std::sample(tour.begin(), tour.end(), std::back_inserter(to_remove), num_remove, gen);
+    }
+    new_tour.erase(std::remove_if(new_tour.begin(), new_tour.end(),
+                                  [&](const coord &city)
+                                  {
+                                      return std::find(to_remove.begin(), to_remove.end(), city) != to_remove.end();
+                                  }),
+                   new_tour.end());
+
+    return {new_tour, to_remove};
+}
+
+tour recreate(tour tour, const ::tour &removed_cities)
+{
+    for (const auto &city : removed_cities)
+    {
+        size_t best_position = 0;
+        double best_cost = std::numeric_limits<double>::infinity();
+
+        for (size_t i = 1; i < tour.size(); ++i)
+        {
+            // Erstelle eine neue Tour mit der aktuellen Stadt an Position i
+            ::tour new_tour = tour;
+            new_tour.insert(new_tour.begin() + i, city);
+
+            // Kosten der neuen Tour berechnen
+            std::vector<double> angles = calculate_turn_angles(new_tour); // Liste von Winkeln
+            double cost = 0.0;
+            for (const double angle : angles)
+            {
+                cost += angle; // Summiere alle Winkel auf
+            }
+
+            // Beste Position aktualisieren
+            if (cost < best_cost)
+            {
+                best_cost = cost;
+                best_position = i;
+            }
+        }
+
+        // Stadt an der besten Position einfügen
+        tour.insert(tour.begin() + best_position, city);
+    }
+
+    return tour;
+}
+
+tour ruin_and_recreate(::tour tour, int iterations = 2000, double ruin_fraction = 0.3, double distance_mul = 1.2)
+{
+    // Beste Tour initialisieren
+    ::tour best_tour = tour;
+    double best_angles_cost = std::accumulate(calculate_turn_angles(tour).begin(), calculate_turn_angles(tour).end(), 0.0);
+    double best_distance_cost = calculate_tour_distance(tour);
+
+    for (int i = 0; i < iterations; ++i)
+    {
+        // Ruin-Phase: Entferne zufällig Städte aus der Tour
+        auto [ruined_tour, removed_cities] = ruin(best_tour, ruin_fraction);
+
+        // Recreate-Phase: Füge die entfernten Städte wieder ein
+        ::tour new_tour = recreate(ruined_tour, removed_cities);
+
+        // Kosten der neuen Tour berechnen
+        double new_angles_cost = std::accumulate(calculate_turn_angles(new_tour).begin(), calculate_turn_angles(new_tour).end(), 0.0);
+        double new_distance_cost = calculate_tour_distance(new_tour);
+
+        // Aktualisiere die beste Lösung, falls die neue Tour besser ist
+        if (new_angles_cost < best_angles_cost && new_distance_cost < distance_mul * best_distance_cost)
+        {
+            if (new_distance_cost < best_distance_cost)
+            {
+                best_distance_cost = new_distance_cost;
+            }
+            best_tour = new_tour;
+            best_angles_cost = new_angles_cost;
+        }
+    }
+
+    return best_tour;
+}
+
+tour ruin_and_recreate1(tour tour, int iterations = 2000, double ruin_fraction = 0.3)
 {
     auto best_tour = tour;
     double best_cost = calculate_distance(tour[0], tour.back());
@@ -194,6 +324,11 @@ PYBIND11_MODULE(cpp_wrapper, m)
     m.def("two_opt", &two_opt);
     m.def("farthest_insertion", &farthest_insertion);
     m.def("ruin_and_recreate", &ruin_and_recreate);
+    m.def("ruin_and_recreate1", &ruin_and_recreate1);
     m.def("calculate_distance", &calculate_distance);
     m.def("calculate_angle", &calculate_angle);
+    m.def("ruin", &ruin);
+    m.def("calculate_turn_angles", &calculate_turn_angles);
+    m.def("recreate", &recreate);
+    m.def("calculate_tour_distance", &calculate_tour_distance);
 }
