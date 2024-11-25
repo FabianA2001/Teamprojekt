@@ -190,8 +190,23 @@ double calculate_tour_distance(const tour &tour)
 
     return total_distance;
 }
+void select_random_elements(const tour &tour, ::tour &to_remove, size_t num_remove)
+{
+    // Kopiere die Tour, um sie zu mischen
+    ::tour shuffled_tour = tour;
+
+    // Zufälliges Mischen der Tour
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(shuffled_tour.begin(), shuffled_tour.end(), gen);
+
+    // Wähle die ersten `num_remove` Elemente
+    to_remove.assign(shuffled_tour.begin(), shuffled_tour.begin() + num_remove);
+}
+
 tuple<tour, tour> ruin(::tour tour, double ruin_fraction = 0.3)
 {
+    std::cout << "ruin";
     size_t n = tour.size();
     coord first_city = tour.at(0);
     size_t num_remove = static_cast<size_t>(n * ruin_fraction);
@@ -206,7 +221,7 @@ tuple<tour, tour> ruin(::tour tour, double ruin_fraction = 0.3)
     while (std::find(to_remove.begin(), to_remove.end(), first_city) != to_remove.end())
     {
         to_remove.clear();
-        std::sample(tour.begin(), tour.end(), std::back_inserter(to_remove), num_remove, gen);
+        select_random_elements(tour, to_remove, num_remove);
     }
     new_tour.erase(std::remove_if(new_tour.begin(), new_tour.end(),
                                   [&](const coord &city)
@@ -220,6 +235,7 @@ tuple<tour, tour> ruin(::tour tour, double ruin_fraction = 0.3)
 
 tour recreate(tour tour, const ::tour &removed_cities)
 {
+    std::cout << "recreate";
     for (const auto &city : removed_cities)
     {
         size_t best_position = 0;
@@ -256,6 +272,7 @@ tour recreate(tour tour, const ::tour &removed_cities)
 
 tour ruin_and_recreate(::tour tour, int iterations = 2000, double ruin_fraction = 0.3, double distance_mul = 1.2)
 {
+    std::cout << "ruin and recreate";
     // Beste Tour initialisieren
     ::tour best_tour = tour;
     double best_angles_cost = std::accumulate(calculate_turn_angles(tour).begin(), calculate_turn_angles(tour).end(), 0.0);
