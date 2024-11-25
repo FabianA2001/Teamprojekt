@@ -222,7 +222,7 @@ tuple<tour, tour> ruin(::tour tour, double ruin_fraction = 0.3)
     // Zufällige Auswahl der zu entfernenden Städte
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::sample(tour.begin(), tour.end(), std::back_inserter(to_remove), num_remove, gen);
+    select_random_elements(tour, to_remove, num_remove);
 
     // Sicherstellen, dass die Startstadt nicht entfernt wird
     while (std::find(to_remove.begin(), to_remove.end(), first_city) != to_remove.end())
@@ -277,7 +277,7 @@ tour recreate(tour tour, const ::tour &removed_cities)
     return tour;
 }
 
-tour ruin_and_recreate(::tour tour, int iterations = 2000, double ruin_fraction = 0.3, double distance_mul = 1.2)
+tour ruin_and_recreate(::tour tour, int iterations, double ruin_fraction, double distance_mul)
 {
     std::cout << "ruin and recreate";
     // Beste Tour initialisieren
