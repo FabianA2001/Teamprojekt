@@ -34,6 +34,8 @@ lib64
 *.png
 *.csv
 !standard_test.csv
+cpp_wrapper/src/main.dSYM/*
+cpp_wrapper/src/main
 
 .vscode/
 
