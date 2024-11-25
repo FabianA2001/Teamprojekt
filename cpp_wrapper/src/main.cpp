@@ -349,16 +349,6 @@ PYBIND11_MODULE(cpp_wrapper, m)
     m.def("two_opt", &two_opt);
     m.def("farthest_insertion", &farthest_insertion);
     m.def("ruin_and_recreate", &ruin_and_recreate);
-    m.def("two_opt", &two_opt);
-    m.def("farthest_insertion", &farthest_insertion);
-    m.def("ruin_and_recreate", &ruin_and_recreate);
-    m.def("ruin_and_recreate1", &ruin_and_recreate1);
-    m.def("calculate_distance", &calculate_distance);
-    m.def("calculate_angle", &calculate_angle);
-    m.def("ruin", &ruin);
-    m.def("calculate_turn_angles", &calculate_turn_angles);
-    m.def("recreate", &recreate);
-    m.def("calculate_tour_distance", &calculate_tour_distance);
 }
 #endif
 
