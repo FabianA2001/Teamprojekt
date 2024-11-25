@@ -178,10 +178,17 @@ std::vector<double> calculate_turn_angles(const tour &path)
         const coord &p3 = path[i + 1]; // Nächster Punkt
 
         // Berechne den Winkel zwischen den Punkten und füge ihn zur Liste hinzu
-        double angle = calculate_angle(p1, p2, p3); // Annahme: `calculate_angle` existiert
+        double angle = calculate_angle(p1, p2, p3);
+
         angles.push_back(angle);
     }
+    double new_angles_cost = 0.0;
 
+    for (double angle : angles)
+    {
+        new_angles_cost += angle;
+    }
+    // std::cout << new_angles_cost << "\n";
     return angles;
 }
 double calculate_tour_distance(const tour &tour)
@@ -263,6 +270,7 @@ tour recreate(tour tour, const ::tour &removed_cities)
             }
 
             // Beste Position aktualisieren
+
             if (cost < best_cost)
             {
                 best_cost = cost;
@@ -302,7 +310,7 @@ tour ruin_and_recreate(::tour tour, int iterations, double ruin_fraction, double
         ::tour new_tour = recreate(ruined_tour, removed_cities);
 
         // Kosten der neuen Tour berechnen
-        std::vector<double> angles = calculate_turn_angles(tour);
+        std::vector<double> angles = calculate_turn_angles(new_tour);
         double new_angles_cost = 0.0;
 
         for (double angle : angles)
@@ -313,8 +321,11 @@ tour ruin_and_recreate(::tour tour, int iterations, double ruin_fraction, double
         double new_distance_cost = calculate_tour_distance(new_tour);
 
         // Aktualisiere die beste Lösung, falls die neue Tour besser ist
+        // std::cout << "a " << new_angles_cost << " " << best_angles_cost << "\n";
+        // std::cout << "d " << new_distance_cost << " " << best_distance_cost << "\n";
         if (new_angles_cost < best_angles_cost && new_distance_cost < distance_mul * best_distance_cost)
         {
+
             if (new_distance_cost < best_distance_cost)
             {
                 best_distance_cost = new_distance_cost;
