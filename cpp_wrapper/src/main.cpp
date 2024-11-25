@@ -1,5 +1,5 @@
 
-#define python 0
+#define python 1
 
 #if python
 #include <pybind11/pybind11.h>
@@ -213,7 +213,7 @@ void select_random_elements(const tour &tour, ::tour &to_remove, size_t num_remo
 
 tuple<tour, tour> ruin(::tour tour, double ruin_fraction = 0.3)
 {
-    std::cout << "ruin";
+    // std::cout << "ruin";
     size_t n = tour.size();
     coord first_city = tour.at(0);
     size_t num_remove = static_cast<size_t>(n * ruin_fraction);
@@ -242,7 +242,7 @@ tuple<tour, tour> ruin(::tour tour, double ruin_fraction = 0.3)
 
 tour recreate(tour tour, const ::tour &removed_cities)
 {
-    std::cout << "recreate";
+    // std::cout << "recreate";
     for (const auto &city : removed_cities)
     {
         size_t best_position = 0;
@@ -279,10 +279,18 @@ tour recreate(tour tour, const ::tour &removed_cities)
 
 tour ruin_and_recreate(::tour tour, int iterations, double ruin_fraction, double distance_mul)
 {
-    std::cout << "ruin and recreate";
-    // Beste Tour initialisieren
+    // std::cout << "ruin and recreate";
+    //  Beste Tour initialisierendouble
+    std::vector<double> angles = calculate_turn_angles(tour);
+    double best_angles_cost = 0.0;
+
+    for (double angle : angles)
+    {
+        best_angles_cost += angle;
+    }
+
     ::tour best_tour = tour;
-    double best_angles_cost = std::accumulate(calculate_turn_angles(tour).begin(), calculate_turn_angles(tour).end(), 0.0);
+
     double best_distance_cost = calculate_tour_distance(tour);
 
     for (int i = 0; i < iterations; ++i)
@@ -294,7 +302,14 @@ tour ruin_and_recreate(::tour tour, int iterations, double ruin_fraction, double
         ::tour new_tour = recreate(ruined_tour, removed_cities);
 
         // Kosten der neuen Tour berechnen
-        double new_angles_cost = std::accumulate(calculate_turn_angles(new_tour).begin(), calculate_turn_angles(new_tour).end(), 0.0);
+        std::vector<double> angles = calculate_turn_angles(tour);
+        double new_angles_cost = 0.0;
+
+        for (double angle : angles)
+        {
+            new_angles_cost += angle;
+        }
+
         double new_distance_cost = calculate_tour_distance(new_tour);
 
         // Aktualisiere die beste Lösung, falls die neue Tour besser ist
