@@ -113,11 +113,11 @@ if __name__ == "__main__":
     args = parse_args()
     if args.file != None:
         points = file.read(args.file)
+    else:
+        height = args.height * CONST.ANTIALIAS_FACTOR
+        width = args.width * CONST.ANTIALIAS_FACTOR
+        points = generate_point(args.count, height, width)
 
-    height = args.height * CONST.ANTIALIAS_FACTOR
-    width = args.width * CONST.ANTIALIAS_FACTOR
-
-    points = generate_point(args.count, height, width)
     file.write(points, args.name)
     points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
     points = to_coord(points)
