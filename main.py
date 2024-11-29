@@ -8,6 +8,8 @@ import math
 import solver
 import cpp_wrapper
 
+from generate import generate_areas
+
 
 def calculate_distance(point1: Coord, point2: Coord) -> float:
     distance = math.sqrt(
@@ -73,8 +75,8 @@ def parse_args():
         "-c",
         type=int,
         metavar="INT",
-        default=CONST.COUNT,
-        help=f"anzahl der kreuze (Default {CONST.COUNT})",
+        default=CONST.AREA_COUNT,
+        help=f"anzahl der kreuze (Default {CONST.AREA_COUNT})",
     )
     parser.add_argument(
         "-name",
@@ -111,29 +113,37 @@ def prints_stats(name: str, points: list[Coord]):
 
 if __name__ == "__main__":
     args = parse_args()
+        
     if args.file != None:
         points = file.read(args.file)
-    else:
-        height = args.height * CONST.ANTIALIAS_FACTOR
-        width = args.width * CONST.ANTIALIAS_FACTOR
-        points = generate_point(args.count, height, width)
+        print("Dieses Programm funktioniert für Areas, die zufällig generiert werden, weswegen keine Punkte angegeben werden müssen.")
+        quit()
+
+    height = args.height * CONST.ANTIALIAS_FACTOR
+    width = args.width * CONST.ANTIALIAS_FACTOR   
+    all_points = generate_areas(args.count, height, width)
+    
+    file.write_all_points(all_points, args.name)
+
+    points = cpp_wrapper.get_midpoints_from_areas([[tuple(i) for i in area] for area in all_points])
+    points = to_coord(points)
 
     file.write(points, args.name)
     points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
     points = to_coord(points)
-    img = Img(points, args.height, args.width)
+    img = Img(all_points, points, args.height, args.width)
     img.save(args.name+"farthest")
     prints_stats("farthest", points)
 
     points = cpp_wrapper.ruin_and_recreate(
         [tuple(i) for i in points], 3000, 0.3, 1.2)
     points = to_coord(points)
-    img = Img(points, args.height, args.width)
+    img = Img(all_points, points, args.height, args.width)
     img.save(args.name+"ruin")
     prints_stats("ruin", points)
 
     points = cpp_wrapper.two_opt([tuple(i) for i in points])
     points = to_coord(points)
-    img = Img(points, args.height, args.width)
+    img = Img(all_points, points, args.height, args.width)
     img.save(args.name+"two_opt")
     prints_stats("two opt", points)
