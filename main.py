@@ -7,7 +7,8 @@ from CONST import Coord, Edge
 import math
 import solver
 import cpp_wrapper
-
+import gurobipy as gp
+from gurobipy import GRB
 from generate import generate_areas
 
 
@@ -111,21 +112,65 @@ def prints_stats(name: str, points: list[Coord]):
     print(f"Distance: {round(dis, 2)}\tAngle: {round(angle, 2)}\t{name}")
 
 
+def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
+    model = gp.Model()
+    # Vars
+    vars = {}
+    for points in pointslist:
+        for point in points:
+            vars[point] = model.addVar(vtype=GRB.BINARY)
+    # Constraint
+    for points in pointslist:
+        model.addConstr(sum((vars[point]) for point in points) == 1)
+
+    # Objective
+    order = []
+    dist = 0
+    for opoint in orderlist:
+        for ppoints in pointslist:
+            for point in ppoints:
+                if opoint.x == point.x and opoint.y == point.y:
+                    order.append(ppoints)
+    for i in range(len(order)-1):
+        for point in order[i]:
+            # if vars[point] == 1:
+            point1 = point
+        for point in order[(i+1) % len(order)]:
+            # if vars[point] == 1:
+            point2 = point
+        dist += (math.sqrt((point1.x - point2.x) ** 2 +
+                           (point1.y - point2.y) ** 2)) * (vars[point1]+vars[point2])
+    # print(order)
+    # Solution
+    model.setObjective(dist, GRB.MINIMIZE)
+    model.optimize()
+    retpoints = []
+
+    for pointss in order:
+        for point in pointss:
+            # print("h", vars[point], vars[point].X)
+            if vars[point].X > 0.5:
+                retpoints.append(point)
+
+    return retpoints
+
+
 if __name__ == "__main__":
     args = parse_args()
-        
+
     if args.file != None:
         points = file.read(args.file)
         print("Dieses Programm funktioniert für Areas, die zufällig generiert werden, weswegen keine Punkte angegeben werden müssen.")
         quit()
 
     height = args.height * CONST.ANTIALIAS_FACTOR
-    width = args.width * CONST.ANTIALIAS_FACTOR   
+    width = args.width * CONST.ANTIALIAS_FACTOR
     all_points = generate_areas(args.count, height, width)
-    
+
     file.write_all_points(all_points, args.name)
 
-    points = cpp_wrapper.get_midpoints_from_areas([[tuple(i) for i in area] for area in all_points])
+    points = cpp_wrapper.get_midpoints_from_areas(
+        [[tuple(i) for i in area] for area in all_points])
     points = to_coord(points)
 
     file.write(points, args.name)
@@ -147,3 +192,9 @@ if __name__ == "__main__":
     img = Img(all_points, points, args.height, args.width)
     img.save(args.name+"two_opt")
     prints_stats("two opt", points)
+
+    points = gurobi_solver(all_points, points)
+    # print(points)
+    img = Img(all_points, points, args.height, args.width)
+    img.save(args.name+"gurobi")
+    prints_stats("gurobi", points)
