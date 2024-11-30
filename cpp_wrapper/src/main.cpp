@@ -24,6 +24,7 @@ using namespace std;
 
 typedef std::pair<int, int> coord;
 typedef std::vector<coord> tour;
+typedef std::vector<coord> area;
 
 double calculate_distance(const coord &a, const coord &b)
 {
@@ -45,6 +46,40 @@ double calculate_angle(const coord &p1, const coord &p2, const coord &p3)
     cos_theta = max(-1.0, min(1.0, cos_theta));
 
     return acos(cos_theta) * (180.0 / M_PI);
+}
+
+coord get_closest_point(const area _area)
+{
+    coord sum(0, 0);
+    for (const auto &point : _area)
+    {
+        sum.first += point.first;
+        sum.second += point.second;
+    }
+    coord mid(double(sum.first) / _area.size(), double(sum.second) / _area.size());
+    if (_area.empty())
+    {
+        throw invalid_argument("Area darf nicht leer sein");
+    }
+    coord closest = _area[0];
+    for (int i = 1; i < _area.size(); ++i)
+    {
+        if (calculate_distance(mid, _area[i]) < calculate_distance(mid, closest))
+        {
+            closest = _area[i];
+        }
+    }
+    return closest;
+}
+
+tour get_midpoints_from_areas(vector<area> areas)
+{
+    tour _tour;
+    for (const auto &_area : areas)
+    {
+        _tour.push_back(get_closest_point(_area));
+    }
+    return _tour;
 }
 
 tour two_opt(tour tour)
@@ -375,6 +410,7 @@ PYBIND11_MODULE(cpp_wrapper, m)
     m.def("two_opt", &two_opt);
     m.def("farthest_insertion", &farthest_insertion);
     m.def("ruin_and_recreate", &ruin_and_recreate);
+    m.def("get_midpoints_from_areas", &get_midpoints_from_areas);
 }
 #endif
 
