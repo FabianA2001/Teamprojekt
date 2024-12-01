@@ -27,31 +27,6 @@ def to_coord(tuples):
     return coords
 
 
-def generate_point(count: int, height: int, width: int) -> list[Coord]:
-    OFFSET = CONST.OFFSET * CONST.ANTIALIAS_FACTOR
-    list = []
-
-    def enough_distance() -> bool:
-        for point in list:
-            if (
-                calculate_distance(coord, point)
-                <= CONST.MIN_DISTANCE * CONST.ANTIALIAS_FACTOR
-            ):
-                return False
-        return True
-
-    for _ in range(count):
-        for _ in range(100):
-            coord = Coord(
-                random.randint(OFFSET, height - OFFSET),
-                random.randint(OFFSET, width - OFFSET),
-            )
-            if enough_distance() == True:
-                break
-        list.append(coord)
-    return list
-
-
 def parse_args():
 
     parser = argparse.ArgumentParser()
@@ -124,22 +99,32 @@ def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
         model.addConstr(sum((vars[point]) for point in points) == 1)
 
     # Objective
-    order = []
+    order: list[list[Coord]] = []
     dist = 0
     for opoint in orderlist:
         for ppoints in pointslist:
             for point in ppoints:
                 if opoint.x == point.x and opoint.y == point.y:
                     order.append(ppoints)
+
+    # for i in range(len(order)-1):
+    #     for point in order[i]:
+    #         # if vars[point] == 1:
+    #         point1 = point
+    #     for point in order[(i+1) % len(order)]:
+    #         # if vars[point] == 1:
+    #         point2 = point
+    #     dist += (math.sqrt((point1.x - point2.x) ** 2 +
+    #                        (point1.y - point2.y) ** 2)) * (vars[point1]+vars[point2])
+    counter = 0
     for i in range(len(order)-1):
-        for point in order[i]:
-            # if vars[point] == 1:
-            point1 = point
-        for point in order[(i+1) % len(order)]:
-            # if vars[point] == 1:
-            point2 = point
-        dist += (math.sqrt((point1.x - point2.x) ** 2 +
-                           (point1.y - point2.y) ** 2)) * (vars[point1]+vars[point2])
+        for point1 in order[i]:
+            for point2 in order[(i+1) % len(order)]:
+                counter += 1
+                dist = solver.calculate_distance(
+                    point1, point2) * vars[point1] * vars[point2]
+    print(counter)
+
     # print(order)
     # Solution
     model.setObjective(dist, GRB.MINIMIZE)
