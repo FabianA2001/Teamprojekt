@@ -33,7 +33,9 @@ lib64
 *.jpg
 *.png
 *.csv
-!standard_test.csv
+!instances/standart_test.csv
+cpp_wrapper/src/main.dSYM/*
+cpp_wrapper/src/main
 
 .vscode/
 
