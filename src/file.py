@@ -4,7 +4,7 @@ import CONST
 
 
 def write(points: list[tuple], name: str) -> None:
-    with open(f"{name}.csv", mode="w", newline="") as file:
+    with open(f"{CONST.INSTANCES_PRE}{name}.csv", mode="w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=["x", "y"], delimiter=";")
         writer.writeheader()  # Kopfzeile schreiben
         for coord in points:
@@ -13,10 +13,10 @@ def write(points: list[tuple], name: str) -> None:
 
 
 def write_all_points(points: list[list[Coord]], name: str) -> None:
-    with open(f"{name}allpoints.csv", mode="w", newline="") as file:
+    with open(f"{CONST.INSTANCES_PRE}{name}allpoints.csv", mode="w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=["x", "y"], delimiter=";")
         writer.writeheader()  # Kopfzeile schreiben
-        
+
         for i in range(CONST.AREA_COUNT):
             for j in range(CONST.CLUSTER_SIZE):
                 point = {"x": points[i][j].x, "y": points[i][j].y}
@@ -24,7 +24,7 @@ def write_all_points(points: list[list[Coord]], name: str) -> None:
 
 
 def read(name: str) -> list[Coord]:
-    with open(f"{name}.csv", mode="r") as file:
+    with open(f"{CONST.INSTANCES_PRE}{name}.csv", mode="r") as file:
         reader = csv.DictReader(file, delimiter=";")
         coordinates_from_csv = [row for row in reader]
 

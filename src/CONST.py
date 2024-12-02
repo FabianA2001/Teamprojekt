@@ -16,6 +16,11 @@ OFFSET = 30
 OPT_TURN_COST = True
 
 
+IMAGE_PRE = "image/"
+INSTANCES_PRE = "instances/"
+FONT_PRE = "font/"
+
+
 class Coord:
     def __init__(self, x: int, y: int) -> None:
         self.x = x
