@@ -107,23 +107,19 @@ def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
                 if opoint.x == point.x and opoint.y == point.y:
                     order.append(ppoints)
 
-    # for i in range(len(order)-1):
-    #     for point in order[i]:
-    #         # if vars[point] == 1:
-    #         point1 = point
-    #     for point in order[(i+1) % len(order)]:
-    #         # if vars[point] == 1:
-    #         point2 = point
-    #     dist += (math.sqrt((point1.x - point2.x) ** 2 +
-    #                        (point1.y - point2.y) ** 2)) * (vars[point1]+vars[point2])
-    counter = 0
+    dist = 0
     for i in range(len(order)-1):
         for point1 in order[i]:
             for point2 in order[(i+1) % len(order)]:
-                counter += 1
-                dist = solver.calculate_distance(
+                dist += solver.calculate_distance(
                     point1, point2) * vars[point1] * vars[point2]
-    print(counter)
+
+    # for i in range(len(order)-2):
+    #    for point1 in order[i]:
+    #        for point2 in order[(i+1) % len(order)]:
+    #            for point3 in order[(i+2) % len(order)]:
+    #            dist = solver.calculate_distance(
+    #                point1, point2) * vars[point1] * vars[point2]
 
     # print(order)
     # Solution
