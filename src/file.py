@@ -28,8 +28,11 @@ def read(name: str) -> list[Coord]:
         reader = csv.DictReader(file, delimiter=";")
         coordinates_from_csv = [row for row in reader]
 
-    result = []
-    for row in coordinates_from_csv:
-        result.append(Coord(int(row["x"]), int(row["y"])))
-
-    return result
+    areas = []
+    for i in range(CONST.AREA_COUNT):
+        cluster =[]
+        for j in range(CONST.CLUSTER_SIZE):
+            row = coordinates_from_csv[i * CONST.CLUSTER_SIZE + j]
+            cluster.append(Coord(int(row["x"]), int(row["y"])))
+        areas.append(cluster)
+    return areas

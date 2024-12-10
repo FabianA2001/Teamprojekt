@@ -2,8 +2,7 @@ import CONST
 from image import Img
 import argparse
 import file
-import random
-from CONST import Coord, Edge
+from CONST import Coord
 import math
 import solver
 import cpp_wrapper
@@ -62,11 +61,20 @@ def parse_args():
         default=CONST.DATEI_NAME,
         help=f"Name der output Datei (Default {CONST.DATEI_NAME})",
     )
-    parser.add_argument("-opt", "-o", action="store_false",
-                        help="Ob keine Ruin und Create verbesserung vorgenommen werden soll")
     parser.add_argument(
-        "-file", "-f", type=str, metavar="STR", help="Name der input Datei"
+        "-opt",
+        "-o",
+        action="store_false",
+        help="Ob keine Ruin und Create verbesserung vorgenommen werden soll",
     )
+    parser.add_argument(
+        "-file",
+        "-f",
+        type=str,
+        metavar="STR",
+        help="Name der input Datei",
+    )
+
     args = parser.parse_args()
     if args.height < 50:
         raise argparse.ArgumentTypeError("Bitte eine größere Höhe")
@@ -140,42 +148,48 @@ if __name__ == "__main__":
     args = parse_args()
 
     if args.file != None:
-        points = file.read(args.file)
-        print("Dieses Programm funktioniert für Areas, die zufällig generiert werden, weswegen keine Punkte angegeben werden müssen.")
-        quit()
+        all_points = file.read(args.file)
+    else:
+        height = args.height * CONST.ANTIALIAS_FACTOR
+        width = args.width * CONST.ANTIALIAS_FACTOR
+        all_points = generate_areas(args.count, height, width)
 
-    height = args.height * CONST.ANTIALIAS_FACTOR
-    width = args.width * CONST.ANTIALIAS_FACTOR
-    all_points = generate_areas(args.count, height, width)
+        file.write_all_points(all_points, args.name)
+        img = Img(all_points,[], args.height, args.width)
+        img.save(args.name + "00points")
+        print("New points have been generated")
 
-    file.write_all_points(all_points, args.name)
 
     points = cpp_wrapper.get_midpoints_from_areas(
         [[tuple(i) for i in area] for area in all_points])
     points = to_coord(points)
 
+
+
     file.write(points, args.name)
     points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
     points = to_coord(points)
     img = Img(all_points, points, args.height, args.width)
-    img.save(args.name+"farthest")
-    prints_stats("farthest", points)
+    img.save(args.name+"01farthest_insertion")
+    prints_stats("farthest insertion", points)
 
     points = cpp_wrapper.ruin_and_recreate(
         [tuple(i) for i in points], 3000, 0.3, 1.2)
     points = to_coord(points)
     img = Img(all_points, points, args.height, args.width)
-    img.save(args.name+"ruin")
-    prints_stats("ruin", points)
+    img.save(args.name+"02ruin&recreate")
+    prints_stats("ruin & recreate", points)
 
     points = cpp_wrapper.two_opt([tuple(i) for i in points])
     points = to_coord(points)
     img = Img(all_points, points, args.height, args.width)
-    img.save(args.name+"two_opt")
+    img.save(args.name+"03two_opt")
     prints_stats("two opt", points)
 
+    #"""
     points = gurobi_solver(all_points, points)
     # print(points)
     img = Img(all_points, points, args.height, args.width)
-    img.save(args.name+"gurobi")
+    img.save(args.name+"04gurobi")
     prints_stats("gurobi", points)
+    #"""
