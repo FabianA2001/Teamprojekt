@@ -47,6 +47,16 @@ class Edge:
 
     def __repr__(self) -> str:
         return str(self)
+    
+
+class Polygon:
+    def __init__(self, hull: list[Coord]) -> None:
+        if len(hull) < 3:
+            raise ValueError("Ein Polygon benötigt mindestens 3 Punkte.")
+        self.hull = hull
+
+    def __str__(self) -> str:
+        return f"{self.hull}"
 
 
 def make_edges(points: list[Coord]) -> list[Edge]:

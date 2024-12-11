@@ -2,12 +2,12 @@ import CONST
 from image import Img
 import argparse
 import file
-from CONST import Coord
+from CONST import Coord, Polygon
 import solver
 import cpp_wrapper
 import gurobipy as gp
 from gurobipy import GRB
-from generate import generate_areas
+from generate import generate_polygons
 from openpyxl import load_workbook
 
 
@@ -192,6 +192,68 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
     return result
 
 
+class Stats:
+    def __init__(self, dist, angle) -> None:
+        self.dist = dist
+        self.angle = angle
+
+
+def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
+    result = []
+
+
+    points = cpp_wrapper.get_midpoints_from_areas(
+        [[tuple(i) for i in area] for area in all_points])
+    points = to_coord(points)
+
+    points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
+    points = to_coord(points)
+    if save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+"01_farthest_insertion")
+    dis, angle = solver.calculate_dis_angle(points)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats(name + " farthest insertion", dis, angle)
+
+    points = cpp_wrapper.ruin_and_recreate(
+        [tuple(i) for i in points], 3000, 0.3, 1.2)
+    points = to_coord(points)
+    if save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+"02_ruin&recreate")
+    dis, angle = solver.calculate_dis_angle(points)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats(name + " ruin & recreate", dis, angle)
+
+    points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
+    points = to_coord(points)
+    if save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+"03_two_opt")
+    dis, angle = solver.calculate_dis_angle(points)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats(name + " two opt", dis, angle)
+
+    
+    points = gurobi_solver(all_points, points)
+    if save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+"04_gurobi")
+    dis, angle = solver.calculate_dis_angle(points)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats(name + " gurobi", dis, angle)
+
+    if not save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+name)
+
+    return result
+
+
 if __name__ == "__main__":
     args = parse_args()
 
@@ -239,6 +301,6 @@ if __name__ == "__main__":
         file.write_all_points(all_points, args.name)
         print("New points have been generated")
          
-    img = Img(all_points,[], args.height, args.width)
-    img.save(args.name + "00points")
+    #img = Img(all_points,[], args.height, args.width)
+    #img.save(args.name + "00points")
 """
