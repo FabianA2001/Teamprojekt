@@ -178,9 +178,10 @@ if __name__ == "__main__":
     img.save(args.name+"03two_opt")
     prints_stats("two opt", points)
 
+    """
     points = gurobi_solver(all_points, points)
     # print(points)
     img = Img(all_points, points, args.height, args.width)
     img.save(args.name+"04gurobi")
     prints_stats("gurobi", points)
-    
+    #"""
