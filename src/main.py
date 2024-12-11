@@ -47,7 +47,6 @@ def parse_args():
     )
     parser.add_argument(
         "-name",
-        "-n",
         type=str,
         metavar="STR",
         default=CONST.DATEI_NAME,
@@ -59,12 +58,18 @@ def parse_args():
         action="store_false",
         help="Ob keine Ruin und Create verbesserung vorgenommen werden soll",
     )
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
         "-file",
         "-f",
         type=str,
         metavar="STR",
         help="Name der input Datei",
+    )
+    group.add_argument(
+        "-neu", "-n",
+        action="store_true",
+        help="ob neue Punkte generiert werden sollen"
     )
 
     args = parser.parse_args()
@@ -82,8 +87,7 @@ def parse_args():
     return args
 
 
-def prints_stats(name: str, points: list[Coord]):
-    dis, angle = solver.calculate_dis_angle(points)
+def prints_stats(name: str, dis, angle):
     print(f"Distance: {round(dis, 2)}\tAngle: {round(angle, 2)}\t{name}")
 
 
@@ -136,12 +140,68 @@ def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
     return retpoints
 
 
+class Stats:
+    def __init__(self, dist, angle) -> None:
+        self.dist = dist
+        self.angle = angle
+
+
+def run_algo(all_points: list[list[Coord]], print_st: bool = True, save: bool = True) -> list[Stats]:
+    result = []
+
+    points = cpp_wrapper.get_midpoints_from_areas(
+        [[tuple(i) for i in area] for area in all_points])
+    points = to_coord(points)
+
+    points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
+    points = to_coord(points)
+    if save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+"01farthest_insertion")
+    dis, angle = solver.calculate_dis_angle(points)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats("farthest insertion", dis, angle)
+
+    points = cpp_wrapper.ruin_and_recreate(
+        [tuple(i) for i in points], 3000, 0.3, 1.2)
+    points = to_coord(points)
+    if save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+"02ruin&recreate")
+    dis, angle = solver.calculate_dis_angle(points)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats("ruin & recreate", dis, angle)
+
+    points = cpp_wrapper.two_opt([tuple(i) for i in points])
+    points = to_coord(points)
+    if save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+"03two_opt")
+    dis, angle = solver.calculate_dis_angle(points)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats("two opt", dis, angle)
+
+    points = gurobi_solver(all_points, points)
+    if save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+"04gurobi")
+    dis, angle = solver.calculate_dis_angle(points)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats("gurobi", dis, angle)
+    return result
+
+
 if __name__ == "__main__":
     args = parse_args()
 
     if args.file != None:
         all_points = file.read(args.file)
-    else:
+        run_algo(all_points)
+    elif args.neu:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
         all_points = generate_areas(args.count, height, width)
@@ -150,31 +210,6 @@ if __name__ == "__main__":
         img = Img(all_points, [], args.height, args.width)
         img.save(args.name + "00points")
         print("New points have been generated")
-
-    points = cpp_wrapper.get_midpoints_from_areas(
-        [[tuple(i) for i in area] for area in all_points])
-    points = to_coord(points)
-
-    points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
-    points = to_coord(points)
-    img = Img(all_points, points, args.height, args.width)
-    img.save(args.name+"01farthest_insertion")
-    prints_stats("farthest insertion", points)
-
-    points = cpp_wrapper.ruin_and_recreate(
-        [tuple(i) for i in points], 3000, 0.3, 1.2)
-    points = to_coord(points)
-    img = Img(all_points, points, args.height, args.width)
-    img.save(args.name+"02ruin&recreate")
-    prints_stats("ruin & recreate", points)
-
-    points = cpp_wrapper.two_opt([tuple(i) for i in points])
-    points = to_coord(points)
-    img = Img(all_points, points, args.height, args.width)
-    img.save(args.name+"03two_opt")
-    prints_stats("two opt", points)
-
-    points = gurobi_solver(all_points, points)
-    img = Img(all_points, points, args.height, args.width)
-    img.save(args.name+"04gurobi")
-    prints_stats("gurobi", points)
+        run_algo(all_points)
+    else:
+        pass
