@@ -11,14 +11,6 @@ from gurobipy import GRB
 from generate import generate_areas
 
 
-def calculate_distance(point1: Coord, point2: Coord) -> float:
-    distance = math.sqrt(
-        math.pow((point1.x - point2.x), 2) +
-        math.pow((point1.y - point2.y), 2)
-    )
-    return distance
-
-
 def to_coord(tuples):
     coords = []
     for tuple in tuples:
@@ -186,7 +178,7 @@ if __name__ == "__main__":
     img.save(args.name+"03two_opt")
     prints_stats("two opt", points)
 
-    #"""
+    """
     points = gurobi_solver(all_points, points)
     # print(points)
     img = Img(all_points, points, args.height, args.width)
