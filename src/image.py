@@ -3,6 +3,7 @@ from CONST import Coord, Edge
 import file
 import CONST
 import random
+from generate import create_convexe_hull
 
 
 class Img:
@@ -52,6 +53,13 @@ class Img:
             cluster_color = random_blue()
             for j in range(CONST.CLUSTER_SIZE):
                 self._draw_ellipse(self.all_points[i][j], cluster_color)
+            hull = create_convexe_hull(self.all_points[i])
+            self._draw_hull(hull, cluster_color)
+
+    def _draw_hull(self, points: list[Coord], color: str) -> None:
+        hull = CONST.make_edges(points)
+        for edge in hull:
+            self._draw_edge(edge, color)
 
     def _draw_route(self) -> None:
         for edge in self.edges:

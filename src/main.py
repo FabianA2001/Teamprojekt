@@ -3,7 +3,6 @@ from image import Img
 import argparse
 import file
 from CONST import Coord
-import math
 import solver
 import cpp_wrapper
 import gurobipy as gp
@@ -140,6 +139,7 @@ class Stats:
 def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
 
+
     points = cpp_wrapper.get_midpoints_from_areas(
         [[tuple(i) for i in area] for area in all_points])
     points = to_coord(points)
@@ -175,6 +175,7 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
     if print_st:
         prints_stats(name + " two opt", dis, angle)
 
+    
     points = gurobi_solver(all_points, points)
     if save:
         img = Img(all_points, points, args.height, args.width)
@@ -225,3 +226,19 @@ if __name__ == "__main__":
             # Save the changes
             workbook.save("result.xlsx")
             print("----------------------------------------")
+"""
+if __name__ == "__main__":
+    args = parse_args()
+
+    if args.file != None:
+        all_points = file.read(args.file)
+    else:
+        height = args.height * CONST.ANTIALIAS_FACTOR
+        width = args.width * CONST.ANTIALIAS_FACTOR
+        all_points = generate_areas(args.count, height, width)
+        file.write_all_points(all_points, args.name)
+        print("New points have been generated")
+         
+    img = Img(all_points,[], args.height, args.width)
+    img.save(args.name + "00points")
+"""
