@@ -11,7 +11,7 @@ from gurobipy import GRB
 from generate import generate_areas
 
 
-def to_coord(tuples):
+def to_coord(tuples) -> list[Coord]:
     coords = []
     for tuple in tuples:
         coords.append(Coord(tuple[0], tuple[1]))
@@ -147,18 +147,14 @@ if __name__ == "__main__":
         all_points = generate_areas(args.count, height, width)
 
         file.write_all_points(all_points, args.name)
-        img = Img(all_points,[], args.height, args.width)
+        img = Img(all_points, [], args.height, args.width)
         img.save(args.name + "00points")
         print("New points have been generated")
-
 
     points = cpp_wrapper.get_midpoints_from_areas(
         [[tuple(i) for i in area] for area in all_points])
     points = to_coord(points)
 
-
-
-    file.write(points, args.name)
     points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
     points = to_coord(points)
     img = Img(all_points, points, args.height, args.width)
@@ -178,10 +174,7 @@ if __name__ == "__main__":
     img.save(args.name+"03two_opt")
     prints_stats("two opt", points)
 
-    """
     points = gurobi_solver(all_points, points)
-    # print(points)
     img = Img(all_points, points, args.height, args.width)
     img.save(args.name+"04gurobi")
     prints_stats("gurobi", points)
-    #"""
