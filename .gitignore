@@ -33,7 +33,7 @@ lib64
 *.jpg
 *.png
 *.csv
-!standard_test.csv
+!instances/standard_test_*.csv
 cpp_wrapper/src/main.dSYM/*
 cpp_wrapper/src/main
 

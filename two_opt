@@ -1,6 +1,0 @@
-#!/bin/sh
-
-# erstelle Punkte mit und ohne opt
-
-python3 main.py -n $1 -o -c $2
-python3 main.py -f $1 -n $1_opt

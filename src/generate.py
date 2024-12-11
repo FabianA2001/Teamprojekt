@@ -1,19 +1,11 @@
 import random
 from CONST import Coord
-import math
 import CONST
 
 
-def calculate_distance(point1: Coord, point2: Coord) -> float:
-    distance = math.sqrt(
-        math.pow((point1.x - point2.x), 2) +
-        math.pow((point1.y - point2.y), 2)
-    )
-    return distance
-
 
 def is_enough_distance(coord1: Coord, coord2: Coord, distance: int) -> bool:
-    if calculate_distance(coord1, coord2) >= distance:
+    if CONST.calculate_distance(coord1, coord2) >= distance:
         return True
     return False
 
@@ -40,7 +32,7 @@ def generate_areas(count: int, height: int, width: int) -> list[list[Coord]]:
             )
             for location in areas_list:
                 if attempt == 0:
-                    continue    # Beim ersten Punkt wird nicht verglichen, um das Vergleichen mit einer leeren Liste zuverhindern.
+                    continue    #Beim ersten Punkt wird nicht verglichen, um das Vergleichen mit einer leeren Liste zuverhindern.
                 if is_enough_distance(area_location, location, CONST.MIN_DISTANCE_AREA):
                     verifier = True
                 else:
@@ -60,7 +52,7 @@ def generate_cluster(count: int, center: Coord) -> list[Coord]:
     :param int count: Die Anzahl an Punkten die ein Cluster enthält.
     :param Coord center: Die Koordinaten des Mittelpunktes des Cluster ("center" ist selbst kein Punkt im Cluster).
 
-    return list[Coord]: Eine Liste die die Koordinaten der Punkte im Cluster enthält.
+    :return list[Coord]: Eine Liste die die Koordinaten der Punkte im Cluster enthält.
     """
     cluster_list = []
     verifier = True
@@ -73,7 +65,7 @@ def generate_cluster(count: int, center: Coord) -> list[Coord]:
             )
             for point in cluster_list:
                 if attempt == 0:
-                    continue    # Beim ersten Punkt wird nicht verglichen, um das Vergleichen mit einer leeren Liste zuverhindern.
+                    continue    #Beim ersten Punkt wird nicht verglichen, um das Vergleichen mit einer leeren Liste zuverhindern.
                 if is_enough_distance(cluster_point, point, CONST.MIN_DISTANCE_CLUSTER):
                     verifier = True
                 else:

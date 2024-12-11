@@ -20,7 +20,7 @@ environment erneut aktiviert werden.
 alle benötigeten Pakete sind in der requirements.txt definiert dieses kann mit
 `pip install -r requirements.txt` genutzt werden
 
-das Programm kann standarmäßig mit `python3 main.py` gestartet werden, dann
+das Programm kann standarmäßig mit `python3 src/main.py` gestartet werden, dann
 werden eine jpg mit den Koordinaten und eine csv datei mit den Koordiaten
 erstellt mit `python3 main.py -h` kann eine hilfe für die möglichen Arugmente
 angezeigt werden.

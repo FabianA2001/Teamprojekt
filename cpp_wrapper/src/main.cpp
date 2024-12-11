@@ -5,11 +5,15 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #endif
+
+#define _USE_MATH_DEFINES
+#include <cmath>
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
 #include <vector>
 #include <utility>
 #include <iostream>
-#include <vector>
-#include <cmath>
 #include <limits>
 #include <algorithm>
 #include <random>
