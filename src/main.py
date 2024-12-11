@@ -3,7 +3,6 @@ from image import Img
 import argparse
 import file
 from CONST import Coord
-import math
 import solver
 import cpp_wrapper
 import gurobipy as gp
@@ -145,17 +144,19 @@ if __name__ == "__main__":
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
         all_points = generate_areas(args.count, height, width)
-
         file.write_all_points(all_points, args.name)
-        img = Img(all_points,[], args.height, args.width)
-        img.save(args.name + "00points")
         print("New points have been generated")
+         
+    
+
+    img = Img(all_points,[], args.height, args.width)
+    img.save(args.name + "00points")
 
 
+    """
     points = cpp_wrapper.get_midpoints_from_areas(
         [[tuple(i) for i in area] for area in all_points])
     points = to_coord(points)
-
 
 
     file.write(points, args.name)
@@ -164,7 +165,7 @@ if __name__ == "__main__":
     img = Img(all_points, points, args.height, args.width)
     img.save(args.name+"01farthest_insertion")
     prints_stats("farthest insertion", points)
-
+    
     points = cpp_wrapper.ruin_and_recreate(
         [tuple(i) for i in points], 3000, 0.3, 1.2)
     points = to_coord(points)
@@ -178,7 +179,7 @@ if __name__ == "__main__":
     img.save(args.name+"03two_opt")
     prints_stats("two opt", points)
 
-    """
+    
     points = gurobi_solver(all_points, points)
     # print(points)
     img = Img(all_points, points, args.height, args.width)
