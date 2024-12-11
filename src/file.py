@@ -13,7 +13,7 @@ def write(points: list[Coord], name: str) -> None:
 
 
 def write_all_points(points: list[list[Coord]], name: str) -> None:
-    with open(f"{CONST.INSTANCES_PRE}{name}allpoints.csv", mode="w", newline="") as file:
+    with open(f"{CONST.INSTANCES_PRE}{name}.csv", mode="w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=["x", "y"], delimiter=";")
         writer.writeheader()  # Kopfzeile schreiben
 

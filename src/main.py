@@ -9,6 +9,7 @@ import cpp_wrapper
 import gurobipy as gp
 from gurobipy import GRB
 from generate import generate_areas
+from openpyxl import load_workbook
 
 
 def to_coord(tuples) -> list[Coord]:
@@ -52,12 +53,6 @@ def parse_args():
         default=CONST.DATEI_NAME,
         help=f"Name der output Datei (Default {CONST.DATEI_NAME})",
     )
-    parser.add_argument(
-        "-opt",
-        "-o",
-        action="store_false",
-        help="Ob keine Ruin und Create verbesserung vorgenommen werden soll",
-    )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "-file",
@@ -92,7 +87,12 @@ def prints_stats(name: str, dis, angle):
 
 
 def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
-    model = gp.Model()
+    env = gp.Env(empty=True)  # Create an environment without startup logs
+    # Disable console output for the environment
+    env.setParam('LogToConsole', 0)
+    env.start()
+
+    model = gp.Model(env=env)
     # Vars
     vars = {}
     for points in pointslist:
@@ -118,15 +118,6 @@ def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
                 dist += solver.calculate_distance(
                     point1, point2) * vars[point1] * vars[point2]
 
-    # for i in range(len(order)-2):
-    #    for point1 in order[i]:
-    #        for point2 in order[(i+1) % len(order)]:
-    #            for point3 in order[(i+2) % len(order)]:
-    #            dist = solver.calculate_distance(
-    #                point1, point2) * vars[point1] * vars[point2]
-
-    # print(order)
-    # Solution
     model.setObjective(dist, GRB.MINIMIZE)
     model.optimize()
     retpoints = []
@@ -146,7 +137,7 @@ class Stats:
         self.angle = angle
 
 
-def run_algo(all_points: list[list[Coord]], print_st: bool = True, save: bool = True) -> list[Stats]:
+def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
 
     points = cpp_wrapper.get_midpoints_from_areas(
@@ -157,41 +148,46 @@ def run_algo(all_points: list[list[Coord]], print_st: bool = True, save: bool = 
     points = to_coord(points)
     if save:
         img = Img(all_points, points, args.height, args.width)
-        img.save(args.name+"01farthest_insertion")
+        img.save(args.name+"01_farthest_insertion")
     dis, angle = solver.calculate_dis_angle(points)
     result.append(Stats(dis, angle))
     if print_st:
-        prints_stats("farthest insertion", dis, angle)
+        prints_stats(name + " farthest insertion", dis, angle)
 
-    points = cpp_wrapper.ruin_and_recreate(
-        [tuple(i) for i in points], 3000, 0.3, 1.2)
-    points = to_coord(points)
-    if save:
-        img = Img(all_points, points, args.height, args.width)
-        img.save(args.name+"02ruin&recreate")
-    dis, angle = solver.calculate_dis_angle(points)
-    result.append(Stats(dis, angle))
-    if print_st:
-        prints_stats("ruin & recreate", dis, angle)
+    # points = cpp_wrapper.ruin_and_recreate(
+    #     [tuple(i) for i in points], 3000, 0.3, 1.2)
+    # points = to_coord(points)
+    # if save:
+    #     img = Img(all_points, points, args.height, args.width)
+    #     img.save(args.name+"02_ruin&recreate")
+    # dis, angle = solver.calculate_dis_angle(points)
+    # result.append(Stats(dis, angle))
+    # if print_st:
+    #     prints_stats(name + " ruin & recreate", dis, angle)
 
-    points = cpp_wrapper.two_opt([tuple(i) for i in points])
-    points = to_coord(points)
-    if save:
-        img = Img(all_points, points, args.height, args.width)
-        img.save(args.name+"03two_opt")
-    dis, angle = solver.calculate_dis_angle(points)
-    result.append(Stats(dis, angle))
-    if print_st:
-        prints_stats("two opt", dis, angle)
+    # points = cpp_wrapper.two_opt([tuple(i) for i in points])
+    # points = to_coord(points)
+    # if save:
+    #     img = Img(all_points, points, args.height, args.width)
+    #     img.save(args.name+"03_two_opt")
+    # dis, angle = solver.calculate_dis_angle(points)
+    # result.append(Stats(dis, angle))
+    # if print_st:
+    #     prints_stats(name + " two opt", dis, angle)
 
-    points = gurobi_solver(all_points, points)
-    if save:
-        img = Img(all_points, points, args.height, args.width)
-        img.save(args.name+"04gurobi")
-    dis, angle = solver.calculate_dis_angle(points)
-    result.append(Stats(dis, angle))
-    if print_st:
-        prints_stats("gurobi", dis, angle)
+    # points = gurobi_solver(all_points, points)
+    # if save:
+    #     img = Img(all_points, points, args.height, args.width)
+    #     img.save(args.name+"04_gurobi")
+    # dis, angle = solver.calculate_dis_angle(points)
+    # result.append(Stats(dis, angle))
+    # if print_st:
+    #     prints_stats(name + " gurobi", dis, angle)
+
+    # if not save:
+    #     img = Img(all_points, points, args.height, args.width)
+    #     img.save(args.name+name)
+
     return result
 
 
@@ -200,7 +196,7 @@ if __name__ == "__main__":
 
     if args.file != None:
         all_points = file.read(args.file)
-        run_algo(all_points)
+        run_algo(all_points, args)
     elif args.neu:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
@@ -208,8 +204,24 @@ if __name__ == "__main__":
 
         file.write_all_points(all_points, args.name)
         img = Img(all_points, [], args.height, args.width)
-        img.save(args.name + "00points")
+        img.save(args.name + "00_points")
         print("New points have been generated")
-        run_algo(all_points)
+        run_algo(all_points, args)
     else:
-        pass
+        # Load the existing workbook
+        workbook = load_workbook("result.xlsx")
+        # Select the active worksheet (or specify by name: workbook["SheetName"])
+        sheet = workbook.active
+        ROW = 8
+        COLUME_DIS = "I"
+        COLUME_ANGLE = "J"
+
+        for i in range(20):
+            all_points = file.read(f"standard_test_{i}")
+            result = run_algo(all_points, args,
+                              save=False, name=f"standard_test_{i}")
+            sheet[f"{COLUME_DIS}{ROW + i}"] = result[-1].dist
+            sheet[f"{COLUME_ANGLE}{ROW + i}"] = result[-1].angle
+            # Save the changes
+            workbook.save("result.xlsx")
+            print("----------------------------------------")
