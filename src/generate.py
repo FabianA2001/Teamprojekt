@@ -1,5 +1,5 @@
 import random
-from CONST import Coord
+from CONST import Coord, Polygon
 import CONST
 
 
@@ -9,8 +9,12 @@ def is_enough_distance(coord1: Coord, coord2: Coord, distance: int) -> bool:
         return True
     return False
 
+def cross_product(a: Coord, b:Coord, p:Coord) -> float:
+    return (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)
+    
 
-def generate_areas(count: int, height: int, width: int) -> list[list[Coord]]:
+
+def generate_polygons(count: int, height: int, width: int) -> list[Polygon]:
     """
     Generiert zufällige Positionen, an denen mit "generate_cluster()" ein Punkte-Cluster erzeugt wird.
     
@@ -18,7 +22,7 @@ def generate_areas(count: int, height: int, width: int) -> list[list[Coord]]:
     :param int height: Die Höhe des Bereiches in dem die Positionen generiert werden können.
     :param int width: Die Breite des Bereiches in dem die Positionen generiert werden können.
     
-    :return list[list[Coord]]: Eine zweidimensonale Liste mit Koordinaten, wobei jede Zeile einem Punkte-Cluster entspricht.
+    :return list[Polygon]: Eine Liste mit Polygon
     """
     OFFSET = (CONST.OFFSET + CONST.CLUSTER_RADIUS) * CONST.ANTIALIAS_FACTOR
     areas_list = []
@@ -40,7 +44,9 @@ def generate_areas(count: int, height: int, width: int) -> list[list[Coord]]:
                     break
             if verifier == True:
                 cluster = generate_cluster(CONST.CLUSTER_SIZE, area_location)
-                areas_list.append(cluster)
+                convexe_hull = create_convexe_hull(cluster)
+                polygon = Polygon(convexe_hull)
+                areas_list.append(polygon)
                 break
     return areas_list
           
@@ -95,14 +101,10 @@ def create_convexe_hull(points: list[Coord]) -> list[Coord]:
 
         return int: die Orientierung der Punkte als integer: -1 -> im Uhrzeigersinn, 0 -> kollinear, 1 -> gegen den Uhrzeigersinn    
         """
-        dot_product = ((next_point.y - current_point.y)
-                            * (pot_next_point.x - next_point.x)
-                            - (next_point.x - current_point.x)
-                            * (pot_next_point.y - next_point.y)
-        )
-        if dot_product == 0:
+        cross = cross_product(current_point, next_point, pot_next_point)
+        if cross == 0:
             return 0
-        return 1 if dot_product > 0 else -1
+        return 1 if cross > 0 else -1
     
     start_point = min(points, key = lambda points: (points.x, points.y))
     convexe_hull =[]

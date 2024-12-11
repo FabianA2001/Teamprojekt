@@ -1,5 +1,5 @@
 import csv
-from CONST import Coord
+from CONST import Coord, Polygon
 import CONST
 
 
@@ -27,6 +27,7 @@ def read(name: str) -> list[Coord]:
     with open(f"{CONST.INSTANCES_PRE}{name}.csv", mode="r") as file:
         reader = csv.DictReader(file, delimiter=";")
         coordinates_from_csv = [row for row in reader]
+        print(coordinates_from_csv[0]["x"])
 
     areas = []
     for i in range(CONST.AREA_COUNT):
@@ -36,3 +37,32 @@ def read(name: str) -> list[Coord]:
             cluster.append(Coord(int(row["x"]), int(row["y"])))
         areas.append(cluster)
     return areas
+
+
+def write_polygons(polygons: list[Polygon], name: str) -> None:
+    with open(f"{CONST.INSTANCES_PRE}{name}polygonlist.csv", mode="w", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=["x", "y"], delimiter=";")
+        writer.writeheader()  # Kopfzeile schreiben
+
+        for i in range(len(polygons)):
+            for j in range(len(polygons[i].hull)):
+                row = {"x":polygons[i].hull[j].x, "y":polygons[i].hull[j].y}
+                writer.writerow(row)
+            writer.writerow({"x": -1, "y": -1}) # fügt eine Reihe mit Koordinaten -1,-1 als Trennsymbol
+
+
+def read_polygons(name: str) -> list[Polygon]:
+    with open(f"{CONST.INSTANCES_PRE}{name}.csv", mode="r") as file:
+        reader = csv.DictReader(file, delimiter=";")
+        coordinates_from_csv = [row for row in reader]
+    
+    polygons = []
+    points = []
+    for i in range(len(coordinates_from_csv)):
+        if int(coordinates_from_csv[i]["x"]) != -1:
+            points.append(Coord(int(coordinates_from_csv[i]["x"]), int(coordinates_from_csv[i]["y"])))
+        else:
+            polygon = Polygon(points)
+            polygons.append(polygon)
+            points = []
+    return polygons

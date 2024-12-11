@@ -2,12 +2,12 @@ import CONST
 from image import Img
 import argparse
 import file
-from CONST import Coord
+from CONST import Coord, Polygon
 import solver
 import cpp_wrapper
 import gurobipy as gp
 from gurobipy import GRB
-from generate import generate_areas
+from generate import generate_polygons
 
 
 def to_coord(tuples):
@@ -139,18 +139,19 @@ if __name__ == "__main__":
     args = parse_args()
 
     if args.file != None:
-        all_points = file.read(args.file)
+        polygon_list = file.read_polygons(args.file)
     else:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
-        all_points = generate_areas(args.count, height, width)
-        file.write_all_points(all_points, args.name)
+        polygon_list = generate_polygons(args.count, height, width)
+        file.write_polygons(polygon_list, args.name)
+        #file.write_all_points(all_points, args.name)
         print("New points have been generated")
          
     
 
-    img = Img(all_points,[], args.height, args.width)
-    img.save(args.name + "00points")
+    #img = Img(all_points,[], args.height, args.width)
+    #img.save(args.name + "00points")
 
 
     """
