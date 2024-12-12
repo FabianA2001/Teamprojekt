@@ -1,7 +1,5 @@
 from CONST import Coord, Edge
-import CONST
 import math
-import random
 
 
 def make_edges(points: list[Coord]) -> list[Edge]:

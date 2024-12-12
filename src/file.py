@@ -39,7 +39,7 @@ def read(name: str) -> list[list[Coord]]:
 
 
 def write_polygons(polygon_list: list[Polygon], name: str) -> None:
-    with open(f"{CONST.INSTANCES_PRE}{name}polygonlist.csv", mode="w", newline="") as file:
+    with open(f"{CONST.INSTANCES_PRE}{name}.csv", mode="w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=["x", "y"], delimiter=";")
         writer.writeheader()  # Kopfzeile schreiben
 

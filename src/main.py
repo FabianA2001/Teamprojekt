@@ -8,7 +8,7 @@ import solver
 import cpp_wrapper
 import gurobipy as gp
 from gurobipy import GRB
-from generate import generate_polygons
+import generate
 from openpyxl import load_workbook
 
 
@@ -140,7 +140,6 @@ class Stats:
 def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
 
-
     points = cpp_wrapper.get_midpoints_from_areas(
         [[tuple(i) for i in area] for area in all_points])
     points = to_coord(points)
@@ -193,114 +192,23 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
     return result
 
 
-class Stats:
-    def __init__(self, dist, angle) -> None:
-        self.dist = dist
-        self.angle = angle
-
-
-def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
-    result = []
-
 
 if __name__ == "__main__":
     args = parse_args()
 
     if args.file != None:
-        polygon_list = file.read_polygons(args.file)   
-        polygon_list = file.read_polygons(args.file)   
-    else:
-        height = args.height * CONST.ANTIALIAS_FACTOR
-        width = args.width * CONST.ANTIALIAS_FACTOR
-        polygon_list = generate.generate_polygons(args.count, height, width)
-        file.write_polygons(polygon_list, args.name)
-        print("New polygons have been generated")
-         
-    
-        polygon_list = generate.generate_polygons(args.count, height, width)
-        file.write_polygons(polygon_list, args.name)
-        print("New polygons have been generated")
-         
-    
-
-    img = Img(polygon_list,[], args.height, args.width)
-    img.save(args.name + "00polygons")
-
-
-    """
-    img = Img(polygon_list,[], args.height, args.width)
-    img.save(args.name + "00polygons")
-
-
-    """
-    points = cpp_wrapper.get_midpoints_from_areas(
-        [[tuple(i) for i in area] for area in all_points])
-    points = to_coord(points)
-
-    points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
-    points = to_coord(points)
-    if save:
-        img = Img(all_points, points, args.height, args.width)
-        img.save(args.name+"01_farthest_insertion")
-    dis, angle = solver.calculate_dis_angle(points)
-    result.append(Stats(dis, angle))
-    if print_st:
-        prints_stats(name + " farthest insertion", dis, angle)
-
-    points = cpp_wrapper.ruin_and_recreate(
-        [tuple(i) for i in points], 3000, 0.3, 1.2)
-    points = to_coord(points)
-    if save:
-        img = Img(all_points, points, args.height, args.width)
-        img.save(args.name+"02_ruin&recreate")
-    dis, angle = solver.calculate_dis_angle(points)
-    result.append(Stats(dis, angle))
-    if print_st:
-        prints_stats(name + " ruin & recreate", dis, angle)
-
-    points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
-    points = to_coord(points)
-    if save:
-        img = Img(all_points, points, args.height, args.width)
-        img.save(args.name+"03_two_opt")
-    dis, angle = solver.calculate_dis_angle(points)
-    result.append(Stats(dis, angle))
-    if print_st:
-        prints_stats(name + " two opt", dis, angle)
-
-    
-    points = gurobi_solver(all_points, points)
-    if save:
-        img = Img(all_points, points, args.height, args.width)
-        img.save(args.name+"04_gurobi")
-    dis, angle = solver.calculate_dis_angle(points)
-    result.append(Stats(dis, angle))
-    if print_st:
-        prints_stats(name + " gurobi", dis, angle)
-
-    if not save:
-        img = Img(all_points, points, args.height, args.width)
-        img.save(args.name+name)
-
-    return result
-
-
-if __name__ == "__main__":
-    args = parse_args()
-
-    if args.file != None:
-        all_points = file.read(args.file)
-        run_algo(all_points, args)
+        polygon_list = file.read_polygons(args.file)
+        run_algo(polygon_list, args)
     elif args.neu:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
-        all_points = generate_areas(args.count, height, width)
+        polygon_list = generate.generate_polygons(args.count, height, width)
 
-        file.write_all_points(all_points, args.name)
-        img = Img(all_points, [], args.height, args.width)
-        img.save(args.name + "00_points")
-        print("New points have been generated")
-        run_algo(all_points, args)
+        file.write_polygons(polygon_list, f"new_{args.name}")
+        img = Img(polygon_list, [], args.height, args.width)
+        img.save(args.name + "00_polygons")
+        print("New polygons have been generated")
+        run_algo(polygon_list, args)
     else:
         # Load the existing workbook
         workbook = load_workbook("result.xlsx")
@@ -311,27 +219,11 @@ if __name__ == "__main__":
         COLUME_ANGLE = "J"
 
         for i in range(20):
-            all_points = file.read(f"standard_test_{i}")
-            result = run_algo(all_points, args,
+            polygon_list = file.read_polygons(f"standard_test_{i}")
+            result = run_algo(polygon_list, args,
                               save=False, name=f"standard_test_{i}")
             sheet[f"{COLUME_DIS}{ROW + i}"] = result[-1].dist
             sheet[f"{COLUME_ANGLE}{ROW + i}"] = result[-1].angle
             # Save the changes
             workbook.save("result.xlsx")
             print("----------------------------------------")
-"""
-if __name__ == "__main__":
-    args = parse_args()
-
-    if args.file != None:
-        all_points = file.read(args.file)
-    else:
-        height = args.height * CONST.ANTIALIAS_FACTOR
-        width = args.width * CONST.ANTIALIAS_FACTOR
-        all_points = generate_areas(args.count, height, width)
-        file.write_all_points(all_points, args.name)
-        print("New points have been generated")
-         
-    #img = Img(all_points,[], args.height, args.width)
-    #img.save(args.name + "00points")
-"""

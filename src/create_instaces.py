@@ -28,8 +28,8 @@ def parse_args():
         "-c",
         type=int,
         metavar="INT",
-        default=CONST.AREA_COUNT,
-        help=f"anzahl der kreuze (Default {CONST.AREA_COUNT})",
+        default=CONST.POLYGON_COUNT,
+        help=f"anzahl der kreuze (Default {CONST.POLYGON_COUNT})",
     )
 
     args = parser.parse_args()
@@ -48,5 +48,5 @@ if __name__ == "__main__":
     height = args.height * CONST.ANTIALIAS_FACTOR
     width = args.width * CONST.ANTIALIAS_FACTOR
     for i in range(20):
-        all_points = generate.generate_areas(args.count, height, width)
-        file.write_all_points(all_points, f"standard_test_{i}")
+        polygon_list = generate.generate_polygons(args.count, height, width)
+        file.write_polygons(polygon_list, f"standard_test_{i}")
