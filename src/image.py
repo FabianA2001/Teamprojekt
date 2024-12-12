@@ -57,8 +57,8 @@ class Img:
         for edge in self.edges:
             self._draw_edge(edge, "black")
 
-        for coord in self.points_in_route:
-            self._draw_ellipse(coord, "red")
+        # for coord in self.points_in_route:
+        #     self._draw_ellipse(coord, "red")
 
         for i, coord in enumerate(self.edges):
             if i == len(self.edges) - 1:
