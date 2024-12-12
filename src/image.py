@@ -1,5 +1,5 @@
 from PIL import Image, ImageDraw, ImageFont
-from CONST import Coord, Edge
+from CONST import Coord, Edge, Polygon
 import file
 import CONST
 import random
@@ -9,12 +9,12 @@ from generate import create_convexe_hull
 class Img:
     def __init__(
         self,
-        all_points: list[list[Coord]],
+        polygon_list: list[Polygon],
         points_in_route: list[Coord],
         height: int = CONST.SCREEN_HEIGHT,
         width: int = CONST.SCREEN_WIDTH
     ) -> None:
-        self.all_points = all_points
+        self.polygon_list = polygon_list
         self.points_in_route = points_in_route
         self.HEIGHT = height * CONST.ANTIALIAS_FACTOR
         self.WIDTH = width * CONST.ANTIALIAS_FACTOR
@@ -27,7 +27,7 @@ class Img:
         self._draw = ImageDraw.Draw(self.img)
         self.edges = CONST.make_edges(self.points_in_route)
 
-        self._draw_points()
+        self._draw_polygons()
         self._draw_route()
 
     def show(self) -> None:
@@ -41,20 +41,10 @@ class Img:
         # TODO write anpassen
         # file.write(self.points_in_route, name)
 
-    def _draw_points(self) -> None:
-        def random_blue():
-            red = random.randint(0, 255)
-            green = random.randint(0, 255)
-            blue = random.randint(100, 255)
-            color = "#{:02x}{:02x}{:02x}".format(red, green, blue)
-            return color
 
-        for i in range(CONST.AREA_COUNT):
-            cluster_color = random_blue()
-            for j in range(CONST.CLUSTER_SIZE):
-                self._draw_ellipse(self.all_points[i][j], cluster_color)
-            hull = create_convexe_hull(self.all_points[i])
-            self._draw_hull(hull, cluster_color)
+    def _draw_polygons(self) -> None:
+        for i in range(len(self.polygon_list)):
+            self._draw_hull(self.polygon_list[i].hull, self._random_blue())
 
     def _draw_hull(self, points: list[Coord], color: str) -> None:
         hull = CONST.make_edges(points)
@@ -121,3 +111,10 @@ class Img:
             fill=LINE_COLOR,
             width=LINE_WIDTH,
         )
+
+    def _random_blue(self):
+        red = random.randint(0, 50)
+        green = random.randint(0, 100)
+        blue = random.randint(100, 255)
+        color = "#{:02x}{:02x}{:02x}".format(red, green, blue)
+        return color

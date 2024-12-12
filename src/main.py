@@ -42,8 +42,8 @@ def parse_args():
         "-c",
         type=int,
         metavar="INT",
-        default=CONST.AREA_COUNT,
-        help=f"anzahl der kreuze (Default {CONST.AREA_COUNT})",
+        default=CONST.POLYGON_COUNT,
+        help=f"anzahl der kreuze (Default {CONST.POLYGON_COUNT})",
     )
     parser.add_argument(
         "-name",
@@ -202,6 +202,25 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
     result = []
 
 
+if __name__ == "__main__":
+    args = parse_args()
+
+    if args.file != None:
+        polygon_list = file.read_polygons(args.file)
+    else:
+        height = args.height * CONST.ANTIALIAS_FACTOR
+        width = args.width * CONST.ANTIALIAS_FACTOR
+        polygon_list = generate_polygons(args.count, height, width)
+        file.write_polygons(polygon_list, args.name)
+        print("New polygons have been generated")
+         
+    
+
+    img = Img(polygon_list,[], args.height, args.width)
+    img.save(args.name + "00polygons")
+
+
+    """
     points = cpp_wrapper.get_midpoints_from_areas(
         [[tuple(i) for i in area] for area in all_points])
     points = to_coord(points)
