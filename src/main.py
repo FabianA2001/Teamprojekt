@@ -210,7 +210,7 @@ if __name__ == "__main__":
     else:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
-        polygon_list = generate_polygons(args.count, height, width)
+        polygon_list = generate.generate_polygons(args.count, height, width)
         file.write_polygons(polygon_list, args.name)
         print("New polygons have been generated")
          
