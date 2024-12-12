@@ -42,8 +42,8 @@ class Img:
 
     def _draw_points(self) -> None:
         def random_blue():
-            red = random.randint(0, 50)
-            green = random.randint(0, 100)
+            red = random.randint(0, 255)
+            green = random.randint(0, 255)
             blue = random.randint(100, 255)
             color = "#{:02x}{:02x}{:02x}".format(red, green, blue)
             return color

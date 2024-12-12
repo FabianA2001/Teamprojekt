@@ -154,39 +154,39 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
     if print_st:
         prints_stats(name + " farthest insertion", dis, angle)
 
-    # points = cpp_wrapper.ruin_and_recreate(
-    #     [tuple(i) for i in points], 3000, 0.3, 1.2)
-    # points = to_coord(points)
-    # if save:
-    #     img = Img(all_points, points, args.height, args.width)
-    #     img.save(args.name+"02_ruin&recreate")
-    # dis, angle = solver.calculate_dis_angle(points)
-    # result.append(Stats(dis, angle))
-    # if print_st:
-    #     prints_stats(name + " ruin & recreate", dis, angle)
+    points = cpp_wrapper.ruin_and_recreate(
+        [tuple(i) for i in points], 3000, 0.3, 1.2)
+    points = to_coord(points)
+    if save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+"02_ruin&recreate")
+    dis, angle = solver.calculate_dis_angle(points)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats(name + " ruin & recreate", dis, angle)
 
-    # points = cpp_wrapper.two_opt([tuple(i) for i in points])
-    # points = to_coord(points)
-    # if save:
-    #     img = Img(all_points, points, args.height, args.width)
-    #     img.save(args.name+"03_two_opt")
-    # dis, angle = solver.calculate_dis_angle(points)
-    # result.append(Stats(dis, angle))
-    # if print_st:
-    #     prints_stats(name + " two opt", dis, angle)
+    points = cpp_wrapper.two_opt([tuple(i) for i in points])
+    points = to_coord(points)
+    if save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+"03_two_opt")
+    dis, angle = solver.calculate_dis_angle(points)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats(name + " two opt", dis, angle)
 
-    # points = gurobi_solver(all_points, points)
-    # if save:
-    #     img = Img(all_points, points, args.height, args.width)
-    #     img.save(args.name+"04_gurobi")
-    # dis, angle = solver.calculate_dis_angle(points)
-    # result.append(Stats(dis, angle))
-    # if print_st:
-    #     prints_stats(name + " gurobi", dis, angle)
+    points = gurobi_solver(all_points, points)
+    if save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+"04_gurobi")
+    dis, angle = solver.calculate_dis_angle(points)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats(name + " gurobi", dis, angle)
 
-    # if not save:
-    #     img = Img(all_points, points, args.height, args.width)
-    #     img.save(args.name+name)
+    if not save:
+        img = Img(all_points, points, args.height, args.width)
+        img.save(args.name+name)
 
     return result
 
