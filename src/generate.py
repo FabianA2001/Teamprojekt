@@ -84,6 +84,23 @@ def create_convexe_hull(points: list[Coord]) -> list[Coord]:
 
 
 
+def is_point_inside_polygon(polygon: Polygon, point: Coord) -> bool:
+        """
+        Überprüft, ob ein Punkt innerhalb oder auf der Grenze des Polygon liegt.
+
+        :param Polygon polygon: Das zu überprüfende Polygon.
+        :param Coord point: Der zu überprüfende Punkt.
+        :return bool: True, wenn der Punkt innerhalb oder auf der Grenze der Hülle liegt, sonst False.
+        """
+        for i in range(len(polygon.hull)):
+            A = polygon.hull[i]
+            B = polygon.hull[(i + 1) % len(polygon.hull)]
+            if cross_product(A, B, point) < 0:
+                return False
+        return True
+
+
+
 # Die folgenden Funktionen werden nicht mehr verwendet
 
 def is_enough_distance(coord1: Coord, coord2: Coord, distance: int) -> bool:

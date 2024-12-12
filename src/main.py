@@ -206,7 +206,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     if args.file != None:
-        polygon_list = file.read_polygons(args.file)
+        polygon_list = file.read_polygons(args.file)   
     else:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
@@ -216,8 +216,8 @@ if __name__ == "__main__":
          
     
 
-    img = Img(polygon_list,[], args.height, args.width)
-    img.save(args.name + "00polygons")
+    #img = Img(polygon_list,[], args.height, args.width)
+    #img.save(args.name + "00polygons")
 
 
     """
