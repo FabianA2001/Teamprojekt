@@ -3,6 +3,7 @@ from image import Img
 import argparse
 import file
 from CONST import Coord, Polygon
+from CONST import Coord, Polygon
 import solver
 import cpp_wrapper
 import gurobipy as gp
@@ -207,6 +208,7 @@ if __name__ == "__main__":
 
     if args.file != None:
         polygon_list = file.read_polygons(args.file)   
+        polygon_list = file.read_polygons(args.file)   
     else:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
@@ -215,7 +217,17 @@ if __name__ == "__main__":
         print("New polygons have been generated")
          
     
+        polygon_list = generate.generate_polygons(args.count, height, width)
+        file.write_polygons(polygon_list, args.name)
+        print("New polygons have been generated")
+         
+    
 
+    img = Img(polygon_list,[], args.height, args.width)
+    img.save(args.name + "00polygons")
+
+
+    """
     img = Img(polygon_list,[], args.height, args.width)
     img.save(args.name + "00polygons")
 
