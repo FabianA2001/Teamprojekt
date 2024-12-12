@@ -3,7 +3,6 @@ from CONST import Coord, Edge, Polygon
 import file
 import CONST
 import random
-from generate import create_convexe_hull
 
 
 class Img:
@@ -44,7 +43,7 @@ class Img:
 
     def _draw_polygons(self) -> None:
         for i in range(len(self.polygon_list)):
-            self._draw_hull(self.polygon_list[i].hull, self._random_blue())
+            self._draw_hull(self.polygon_list[i].hull, self._random_color())
 
     def _draw_hull(self, points: list[Coord], color: str) -> None:
         hull = CONST.make_edges(points)
@@ -112,9 +111,9 @@ class Img:
             width=LINE_WIDTH,
         )
 
-    def _random_blue(self):
-        red = random.randint(0, 50)
-        green = random.randint(0, 100)
+    def _random_color(self):
+        red = random.randint(0, 100)
+        green = random.randint(0, 255)
         blue = random.randint(100, 255)
         color = "#{:02x}{:02x}{:02x}".format(red, green, blue)
         return color

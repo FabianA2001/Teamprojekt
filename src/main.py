@@ -216,8 +216,8 @@ if __name__ == "__main__":
          
     
 
-    #img = Img(polygon_list,[], args.height, args.width)
-    #img.save(args.name + "00polygons")
+    img = Img(polygon_list,[], args.height, args.width)
+    img.save(args.name + "00polygons")
 
 
     """
