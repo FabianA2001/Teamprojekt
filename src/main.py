@@ -41,8 +41,8 @@ def parse_args():
         "-c",
         type=int,
         metavar="INT",
-        default=CONST.AREA_COUNT,
-        help=f"anzahl der kreuze (Default {CONST.AREA_COUNT})",
+        default=CONST.POLYGON_COUNT,
+        help=f"anzahl der kreuze (Default {CONST.POLYGON_COUNT})",
     )
     parser.add_argument(
         "-name",
@@ -145,13 +145,12 @@ if __name__ == "__main__":
         width = args.width * CONST.ANTIALIAS_FACTOR
         polygon_list = generate_polygons(args.count, height, width)
         file.write_polygons(polygon_list, args.name)
-        #file.write_all_points(all_points, args.name)
-        print("New points have been generated")
+        print("New polygons have been generated")
          
     
 
-    #img = Img(all_points,[], args.height, args.width)
-    #img.save(args.name + "00points")
+    img = Img(polygon_list,[], args.height, args.width)
+    img.save(args.name + "00polygons")
 
 
     """
