@@ -165,7 +165,7 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
     if print_st:
         prints_stats(name + " ruin & recreate", dis, angle)
 
-    points = cpp_wrapper.two_opt([tuple(i) for i in points])
+    points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
     points = to_coord(points)
     if save:
         img = Img(all_points, points, args.height, args.width)

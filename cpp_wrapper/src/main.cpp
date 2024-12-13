@@ -9,7 +9,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #ifndef M_PI
-    #define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 #include <vector>
 #include <utility>
@@ -86,10 +86,9 @@ tour get_midpoints_from_areas(vector<area> areas)
     return _tour;
 }
 
-tour two_opt(tour tour)
+tour two_opt(tour tour, double FACTOR)
 {
     tour.pop_back(); // Entferne den letzten Punkt (Tour wird geschlossen)
-    const double FACTOR = 0.9;
     bool improvement_found = true;
 
     while (improvement_found)
