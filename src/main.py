@@ -154,6 +154,26 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
     if print_st:
         prints_stats(name + " farthest insertion", dis, angle)
 
+    # NEU KLEINE VIERTEL
+    points1 = cpp_wrapper.get_midpoints_from_areas(
+        [[tuple(i) for i in area] for area in all_points])
+    points1 = to_coord(points1)
+    points2 = cpp_wrapper.get_quarter_tours([tuple(i) for i in points1])
+    # point21 = cpp_wrapper.shortest_path([tuple(i) for i in points2[0]],0)
+    point22 = cpp_wrapper.shortest_path([tuple(i) for i in points2[1]], 1)
+    point23 = cpp_wrapper.shortest_path([tuple(i) for i in points2[2]], 2)
+    point24 = cpp_wrapper.shortest_path([tuple(i) for i in points2[3]], 3)
+    points1 = cpp_wrapper.small_tours([tuple(i) for i in points1])
+    points1 = to_coord(points1)
+    if save:
+        img = Img(all_points, points1, args.height, args.width)
+        img.save(args.name+"02_small_tours")
+    dis, angle = solver.calculate_dis_angle(points1)
+    result.append(Stats(dis, angle))
+    if print_st:
+        prints_stats(name + " small tours", dis, angle)
+    # ENDE NEU
+
     points = cpp_wrapper.ruin_and_recreate(
         [tuple(i) for i in points], 3000, 0.3, 1.2)
     points = to_coord(points)

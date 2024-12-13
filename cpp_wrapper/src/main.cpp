@@ -86,6 +86,258 @@ tour get_midpoints_from_areas(vector<area> areas)
     return _tour;
 }
 
+vector<tour> get_quarter_tours(tour areas)
+{
+    tour tour_up_l;
+    tour tour_up_r;
+    tour tour_do_l;
+    tour tour_do_r;
+    for (coord cord : areas)
+    {
+        if (cord.first < 10000 and cord.second < 10000)
+        {
+            tour_do_l.push_back(cord);
+        }
+        else if (cord.first < 10000 and cord.second >= 10000)
+        {
+            tour_up_l.push_back(cord);
+        }
+        else if (cord.first >= 10000 and cord.second >= 10000)
+        {
+            tour_up_r.push_back(cord);
+        }
+        else if (cord.first >= 10000 and cord.second < 10000)
+        {
+            tour_do_r.push_back(cord);
+        }
+    }
+    return {tour_do_l, tour_do_r, tour_up_l, tour_up_r};
+}
+
+tour shortest_path1(tour points, int op)
+{
+
+    coord start;
+    coord end;
+    if (op == 0)
+    {
+        start = {5000, 10000};
+        end = {10000, 5000};
+    }
+    else if (op == 1)
+    {
+        start = {10000, 5000};
+        end = {15000, 10000};
+    }
+    else if (op == 2)
+    {
+        start = {15000, 10000};
+        end = {10000, 15000};
+    }
+    else if (op == 3)
+    {
+        start = {10000, 15000};
+        end = {5000, 10000};
+    }
+    points.push_back(start);
+    points.push_back(end);
+    size_t n = points.size();
+    vector<vector<double>> distance_matrix(n, vector<double>(n));
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        for (size_t j = 0; j < n; ++j)
+        {
+            distance_matrix[i][j] = calculate_distance(points[i], points[j]);
+        }
+    }
+
+    vector<coord> tour = {start, end};
+    vector<bool> visited(n, false);
+    visited[n - 2] = visited[n - 1] = true;
+
+    while (tour.size() < n + 1)
+    {
+        double max_dist_to_tour = -1;
+        size_t farthest_node = 0;
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            if (!visited[i])
+            {
+                double min_dist_to_tour = numeric_limits<double>::infinity();
+                for (const auto &node : tour)
+                {
+                    min_dist_to_tour = min(min_dist_to_tour, calculate_distance(points[i], node));
+                }
+                if (min_dist_to_tour > max_dist_to_tour)
+                {
+                    max_dist_to_tour = min_dist_to_tour;
+                    farthest_node = i;
+                }
+            }
+        }
+
+        double best_increase = numeric_limits<double>::infinity();
+        size_t best_position = 0;
+        for (size_t i = 0; i < tour.size() - 1; ++i)
+        {
+            double increase = calculate_distance(points[farthest_node], tour[i]) +
+                              calculate_distance(points[farthest_node], tour[i + 1]) -
+                              calculate_distance(tour[i], tour[i + 1]);
+
+            if (increase < best_increase)
+            {
+                best_increase = increase;
+                best_position = i;
+            }
+        }
+
+        tour.insert(tour.begin() + best_position + 1, points[farthest_node]);
+        visited[farthest_node] = true;
+    }
+
+    return tour;
+}
+
+tour shortest_path(tour points, int op)
+{
+    coord start;
+    coord end;
+
+    // Bestimme Start- und Endpunkte basierend auf der Operation
+    if (op == 0)
+    {
+        start = {1250, 2500};
+        end = {2500, 1250};
+    }
+    else if (op == 1)
+    {
+        start = {2500, 1250};
+        end = {3750, 2500};
+    }
+    else if (op == 2)
+    {
+        start = {3750, 2500};
+        end = {2500, 3750};
+    }
+    else if (op == 3)
+    {
+        start = {2500, 3750};
+        end = {1250, 2500};
+    }
+
+    // Überprüfe, ob Start und Ende bereits in der Liste sind
+    // if (std::find(points.begin(), points.end(), start) == points.end())
+    points.push_back(start);
+    // if (std::find(points.begin(), points.end(), end) == points.end())
+    points.push_back(end);
+
+    size_t n = points.size();
+
+    // Erstelle die Distanzmatrix
+    vector<vector<double>> distance_matrix(n, vector<double>(n));
+    for (size_t i = 0; i < n; ++i)
+    {
+        for (size_t j = 0; j < n; ++j)
+        {
+            distance_matrix[i][j] = calculate_distance(points[i], points[j]);
+        }
+    }
+
+    // Initialisiere Tour mit Start- und Endpunkten
+    vector<coord> restour = {start, end};
+    vector<bool> visited(n, false);
+
+    // Markiere Start und Ende als besucht
+    visited[n - 2] = true; // Start
+    visited[n - 1] = true; // Endpunkt
+
+    while (restour.size() < n)
+    {
+        size_t farthest_node = -1;
+        double max_dist_to_tour = -1;
+
+        // Finde den am weitesten entfernten Punkt von der aktuellen Tour
+        for (size_t i = 0; i < n; ++i)
+        {
+            if (!visited[i])
+            {
+                double min_dist_to_tour = numeric_limits<double>::infinity();
+                for (const auto &node : restour)
+                {
+                    min_dist_to_tour = min(min_dist_to_tour, calculate_distance(points[i], node));
+                }
+                if (min_dist_to_tour > max_dist_to_tour)
+                {
+                    max_dist_to_tour = min_dist_to_tour;
+                    farthest_node = i;
+                }
+            }
+        }
+
+        // Finde die beste Position, um den Punkt in die Tour einzufügen
+        size_t best_position = -1;
+        double best_increase = numeric_limits<double>::infinity();
+        for (size_t i = 0; i < restour.size() - 1; ++i)
+        {
+            double increase = distance_matrix[farthest_node][i] +
+                              distance_matrix[farthest_node][i + 1] -
+                              distance_matrix[i][i + 1];
+
+            if (increase < best_increase)
+            {
+                best_increase = increase;
+                best_position = i;
+            }
+        }
+
+        // Füge den Punkt in die Tour ein
+        restour.insert(restour.begin() + best_position + 1, points[farthest_node]);
+        visited[farthest_node] = true;
+    }
+
+    return restour;
+}
+
+tour small_tours(tour points)
+{
+    vector<tour> tours = get_quarter_tours(points);
+    tour tour_do_l = tours[0];
+    tour tour_do_r = tours[1];
+    tour tour_up_l = tours[2];
+    tour tour_up_r = tours[3];
+
+    tour_do_l = shortest_path(tour_do_l, 0);
+    tour_do_r = shortest_path(tour_do_r, 1);
+    tour_up_l = shortest_path(tour_up_l, 2);
+    tour_up_r = shortest_path(tour_up_r, 3);
+
+    tour result;
+    size_t n1 = tour_do_l.size();
+    for (size_t i = 1; i < n1 - 1; i++)
+    {
+        result.push_back(tour_do_l[i]);
+    }
+    size_t n2 = tour_do_r.size();
+    for (size_t i = 1; i < n2 - 1; i++)
+    {
+        result.push_back(tour_do_r[i]);
+    }
+    size_t n3 = tour_up_l.size();
+    for (size_t i = 1; i < n3 - 1; i++)
+    {
+        result.push_back(tour_up_l[i]);
+    }
+    size_t n4 = tour_up_r.size();
+    for (size_t i = 1; i < n4 - 1; i++)
+    {
+        result.push_back(tour_up_r[i]);
+    }
+    result.push_back(result[0]);
+    return result;
+}
+
 tour two_opt(tour tour, double FACTOR)
 {
     tour.pop_back(); // Entferne den letzten Punkt (Tour wird geschlossen)
@@ -414,11 +666,15 @@ PYBIND11_MODULE(cpp_wrapper, m)
     m.def("farthest_insertion", &farthest_insertion);
     m.def("ruin_and_recreate", &ruin_and_recreate);
     m.def("get_midpoints_from_areas", &get_midpoints_from_areas);
+    m.def("small_tours", &small_tours);
+    m.def("get_quarter_tours", &get_quarter_tours);
+    m.def("shortest_path", &shortest_path);
 }
 #endif
 
 int main()
 {
     tour points = {{915, 3759}, {3440, 675}, {1141, 1864}, {2759, 3850}, {2007, 223}, {760, 130}, {527, 964}, {3046, 3001}, {1190, 1005}, {1875, 1780}, {3047, 599}, {2310, 3239}, {1959, 2624}, {2768, 3116}, {1701, 408}, {129, 2746}, {3627, 2663}, {435, 3874}, {819, 3155}, {285, 1302}, {2589, 2566}, {2225, 2097}, {2522, 841}, {3571, 2398}, {1780, 2784}, {456, 2748}, {2551, 3786}, {1212, 2764}, {2852, 2775}, {3510, 1174}, {188, 3545}, {898, 2969}, {948, 1061}, {3658, 1548}, {3678, 1319}, {585, 1196}, {227, 531}, {409, 2335}, {852, 865}, {420, 695}, {3515, 1976}, {2234, 3020}, {830, 2387}, {3121, 2046}, {1701, 2493}, {2860, 2025}, {264, 1522}, {860, 2134}, {3196, 3294}, {1086, 3069}};
-    points = ruin_and_recreate(points, 3000, 0.3, 1.2);
+    // points = ruin_and_recreate(points, 3000, 0.3, 1.2);
+    points = small_tours(points);
 }
