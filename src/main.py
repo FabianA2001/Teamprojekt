@@ -159,7 +159,7 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
         [[tuple(i) for i in area] for area in all_points])
     points1 = to_coord(points1)
     points2 = cpp_wrapper.get_quarter_tours([tuple(i) for i in points1])
-    # point21 = cpp_wrapper.shortest_path([tuple(i) for i in points2[0]],0)
+    point21 = cpp_wrapper.shortest_path([tuple(i) for i in points2[0]], 0)
     point22 = cpp_wrapper.shortest_path([tuple(i) for i in points2[1]], 1)
     point23 = cpp_wrapper.shortest_path([tuple(i) for i in points2[2]], 2)
     point24 = cpp_wrapper.shortest_path([tuple(i) for i in points2[3]], 3)

@@ -208,23 +208,23 @@ tour shortest_path(tour points, int op)
     // Bestimme Start- und Endpunkte basierend auf der Operation
     if (op == 0)
     {
-        start = {1250, 2500};
-        end = {2500, 1250};
+        start = {5000, 10000};
+        end = {10000, 5000};
     }
     else if (op == 1)
     {
-        start = {2500, 1250};
-        end = {3750, 2500};
-    }
-    else if (op == 2)
-    {
-        start = {3750, 2500};
-        end = {2500, 3750};
+        start = {10000, 5000};
+        end = {15000, 10000};
     }
     else if (op == 3)
     {
-        start = {2500, 3750};
-        end = {1250, 2500};
+        start = {15000, 10000};
+        end = {10000, 15000};
+    }
+    else if (op == 2)
+    {
+        start = {10000, 15000};
+        end = {5000, 10000};
     }
 
     // Überprüfe, ob Start und Ende bereits in der Liste sind
@@ -281,9 +281,9 @@ tour shortest_path(tour points, int op)
         double best_increase = numeric_limits<double>::infinity();
         for (size_t i = 0; i < restour.size() - 1; ++i)
         {
-            double increase = distance_matrix[farthest_node][i] +
-                              distance_matrix[farthest_node][i + 1] -
-                              distance_matrix[i][i + 1];
+            double increase = calculate_distance(points[farthest_node], restour[i]) +
+                              calculate_distance(points[farthest_node], restour[i + 1]) -
+                              calculate_distance(restour[i], restour[i + 1]);
 
             if (increase < best_increase)
             {
@@ -324,15 +324,15 @@ tour small_tours(tour points)
     {
         result.push_back(tour_do_r[i]);
     }
-    size_t n3 = tour_up_l.size();
+    size_t n3 = tour_up_r.size();
     for (size_t i = 1; i < n3 - 1; i++)
     {
-        result.push_back(tour_up_l[i]);
+        result.push_back(tour_up_r[i]);
     }
-    size_t n4 = tour_up_r.size();
+    size_t n4 = tour_up_l.size();
     for (size_t i = 1; i < n4 - 1; i++)
     {
-        result.push_back(tour_up_r[i]);
+        result.push_back(tour_up_l[i]);
     }
     result.push_back(result[0]);
     return result;
