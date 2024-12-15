@@ -85,6 +85,86 @@ tour get_midpoints_from_areas(vector<area> areas)
     }
     return _tour;
 }
+tour two_opt(tour tour, double FACTOR)
+{
+    tour.pop_back(); // Entferne den letzten Punkt (Tour wird geschlossen)
+    bool improvement_found = true;
+
+    while (improvement_found)
+    {
+        improvement_found = false;
+
+        for (size_t i = 0; i < tour.size() - 1; ++i)
+        {
+            for (size_t j = i + 2; j < tour.size() - 2; ++j)
+            {
+                if (j == tour.size() - 1 && i == 0)
+                    continue;
+
+                double current_cost = (calculate_distance(tour[i], tour[i + 1]) +
+                                       calculate_distance(tour[j], tour[j + 1])) *
+                                          FACTOR +
+                                      calculate_angle(tour[i], tour[i + 1], tour[i + 2]) +
+                                      calculate_angle(tour[j], tour[j + 1], tour[j + 2]);
+
+                double new_cost = (calculate_distance(tour[i], tour[j]) +
+                                   calculate_distance(tour[i + 1], tour[j + 1])) *
+                                      FACTOR +
+                                  calculate_angle(tour[i], tour[j + 1], tour[i + 2]) +
+                                  calculate_angle(tour[j], tour[i + 1], tour[j + 2]);
+
+                if (new_cost < current_cost)
+                {
+                    reverse(tour.begin() + i + 1, tour.begin() + j + 1);
+                    improvement_found = true;
+                }
+            }
+        }
+    }
+
+    tour.push_back(tour[0]); // Schließe die Tour
+    return tour;
+}
+
+tour two_opt_path(tour path, double FACTOR)
+{
+    bool improvement_found = true;
+
+    // Keine Rückverbindung notwendig, da es ein Pfad ist
+    while (improvement_found)
+    {
+        improvement_found = false;
+
+        for (size_t i = 0; i < path.size() - 2; ++i) // Bis zum vorletzten Element
+        {
+            for (size_t j = i + 2; j < path.size(); ++j) // Überprüfe Paare ohne Endpunkte
+            {
+                // Berechne die Kosten der aktuellen Kanten
+                double current_cost = (calculate_distance(path[i], path[i + 1]) +
+                                       calculate_distance(path[j], path[j - 1])) *
+                                          FACTOR +
+                                      calculate_angle(path[i], path[i + 1], path[i + 2]) +
+                                      calculate_angle(path[j], path[j - 1], path[j - 2]);
+
+                // Berechne die Kosten der neuen Kanten nach einem Tausch
+                double new_cost = (calculate_distance(path[i], path[j]) +
+                                   calculate_distance(path[i + 1], path[j - 1])) *
+                                      FACTOR +
+                                  calculate_angle(path[i], path[j], path[i + 1]) +
+                                  calculate_angle(path[j], path[i + 1], path[j - 1]);
+
+                // Wenn der Tausch die Gesamtkosten verringert, führe ihn durch
+                if (new_cost < current_cost)
+                {
+                    reverse(path.begin() + i + 1, path.begin() + j); // Drehe den Teilbereich um
+                    improvement_found = true;
+                }
+            }
+        }
+    }
+
+    return path;
+}
 
 vector<tour> get_quarter_tours(tour areas)
 {
@@ -114,118 +194,10 @@ vector<tour> get_quarter_tours(tour areas)
     return {tour_do_l, tour_do_r, tour_up_l, tour_up_r};
 }
 
-tour shortest_path1(tour points, int op)
+tour shortest_path(tour points, coord start, coord end)
 {
-
-    coord start;
-    coord end;
-    if (op == 0)
-    {
-        start = {5000, 10000};
-        end = {10000, 5000};
-    }
-    else if (op == 1)
-    {
-        start = {10000, 5000};
-        end = {15000, 10000};
-    }
-    else if (op == 2)
-    {
-        start = {15000, 10000};
-        end = {10000, 15000};
-    }
-    else if (op == 3)
-    {
-        start = {10000, 15000};
-        end = {5000, 10000};
-    }
-    points.push_back(start);
-    points.push_back(end);
-    size_t n = points.size();
-    vector<vector<double>> distance_matrix(n, vector<double>(n));
-
-    for (size_t i = 0; i < n; ++i)
-    {
-        for (size_t j = 0; j < n; ++j)
-        {
-            distance_matrix[i][j] = calculate_distance(points[i], points[j]);
-        }
-    }
-
-    vector<coord> tour = {start, end};
-    vector<bool> visited(n, false);
-    visited[n - 2] = visited[n - 1] = true;
-
-    while (tour.size() < n + 1)
-    {
-        double max_dist_to_tour = -1;
-        size_t farthest_node = 0;
-
-        for (size_t i = 0; i < n; ++i)
-        {
-            if (!visited[i])
-            {
-                double min_dist_to_tour = numeric_limits<double>::infinity();
-                for (const auto &node : tour)
-                {
-                    min_dist_to_tour = min(min_dist_to_tour, calculate_distance(points[i], node));
-                }
-                if (min_dist_to_tour > max_dist_to_tour)
-                {
-                    max_dist_to_tour = min_dist_to_tour;
-                    farthest_node = i;
-                }
-            }
-        }
-
-        double best_increase = numeric_limits<double>::infinity();
-        size_t best_position = 0;
-        for (size_t i = 0; i < tour.size() - 1; ++i)
-        {
-            double increase = calculate_distance(points[farthest_node], tour[i]) +
-                              calculate_distance(points[farthest_node], tour[i + 1]) -
-                              calculate_distance(tour[i], tour[i + 1]);
-
-            if (increase < best_increase)
-            {
-                best_increase = increase;
-                best_position = i;
-            }
-        }
-
-        tour.insert(tour.begin() + best_position + 1, points[farthest_node]);
-        visited[farthest_node] = true;
-    }
-
-    return tour;
-}
-
-tour shortest_path(tour points, int op)
-{
-    coord start;
-    coord end;
-
-    // Bestimme Start- und Endpunkte basierend auf der Operation
-    if (op == 0)
-    {
-        start = {5000, 10000};
-        end = {10000, 5000};
-    }
-    else if (op == 1)
-    {
-        start = {10000, 5000};
-        end = {15000, 10000};
-    }
-    else if (op == 3)
-    {
-        start = {15000, 10000};
-        end = {10000, 15000};
-    }
-    else if (op == 2)
-    {
-        start = {10000, 15000};
-        end = {5000, 10000};
-    }
+    // coord start = start;
+    // coord end = end;
 
     // Überprüfe, ob Start und Ende bereits in der Liste sind
     // if (std::find(points.begin(), points.end(), start) == points.end())
@@ -296,6 +268,10 @@ tour shortest_path(tour points, int op)
         restour.insert(restour.begin() + best_position + 1, points[farthest_node]);
         visited[farthest_node] = true;
     }
+    // if (start.first = 5000)
+    // {
+    //     restour = two_opt_path(restour, 0.0);
+    // }
 
     return restour;
 }
@@ -308,10 +284,10 @@ tour small_tours(tour points)
     tour tour_up_l = tours[2];
     tour tour_up_r = tours[3];
 
-    tour_do_l = shortest_path(tour_do_l, 0);
-    tour_do_r = shortest_path(tour_do_r, 1);
-    tour_up_l = shortest_path(tour_up_l, 2);
-    tour_up_r = shortest_path(tour_up_r, 3);
+    tour_do_l = shortest_path(tour_do_l, {5000, 10000}, {10000, 5000});
+    tour_do_r = shortest_path(tour_do_r, {10000, 5000}, {15000, 10000});
+    tour_up_l = shortest_path(tour_up_l, {10000, 15000}, {5000, 10000});
+    tour_up_r = shortest_path(tour_up_r, {15000, 10000}, {10000, 15000});
 
     tour result;
     size_t n1 = tour_do_l.size();
@@ -336,47 +312,6 @@ tour small_tours(tour points)
     }
     result.push_back(result[0]);
     return result;
-}
-
-tour two_opt(tour tour, double FACTOR)
-{
-    tour.pop_back(); // Entferne den letzten Punkt (Tour wird geschlossen)
-    bool improvement_found = true;
-
-    while (improvement_found)
-    {
-        improvement_found = false;
-
-        for (size_t i = 0; i < tour.size() - 1; ++i)
-        {
-            for (size_t j = i + 2; j < tour.size() - 2; ++j)
-            {
-                if (j == tour.size() - 1 && i == 0)
-                    continue;
-
-                double current_cost = (calculate_distance(tour[i], tour[i + 1]) +
-                                       calculate_distance(tour[j], tour[j + 1])) *
-                                          FACTOR +
-                                      calculate_angle(tour[i], tour[i + 1], tour[i + 2]) +
-                                      calculate_angle(tour[j], tour[j + 1], tour[j + 2]);
-
-                double new_cost = (calculate_distance(tour[i], tour[j]) +
-                                   calculate_distance(tour[i + 1], tour[j + 1])) *
-                                      FACTOR +
-                                  calculate_angle(tour[i], tour[j + 1], tour[i + 2]) +
-                                  calculate_angle(tour[j], tour[i + 1], tour[j + 2]);
-
-                if (new_cost < current_cost)
-                {
-                    reverse(tour.begin() + i + 1, tour.begin() + j + 1);
-                    improvement_found = true;
-                }
-            }
-        }
-    }
-
-    tour.push_back(tour[0]); // Schließe die Tour
-    return tour;
 }
 
 tour farthest_insertion(tour &points)
