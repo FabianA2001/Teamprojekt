@@ -137,7 +137,7 @@ class Stats:
         self.angle = angle
 
 
-def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
+def run_algo(all_points: list[list[Coord]], polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
 
     points = cpp_wrapper.get_midpoints_from_areas(
@@ -147,7 +147,7 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
     points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
     points = to_coord(points)
     if save:
-        img = Img(all_points, points, args.height, args.width)
+        img = Img(polygon_list, points, args.height, args.width)
         img.save(args.name+"01_farthest_insertion")
     dis, angle = solver.calculate_dis_angle(points)
     result.append(Stats(dis, angle))
@@ -158,7 +158,7 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
         [tuple(i) for i in points], 3000, 0.3, 1.2)
     points = to_coord(points)
     if save:
-        img = Img(all_points, points, args.height, args.width)
+        img = Img(polygon_list, points, args.height, args.width)
         img.save(args.name+"02_ruin&recreate")
     dis, angle = solver.calculate_dis_angle(points)
     result.append(Stats(dis, angle))
@@ -168,17 +168,16 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
     points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
     points = to_coord(points)
     if save:
-        img = Img(all_points, points, args.height, args.width)
+        img = Img(polygon_list, points, args.height, args.width)
         img.save(args.name+"03_two_opt")
     dis, angle = solver.calculate_dis_angle(points)
     result.append(Stats(dis, angle))
     if print_st:
         prints_stats(name + " two opt", dis, angle)
 
-    
     points = gurobi_solver(all_points, points)
     if save:
-        img = Img(all_points, points, args.height, args.width)
+        img = Img(polygon_list, points, args.height, args.width)
         img.save(args.name+"04_gurobi")
     dis, angle = solver.calculate_dis_angle(points)
     result.append(Stats(dis, angle))
@@ -186,11 +185,10 @@ def run_algo(all_points: list[list[Coord]], args, print_st: bool = True, save: b
         prints_stats(name + " gurobi", dis, angle)
 
     if not save:
-        img = Img(all_points, points, args.height, args.width)
+        img = Img(polygon_list, points, args.height, args.width)
         img.save(args.name+name)
 
     return result
-
 
 
 if __name__ == "__main__":
@@ -208,7 +206,7 @@ if __name__ == "__main__":
         img = Img(polygon_list, [], args.height, args.width)
         img.save(args.name + "00_polygons")
         print("New polygons have been generated")
-        run_algo(polygon_list, args)
+        run_algo([i.hull for i in polygon_list], polygon_list, args)
     else:
         # Load the existing workbook
         workbook = load_workbook("result.xlsx")
