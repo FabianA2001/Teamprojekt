@@ -90,6 +90,7 @@ def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
     env = gp.Env(empty=True)  # Create an environment without startup logs
     # Disable console output for the environment
     env.setParam('LogToConsole', 0)
+    env.setParam(GRB.Param.TimeLimit, CONST.GUROBI_MAX_TIME)
     env.start()
 
     model = gp.Model(env=env)
@@ -213,8 +214,8 @@ if __name__ == "__main__":
         # Select the active worksheet (or specify by name: workbook["SheetName"])
         sheet = workbook.active
         ROW = 8
-        COLUME_DIS = "I"
-        COLUME_ANGLE = "J"
+        COLUME_DIS = "K"
+        COLUME_ANGLE = "L"
 
         for i in range(20):
             polygon_list = file.read_polygons(f"standard_test_{i}")
