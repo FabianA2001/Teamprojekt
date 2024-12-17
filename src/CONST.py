@@ -6,7 +6,7 @@ POLYGON_COUNT = 60
 CLUSTER_SIZE = 10
 MIN_DISTANCE_POLYGONS = 1000
 MIN_DISTANCE_CLUSTER = 30
-CLUSTER_RADIUS = 500
+CLUSTER_RADIUS = 900
 DATEI_NAME = "test"
 
 ANTIALIAS_FACTOR = 4
@@ -47,7 +47,7 @@ class Edge:
 
     def __repr__(self) -> str:
         return str(self)
-    
+
 
 class Polygon:
     def __init__(self, hull: list[Coord]) -> None:

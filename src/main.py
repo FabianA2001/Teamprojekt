@@ -218,10 +218,27 @@ if __name__ == "__main__":
 
         for i in range(20):
             polygon_list = file.read_polygons(f"standard_test_{i}")
-            result = run_algo(polygon_list, args,
+            result = run_algo([i.hull for i in polygon_list], polygon_list, args,
                               save=False, name=f"standard_test_{i}")
             sheet[f"{COLUME_DIS}{ROW + i}"] = result[-1].dist
             sheet[f"{COLUME_ANGLE}{ROW + i}"] = result[-1].angle
             # Save the changes
             workbook.save("result.xlsx")
             print("----------------------------------------")
+"""
+neu run&recreate(idenizifzieren wo ändern) Basti,Fabian (Caro)
+nur überlappung wen möglich am anfang Torben
+punkte in polygone verschieben Caro
+längere opjekte Torben
+jedes Polygone hat mittelpunkt Torben
+
+
+
+
+run & create
+
+max angle finden -> Radius polygone auswähen
+auf diesen Kreis bilden
+mit grubi wieder einfügen
+
+"""
