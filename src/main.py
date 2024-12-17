@@ -137,9 +137,9 @@ class Stats:
         self.angle = angle
 
 
-def run_algo(all_points: list[list[Coord]], polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
+def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
-
+    all_points = [i.hull for i in polygon_list]
     points = cpp_wrapper.get_midpoints_from_areas(
         [[tuple(i) for i in area] for area in all_points])
     points = to_coord(points)
@@ -206,7 +206,7 @@ if __name__ == "__main__":
         img = Img(polygon_list, [], args.height, args.width)
         img.save(args.name + "00_polygons")
         print("New polygons have been generated")
-        run_algo([i.hull for i in polygon_list], polygon_list, args)
+        run_algo(polygon_list, args)
     else:
         # Load the existing workbook
         workbook = load_workbook("result.xlsx")
@@ -218,7 +218,7 @@ if __name__ == "__main__":
 
         for i in range(20):
             polygon_list = file.read_polygons(f"standard_test_{i}")
-            result = run_algo([i.hull for i in polygon_list], polygon_list, args,
+            result = run_algo(polygon_list, args,
                               save=False, name=f"standard_test_{i}")
             sheet[f"{COLUME_DIS}{ROW + i}"] = result[-1].dist
             sheet[f"{COLUME_ANGLE}{ROW + i}"] = result[-1].angle

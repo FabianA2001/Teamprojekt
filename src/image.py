@@ -40,7 +40,6 @@ class Img:
         # TODO write anpassen
         # file.write(self.points_in_route, name)
 
-
     def _draw_polygons(self) -> None:
         for i in range(len(self.polygon_list)):
             self._draw_hull(self.polygon_list[i].hull, self._random_color())
@@ -112,8 +111,8 @@ class Img:
         )
 
     def _random_color(self):
-        red = random.randint(0, 100)
-        green = random.randint(0, 255)
+        red = random.randint(0, 50)
+        green = random.randint(0, 50)
         blue = random.randint(100, 255)
         color = "#{:02x}{:02x}{:02x}".format(red, green, blue)
         return color
