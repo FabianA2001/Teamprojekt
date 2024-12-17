@@ -82,6 +82,32 @@ tour get_midpoints_from_areas(vector<area> areas)
     return _tour;
 }
 
+std::vector<double> calculate_turn_angles(const tour &path)
+{
+    std::vector<double> angles;
+
+    // Schleife von Index 1 bis path.size() - 2, da drei Punkte benötigt werden
+    for (size_t i = 1; i < path.size() - 1; ++i)
+    {
+        const coord &p1 = path[i - 1]; // Vorheriger Punkt
+        const coord &p2 = path[i];     // Aktueller Punkt
+        const coord &p3 = path[i + 1]; // Nächster Punkt
+
+        // Berechne den Winkel zwischen den Punkten und füge ihn zur Liste hinzu
+        double angle = calculate_angle(p1, p2, p3);
+
+        angles.push_back(angle);
+    }
+    double new_angles_cost = 0.0;
+
+    for (double angle : angles)
+    {
+        new_angles_cost += angle;
+    }
+    // std::cout << new_angles_cost << "\n";
+    return angles;
+}
+
 tour two_opt(tour tour)
 {
     tour.pop_back(); // Entferne den letzten Punkt (Tour wird geschlossen)
@@ -102,14 +128,18 @@ tour two_opt(tour tour)
                 double current_cost = (calculate_distance(tour[i], tour[i + 1]) +
                                        calculate_distance(tour[j], tour[j + 1])) *
                                           FACTOR +
+                                      calculate_angle(tour[(i - 1) % tour.size()], tour[i], tour[i + 1]) +
                                       calculate_angle(tour[i], tour[i + 1], tour[i + 2]) +
+                                      calculate_angle(tour[(j - 1) % tour.size()], tour[j], tour[j + 1]) +
                                       calculate_angle(tour[j], tour[j + 1], tour[j + 2]);
 
                 double new_cost = (calculate_distance(tour[i], tour[j]) +
                                    calculate_distance(tour[i + 1], tour[j + 1])) *
                                       FACTOR +
-                                  calculate_angle(tour[i], tour[j + 1], tour[i + 2]) +
-                                  calculate_angle(tour[j], tour[i + 1], tour[j + 2]);
+                                  calculate_angle(tour[(i - 1) % tour.size()], tour[i], tour[j]) +
+                                  calculate_angle(tour[i], tour[j], tour[(j - 1) % tour.size()]) +
+                                  calculate_angle(tour[i + 2], tour[i + 1], tour[j + 1]) +
+                                  calculate_angle(tour[i + 1], tour[j + 1], tour[j + 2]);
 
                 if (new_cost < current_cost)
                 {
@@ -201,31 +231,6 @@ tour farthest_insertion(tour &points)
     return tour;
 }
 
-std::vector<double> calculate_turn_angles(const tour &path)
-{
-    std::vector<double> angles;
-
-    // Schleife von Index 1 bis path.size() - 2, da drei Punkte benötigt werden
-    for (size_t i = 1; i < path.size() - 1; ++i)
-    {
-        const coord &p1 = path[i - 1]; // Vorheriger Punkt
-        const coord &p2 = path[i];     // Aktueller Punkt
-        const coord &p3 = path[i + 1]; // Nächster Punkt
-
-        // Berechne den Winkel zwischen den Punkten und füge ihn zur Liste hinzu
-        double angle = calculate_angle(p1, p2, p3);
-
-        angles.push_back(angle);
-    }
-    double new_angles_cost = 0.0;
-
-    for (double angle : angles)
-    {
-        new_angles_cost += angle;
-    }
-    // std::cout << new_angles_cost << "\n";
-    return angles;
-}
 double calculate_tour_distance(const tour &tour)
 {
     double total_distance = 0.0;
