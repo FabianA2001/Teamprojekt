@@ -1,7 +1,8 @@
 from CONST import Coord, Edge
 import CONST
 import math
-import random
+import gurobipy as gp
+from gurobipy import GRB
 
 
 def make_edges(points: list[Coord]) -> list[Edge]:
@@ -59,3 +60,49 @@ def caluculate_angle(p1, p2, p3):
 
     # Berechne den Winkel in Radiant und konvertiere zu Grad
     return math.acos(cos_theta) * (180 / math.pi)
+
+
+def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
+    env = gp.Env(empty=True)  # Create an environment without startup logs
+    # Disable console output for the environment
+    env.setParam('LogToConsole', 0)
+    env.setParam(GRB.Param.TimeLimit, CONST.GUROBI_MAX_TIME)
+    env.start()
+
+    model = gp.Model(env=env)
+    # Vars
+    vars = {}
+    for points in pointslist:
+        for point in points:
+            vars[point] = model.addVar(vtype=GRB.BINARY)
+    # Constraint
+    for points in pointslist:
+        model.addConstr(sum((vars[point]) for point in points) == 1)
+
+    # Objective
+    order: list[list[Coord]] = []
+    dist = 0
+    for opoint in orderlist:
+        for ppoints in pointslist:
+            for point in ppoints:
+                if opoint.x == point.x and opoint.y == point.y:
+                    order.append(ppoints)
+
+    dist = 0
+    for i in range(len(order)-1):
+        for point1 in order[i]:
+            for point2 in order[(i+1) % len(order)]:
+                dist += calculate_distance(
+                    point1, point2) * vars[point1] * vars[point2]
+
+    model.setObjective(dist, GRB.MINIMIZE)
+    model.optimize()
+    retpoints = []
+
+    for pointss in order:
+        for point in pointss:
+            # print("h", vars[point], vars[point].X)
+            if vars[point].X > 0.5:
+                retpoints.append(point)
+
+    return retpoints

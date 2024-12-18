@@ -2,18 +2,18 @@ import math
 
 SCREEN_HEIGHT = 5000
 SCREEN_WIDTH = 5000
-AREA_COUNT = 60
+POLYGON_COUNT = 60
 CLUSTER_SIZE = 10
-MIN_DISTANCE_AREA = 1000
+MIN_DISTANCE_POLYGONS = 1000
 MIN_DISTANCE_CLUSTER = 30
-CLUSTER_RADIUS = 400
+CLUSTER_RADIUS = 900
 DATEI_NAME = "test"
 
 ANTIALIAS_FACTOR = 4
 FONT_SIZE = 20
 OFFSET = 30
 
-OPT_TURN_COST = True
+GUROBI_MAX_TIME = 60  # sek
 
 
 IMAGE_PRE = "image/"
@@ -49,12 +49,27 @@ class Edge:
         return str(self)
 
 
+class Polygon:
+    def __init__(self, hull: list[Coord]) -> None:
+        if len(hull) < 3:
+            raise ValueError("Ein Polygon benötigt mindestens 3 Punkte.")
+        self.hull = hull
+
+    def __str__(self) -> str:
+        return f"{self.hull}"
+    
+
+class Stats:
+    def __init__(self, dist, angle) -> None:
+        self.dist = dist
+        self.angle = angle
+
+
 def make_edges(points: list[Coord]) -> list[Edge]:
     result = []
     for i in range(len(points)):
         result.append(Edge(points[i], points[(i + 1) % len(points)]))
     return result
-
 
 def calculate_distance(point1: Coord, point2: Coord) -> float:
     distance = math.sqrt(
@@ -62,3 +77,12 @@ def calculate_distance(point1: Coord, point2: Coord) -> float:
         math.pow((point1.y - point2.y), 2)
     )
     return distance
+
+def to_coord(tuples) -> list[Coord]:
+    coords = []
+    for tuple in tuples:
+        coords.append(Coord(tuple[0], tuple[1]))
+    return coords
+
+def prints_stats(name: str, dis, angle):
+    print(f"Distance: {round(dis, 2)}\tAngle: {round(angle, 2)}\t{name}")
