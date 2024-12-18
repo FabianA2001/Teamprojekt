@@ -416,6 +416,53 @@ std::vector<double> calculate_turn_angles(const tour &path)
     // std::cout << new_angles_cost << "\n";
     return angles;
 }
+
+bool istPunktImKreis(double punktX, double punktY, double kreisX, double kreisY, double radius)
+{
+    // Berechne den Abstand zwischen dem Punkt und dem Mittelpunkt des Kreises
+    double abstand = std::sqrt(std::pow(punktX - kreisX, 2) + std::pow(punktY - kreisY, 2));
+    return abstand <= radius;
+}
+
+tour radius_tour(tour points, vector<tour> all_points)
+{
+    vector<double> angles = calculate_turn_angles(points);
+    double max = 0.0;
+    int position;
+    for (int i = 0; i < angles.size(); i++)
+    {
+        if (angles[i] > max)
+        {
+            max = angles[i];
+            position = i;
+        }
+    }
+    coord center_coord = points[position];
+    double radius = 1500;
+    tour new_tour;
+    vector<tour> radius_areas;
+    bool temp = 0;
+    for (tour area : all_points)
+    {
+
+        for (coord cord : area)
+        {
+            if (istPunktImKreis(cord.first, cord.second, center_coord.first, center_coord.second, radius))
+            {
+                temp = 1;
+                break;
+            }
+        }
+        if (temp)
+        {
+            radius_areas.push_back(area);
+        }
+    }
+    new_tour = get_midpoints_from_areas(radius_areas);
+    new_tour = farthest_insertion(new_tour);
+    return new_tour;
+}
+
 double calculate_tour_distance(const tour &tour)
 {
     double total_distance = 0.0;
