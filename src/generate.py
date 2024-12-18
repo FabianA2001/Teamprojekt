@@ -1,5 +1,5 @@
 import random
-from CONST import Coord, Polygon
+from CONST import Coord, Edge, Polygon
 import CONST
 
 
@@ -102,7 +102,7 @@ def create_convex_hull(points: list[Coord]) -> list[Coord]:
 
 
 
-def is_point_inside_polygon(polygon: Polygon, point: Coord) -> bool:
+def is_point_inside_polygon(point: Coord, polygon: Polygon) -> bool:
         """
         Überprüft, ob ein Punkt innerhalb oder auf der Grenze des Polygon liegt.
 
@@ -116,3 +116,43 @@ def is_point_inside_polygon(polygon: Polygon, point: Coord) -> bool:
             if cross_product(A, B, point) < 0:
                 return False
         return True
+
+
+def do_bouding_boxes_overlap(polygon1: Polygon, polygon2: Polygon) -> bool:
+    x1_min = min(p.x for p in polygon1.hull)
+    x1_max = max(p.x for p in polygon1.hull)
+    y1_min = min(p.y for p in polygon1.hull)
+    y1_max = max(p.y for p in polygon1.hull)
+    
+    x2_min = min(p.x for p in polygon2.hull)
+    x2_max = max(p.x for p in polygon2.hull)
+    y2_min = min(p.y for p in polygon2.hull)
+    y2_max = max(p.y for p in polygon2.hull)
+
+    return not (x1_max < x2_min or x2_max < x1_min or y1_max < y2_min or y2_max < y1_min)
+
+
+def do_polygons_overlap(polygon1: Polygon, polygon2: Polygon) -> bool:
+    for point in polygon1.hull:
+        if is_point_inside_polygon(point, polygon2):
+            return True
+    for point in polygon2.hull:
+        if is_point_inside_polygon(point, polygon1):
+            return True
+    return False
+
+
+def polygon_intersection(polygon1: Polygon, polygon2: Polygon) -> bool:
+    edges_polygon1 = CONST.make_edges(polygon1.hull)
+    edges_polygon2 = CONST.make_edges(polygon2.hull)
+    overlap_points = []
+    for i in range(len(edges_polygon1)):
+        for j in range(len(edges_polygon2)):
+            intersection = edge_intersection(edges_polygon1[i], edges_polygon2[j])
+            overlap_points.append(intersection)
+    #WIP
+    return
+
+def edge_intersection(edge1: Edge, edge2: Edge) -> Coord:
+    #WIP
+    return
