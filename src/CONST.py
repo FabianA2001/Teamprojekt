@@ -6,7 +6,7 @@ POLYGON_COUNT = 60
 CLUSTER_SIZE = 10
 MIN_DISTANCE_POLYGONS = 1000
 MIN_DISTANCE_CLUSTER = 30
-CLUSTER_RADIUS = 900
+CLUSTER_RADIUS = 800
 DATEI_NAME = "test"
 
 ANTIALIAS_FACTOR = 4
@@ -40,7 +40,7 @@ class Edge:
     def __init__(self, point1: Coord, point2: Coord) -> None:
         self.point1 = point1
         self.point2 = point2
-        self.length = calculate_distance(point1, point2)
+        self.length = calculate_distance(self.point1, self.point2)
 
     def __str__(self) -> str:
         return f"{self.point1}{self.point2} der Länge: {self.length}"
@@ -54,6 +54,7 @@ class Polygon:
         if len(hull) < 3:
             raise ValueError("Ein Polygon benötigt mindestens 3 Punkte.")
         self.hull = hull
+        self.centroid = calculate_centroid(self.hull)
 
     def __str__(self) -> str:
         return f"{self.hull}"
@@ -64,12 +65,6 @@ class Stats:
         self.dist = dist
         self.angle = angle
 
-
-def make_edges(points: list[Coord]) -> list[Edge]:
-    result = []
-    for i in range(len(points)):
-        result.append(Edge(points[i], points[(i + 1) % len(points)]))
-    return result
 
 def calculate_distance(point1: Coord, point2: Coord) -> float:
     distance = math.sqrt(
@@ -83,6 +78,22 @@ def to_coord(tuples) -> list[Coord]:
     for tuple in tuples:
         coords.append(Coord(tuple[0], tuple[1]))
     return coords
+
+def make_edges(points: list[Coord]) -> list[Edge]:
+    result = []
+    for i in range(len(points)):
+        result.append(Edge(points[i], points[(i + 1) % len(points)]))
+    return result
+
+def calculate_centroid(hull: list[Coord]) -> Coord:
+    """Berechnet den Schwerpunkt eines Polygons"""
+    x = 0
+    y = 0
+    for i in range(len(hull)):
+        x += hull[i].x
+        y += hull[i].y
+    centroid = Coord(int(x / len(hull)), int(y / len(hull)))
+    return centroid
 
 def prints_stats(name: str, dis, angle):
     print(f"Distance: {round(dis, 2)}\tAngle: {round(angle, 2)}\t{name}")

@@ -8,16 +8,33 @@ def cross_product(a: Coord, b:Coord, p:Coord) -> float:
     return (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)
 
 def random_coord_global(height: int, width: int) -> Coord:
-    OFFSET = (CONST.OFFSET + CONST.CLUSTER_RADIUS) * CONST.ANTIALIAS_FACTOR
+    OFFSET = int((CONST.OFFSET + CONST.CLUSTER_RADIUS / 2) * CONST.ANTIALIAS_FACTOR)
     return Coord(random.randint(OFFSET, height - OFFSET), random.randint(OFFSET, width - OFFSET))
 
-def random_coord_local(center: Coord, radius: int) -> Coord:
-    return Coord(random.randint(center.x - radius, center.x + radius), random.randint(center.y - radius, center.y + radius))
+def random_coord_local(center: Coord, radius: int, form: int) -> Coord:
+    if form == 1 or form == 2:
+        coord = Coord(random.randint(center.x - radius * 2, center.x + radius * 2),
+                      random.randint(center.y - radius, center.y + radius),
+        )
+    elif form == 3 or form == 4:
+        coord = Coord(random.randint(center.x - radius, center.x + radius),
+                      random.randint(center.y - radius * 2, center.y + radius * 2),
+        )
+    elif form == 5:
+        coord = Coord(random.randint(center.x - radius * 2, center.x + radius * 2),
+                      random.randint(center.y - radius * 2, center.y + radius * 2),
+        )
+    elif form >= 6:
+        coord = Coord(random.randint(center.x - radius, center.x + radius),
+                      random.randint(center.y - radius, center.y + radius),
+        )
+    return coord
 
 def random_cluster(center: Coord, count: int) -> list[Coord]:
     cluster = []
+    form = random.randint(1,10)
     for _ in range(count):
-        new_point = random_coord_local(center, CONST.CLUSTER_RADIUS)
+        new_point = random_coord_local(center, CONST.CLUSTER_RADIUS, form)
         cluster.append(new_point)
     return cluster
 
@@ -34,12 +51,13 @@ def generate_polygons(count: int, height: int, width: int) -> list[Polygon]:
     polygon_list = []
     for _ in range(count):
         center = random_coord_global(height, width)
-        polygon = Polygon(create_convexe_hull(random_cluster(center, CONST.CLUSTER_SIZE)))
+        hull = create_convex_hull(random_cluster(center, CONST.CLUSTER_SIZE))
+        polygon = Polygon(hull)
         polygon_list.append(polygon)
     return polygon_list
 
 
-def create_convexe_hull(points: list[Coord]) -> list[Coord]:
+def create_convex_hull(points: list[Coord]) -> list[Coord]:
     """
     Findet die konvexe Hülle einer Punktmenge mit dem Jarvis-March-Algorithmus.
 
@@ -64,10 +82,10 @@ def create_convexe_hull(points: list[Coord]) -> list[Coord]:
         return 1 if cross > 0 else -1
     
     start_point = min(points, key = lambda points: (points.x, points.y))
-    convexe_hull =[]
+    convex_hull =[]
     current_point = start_point
     while True:
-        convexe_hull.append(current_point)
+        convex_hull.append(current_point)
         next_point = points[0]
         for pot_next_point in points:
             if pot_next_point == current_point:
@@ -80,7 +98,7 @@ def create_convexe_hull(points: list[Coord]) -> list[Coord]:
         current_point = next_point
         if current_point == start_point:
             break
-    return convexe_hull
+    return convex_hull
 
 
 
