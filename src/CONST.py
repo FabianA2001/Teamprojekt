@@ -57,7 +57,7 @@ class Polygon:
         self.centroid = calculate_centroid(self.hull)
 
     def __str__(self) -> str:
-        return f"{self.hull}"
+        return f"{self.hull} mit Schwerpunkt: {self.centroid}"
     
 
 class Stats:
