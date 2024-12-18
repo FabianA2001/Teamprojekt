@@ -2,21 +2,11 @@ import CONST
 from image import Img
 import argparse
 import file
-from CONST import Coord, Polygon
-from CONST import Coord, Polygon
+from CONST import Stats
 import solver
 import cpp_wrapper
-import gurobipy as gp
-from gurobipy import GRB
 import generate
 from openpyxl import load_workbook
-
-
-def to_coord(tuples) -> list[Coord]:
-    coords = []
-    for tuple in tuples:
-        coords.append(Coord(tuple[0], tuple[1]))
-    return coords
 
 
 def parse_args():
@@ -25,46 +15,54 @@ def parse_args():
     parser.add_argument(
         "-height",
         "-he",
-        type=int,
-        metavar="INT",
-        default=CONST.SCREEN_HEIGHT,
-        help=f"int als Höhe (Default {CONST.SCREEN_HEIGHT})",
+        type = int,
+        metavar = "INT",
+        default = CONST.SCREEN_HEIGHT,
+        help = f"int als Höhe (Default {CONST.SCREEN_HEIGHT})",
     )
     parser.add_argument(
         "-width",
         "-w",
-        type=int,
-        metavar="INT",
-        default=CONST.SCREEN_WIDTH,
-        help=f"int als Breite (Default {CONST.SCREEN_WIDTH})",
+        type = int,
+        metavar = "INT",
+        default = CONST.SCREEN_WIDTH,
+        help = f"int als Breite (Default {CONST.SCREEN_WIDTH})",
     )
     parser.add_argument(
         "-count",
         "-c",
-        type=int,
-        metavar="INT",
-        default=CONST.POLYGON_COUNT,
-        help=f"anzahl der kreuze (Default {CONST.POLYGON_COUNT})",
+        type = int,
+        metavar = "INT",
+        default = CONST.POLYGON_COUNT,
+        help = f"anzahl der kreuze (Default {CONST.POLYGON_COUNT})",
     )
     parser.add_argument(
         "-name",
-        type=str,
-        metavar="STR",
-        default=CONST.DATEI_NAME,
-        help=f"Name der output Datei (Default {CONST.DATEI_NAME})",
+        type = str,
+        metavar = "STR",
+        default = CONST.DATEI_NAME,
+        help = f"Name der output Datei (Default {CONST.DATEI_NAME})",
+    )
+    parser.add_argument(
+        "-opt",
+        "-o",
+        type = int,
+        metavar = "INT",
+        default = 4,
+        help = f"Wie viele Schritte ausgeführt werden sollen: 0: polygone, 1: farthest, 2: r&r, 3: 2opt, >4: alle (Default Alle)",
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "-file",
         "-f",
-        type=str,
-        metavar="STR",
-        help="Name der input Datei",
+        type = str,
+        metavar = "STR",
+        help = "Name der input Datei",
     )
     group.add_argument(
         "-neu", "-n",
-        action="store_true",
-        help="ob neue Punkte generiert werden sollen"
+        action = "store_true",
+        help = "ob neue Punkte generiert werden sollen"
     )
 
     args = parser.parse_args()
@@ -82,108 +80,57 @@ def parse_args():
     return args
 
 
-def prints_stats(name: str, dis, angle):
-    print(f"Distance: {round(dis, 2)}\tAngle: {round(angle, 2)}\t{name}")
-
-
-def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
-    env = gp.Env(empty=True)  # Create an environment without startup logs
-    # Disable console output for the environment
-    env.setParam('LogToConsole', 0)
-    env.setParam(GRB.Param.TimeLimit, CONST.GUROBI_MAX_TIME)
-    env.start()
-
-    model = gp.Model(env=env)
-    # Vars
-    vars = {}
-    for points in pointslist:
-        for point in points:
-            vars[point] = model.addVar(vtype=GRB.BINARY)
-    # Constraint
-    for points in pointslist:
-        model.addConstr(sum((vars[point]) for point in points) == 1)
-
-    # Objective
-    order: list[list[Coord]] = []
-    dist = 0
-    for opoint in orderlist:
-        for ppoints in pointslist:
-            for point in ppoints:
-                if opoint.x == point.x and opoint.y == point.y:
-                    order.append(ppoints)
-
-    dist = 0
-    for i in range(len(order)-1):
-        for point1 in order[i]:
-            for point2 in order[(i+1) % len(order)]:
-                dist += solver.calculate_distance(
-                    point1, point2) * vars[point1] * vars[point2]
-
-    model.setObjective(dist, GRB.MINIMIZE)
-    model.optimize()
-    retpoints = []
-
-    for pointss in order:
-        for point in pointss:
-            # print("h", vars[point], vars[point].X)
-            if vars[point].X > 0.5:
-                retpoints.append(point)
-
-    return retpoints
-
-
-class Stats:
-    def __init__(self, dist, angle) -> None:
-        self.dist = dist
-        self.angle = angle
-
 
 def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
     all_points = [i.hull for i in polygon_list]
     points = cpp_wrapper.get_midpoints_from_areas(
         [[tuple(i) for i in area] for area in all_points])
-    points = to_coord(points)
+    points = CONST.to_coord(points)
 
-    points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
-    points = to_coord(points)
-    if save:
-        img = Img(polygon_list, points, args.height, args.width)
-        img.save(args.name+"01_farthest_insertion")
-    dis, angle = solver.calculate_dis_angle(points)
-    result.append(Stats(dis, angle))
-    if print_st:
-        prints_stats(name + " farthest insertion", dis, angle)
+    if args.opt >= 1:
+        points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
+        points = CONST.to_coord(points)
+        if save:
+            img = Img(polygon_list, points, args.height, args.width)
+            img.save(args.name+"01_farthest_insertion")
+        dis, angle = solver.calculate_dis_angle(points)
+        result.append(Stats(dis, angle))
+        if print_st:
+            CONST.prints_stats(name + " farthest insertion", dis, angle)
 
-    points = cpp_wrapper.ruin_and_recreate(
-        [tuple(i) for i in points], 3000, 0.3, 1.2)
-    points = to_coord(points)
-    if save:
-        img = Img(polygon_list, points, args.height, args.width)
-        img.save(args.name+"02_ruin&recreate")
-    dis, angle = solver.calculate_dis_angle(points)
-    result.append(Stats(dis, angle))
-    if print_st:
-        prints_stats(name + " ruin & recreate", dis, angle)
+    if args.opt >= 2:
+        points = cpp_wrapper.ruin_and_recreate(
+            [tuple(i) for i in points], 3000, 0.3, 1.2)
+        points = CONST.to_coord(points)
+        if save:
+            img = Img(polygon_list, points, args.height, args.width)
+            img.save(args.name+"02_ruin&recreate")
+        dis, angle = solver.calculate_dis_angle(points)
+        result.append(Stats(dis, angle))
+        if print_st:
+            CONST.prints_stats(name + " ruin & recreate", dis, angle)
 
-    points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
-    points = to_coord(points)
-    if save:
-        img = Img(polygon_list, points, args.height, args.width)
-        img.save(args.name+"03_two_opt")
-    dis, angle = solver.calculate_dis_angle(points)
-    result.append(Stats(dis, angle))
-    if print_st:
-        prints_stats(name + " two opt", dis, angle)
+    if args.opt >= 3:
+        points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
+        points = CONST.to_coord(points)
+        if save:
+            img = Img(polygon_list, points, args.height, args.width)
+            img.save(args.name+"03_two_opt")
+        dis, angle = solver.calculate_dis_angle(points)
+        result.append(Stats(dis, angle))
+        if print_st:
+            CONST.prints_stats(name + " two opt", dis, angle)
 
-    points = gurobi_solver(all_points, points)
-    if save:
-        img = Img(polygon_list, points, args.height, args.width)
-        img.save(args.name+"04_gurobi")
-    dis, angle = solver.calculate_dis_angle(points)
-    result.append(Stats(dis, angle))
-    if print_st:
-        prints_stats(name + " gurobi", dis, angle)
+    if args.opt >=4:
+        points = solver.gurobi_solver(all_points, points)
+        if save:
+            img = Img(polygon_list, points, args.height, args.width)
+            img.save(args.name+"04_gurobi")
+        dis, angle = solver.calculate_dis_angle(points)
+        result.append(Stats(dis, angle))
+        if print_st:
+            CONST.prints_stats(name + " gurobi", dis, angle)
 
     if not save:
         img = Img(polygon_list, points, args.height, args.width)
@@ -197,7 +144,10 @@ if __name__ == "__main__":
 
     if args.file != None:
         polygon_list = file.read_polygons(args.file)
-        run_algo(polygon_list, args)
+        img = Img(polygon_list, [], args.height, args.width)
+        img.save(args.name + "00_polygons")
+        if args.opt != 0:
+            run_algo(polygon_list, args)
     elif args.neu:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
@@ -207,7 +157,8 @@ if __name__ == "__main__":
         img = Img(polygon_list, [], args.height, args.width)
         img.save(args.name + "00_polygons")
         print("New polygons have been generated")
-        run_algo(polygon_list, args)
+        if args.opt != 0:
+            run_algo(polygon_list, args)
     else:
         # Load the existing workbook
         workbook = load_workbook("result.xlsx")
@@ -226,20 +177,22 @@ if __name__ == "__main__":
             # Save the changes
             workbook.save("result.xlsx")
             print("----------------------------------------")
+
+
 """
-neu run&recreate(idenizifzieren wo ändern) Basti,Fabian (Caro)
+neu ruin&recreate(idenizifzieren wo ändern) Basti,Fabian (Caro)
 nur überlappung wen möglich am anfang Torben
 punkte in polygone verschieben Caro
-längere opjekte Torben
-jedes Polygone hat mittelpunkt Torben
+längere objekte Torben
+jedes Polygon hat mittelpunkt Torben
 
 
 
 
-run & create
+ruin & recreate
 
 max angle finden -> Radius polygone auswähen
 auf diesen Kreis bilden
-mit grubi wieder einfügen
+mit gurobi wieder einfügen
 
 """

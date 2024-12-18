@@ -57,6 +57,12 @@ class Polygon:
 
     def __str__(self) -> str:
         return f"{self.hull}"
+    
+
+class Stats:
+    def __init__(self, dist, angle) -> None:
+        self.dist = dist
+        self.angle = angle
 
 
 def make_edges(points: list[Coord]) -> list[Edge]:
@@ -65,10 +71,18 @@ def make_edges(points: list[Coord]) -> list[Edge]:
         result.append(Edge(points[i], points[(i + 1) % len(points)]))
     return result
 
-
 def calculate_distance(point1: Coord, point2: Coord) -> float:
     distance = math.sqrt(
         math.pow((point1.x - point2.x), 2) +
         math.pow((point1.y - point2.y), 2)
     )
     return distance
+
+def to_coord(tuples) -> list[Coord]:
+    coords = []
+    for tuple in tuples:
+        coords.append(Coord(tuple[0], tuple[1]))
+    return coords
+
+def prints_stats(name: str, dis, angle):
+    print(f"Distance: {round(dis, 2)}\tAngle: {round(angle, 2)}\t{name}")
