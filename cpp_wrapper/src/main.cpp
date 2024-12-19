@@ -428,7 +428,7 @@ bool istPunktImKreis(double punktX, double punktY, double kreisX, double kreisY,
     return abstand <= radius;
 }
 
-pair<tour, coord> radius_tour(vector<tour> all_points, tour points, double radius)
+tuple<tour, coord, vector<int>> radius_tour(vector<tour> all_points, tour points, double radius)
 {
     vector<double> angles = calculate_turn_angles(points);
     double max = 0.0;
@@ -444,20 +444,45 @@ pair<tour, coord> radius_tour(vector<tour> all_points, tour points, double radiu
     coord center_coord = points[(position + 1) % points.size()];
     tour new_tour;
     vector<tour> radius_areas;
-    for (tour area : all_points)
+    vector<int> out_indices;
+    for (int i = 0; i < all_points.size(); i++)
     {
+        tour area = all_points.at(i);
         for (coord cord : area)
         {
             if (istPunktImKreis(cord.first, cord.second, center_coord.first, center_coord.second, radius))
             {
+                out_indices.push_back(i);
                 radius_areas.push_back(area);
                 break;
             }
         }
     }
+
+    vector<int> corner;
+    for (int index : out_indices)
+    {
+        if (index == 0)
+        {
+            index = all_points.size();
+        }
+        else
+        {
+            index = index % all_points.size();
+        }
+        if (std::find(out_indices.begin(), out_indices.end(), index + 1) == out_indices.end())
+        {
+            corner.push_back(index);
+        }
+        if (std::find(out_indices.begin(), out_indices.end(), index - 1) == out_indices.end())
+        {
+            corner.push_back(index);
+        }
+    }
+
     new_tour = get_midpoints_from_areas(radius_areas);
     new_tour = farthest_insertion(new_tour);
-    return {new_tour, center_coord};
+    return {new_tour, center_coord, corner};
 }
 
 double calculate_tour_distance(const tour &tour)

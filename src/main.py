@@ -99,56 +99,58 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
         if print_st:
             CONST.prints_stats(name + " farthest insertion", dis, angle)
 
-    if args.opt >= 2:
-        points = cpp_wrapper.ruin_and_recreate(
-            [tuple(i) for i in points], 3000, 0.3, 1.2)
-        points = CONST.to_coord(points)
-        if save:
-            img = Img(polygon_list, points, args.height, args.width)
-            img.save(args.name+"02_ruin&recreate")
-        dis, angle = solver.calculate_dis_angle(points)
-        result.append(Stats(dis, angle))
-        if print_st:
-            CONST.prints_stats(name + " ruin & recreate", dis, angle)
+    # if args.opt >= 2:
+    #     points = cpp_wrapper.ruin_and_recreate(
+    #         [tuple(i) for i in points], 3000, 0.3, 1.2)
+    #     points = CONST.to_coord(points)
+    #     if save:
+    #         img = Img(polygon_list, points, args.height, args.width)
+    #         img.save(args.name+"02_ruin&recreate")
+    #     dis, angle = solver.calculate_dis_angle(points)
+    #     result.append(Stats(dis, angle))
+    #     if print_st:
+    #         CONST.prints_stats(name + " ruin & recreate", dis, angle)
 
-    if args.opt >= 3:
-        points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
-        points = CONST.to_coord(points)
-        if save:
-            img = Img(polygon_list, points, args.height, args.width)
-            img.save(args.name+"03_two_opt")
-        dis, angle = solver.calculate_dis_angle(points)
-        result.append(Stats(dis, angle))
-        if print_st:
-            CONST.prints_stats(name + " two opt", dis, angle)
+    # if args.opt >= 3:
+    #     points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
+    #     points = CONST.to_coord(points)
+    #     if save:
+    #         img = Img(polygon_list, points, args.height, args.width)
+    #         img.save(args.name+"03_two_opt")
+    #     dis, angle = solver.calculate_dis_angle(points)
+    #     result.append(Stats(dis, angle))
+    #     if print_st:
+    #         CONST.prints_stats(name + " two opt", dis, angle)
 
-    if args.opt >= 4:
-        points = solver.gurobi_solver(all_points, points)
-        if save:
-            img = Img(polygon_list, points, args.height, args.width)
-            img.save(args.name+"04_gurobi")
-        dis, angle = solver.calculate_dis_angle(points)
-        result.append(Stats(dis, angle))
-        if print_st:
-            CONST.prints_stats(name + " gurobi", dis, angle)
+    # if args.opt >= 4:
+    #     points = solver.gurobi_solver(all_points, points)
+    #     if save:
+    #         img = Img(polygon_list, points, args.height, args.width)
+    #         img.save(args.name+"04_gurobi")
+    #     dis, angle = solver.calculate_dis_angle(points)
+    #     result.append(Stats(dis, angle))
+    #     if print_st:
+    #         CONST.prints_stats(name + " gurobi", dis, angle)
 
     if args.opt >= 5:
-        all_points_new = []
+        all_points_con = []
         for area in all_points:
             temp = []
             for coord in area:
                 temp.append(tuple(coord))
-            all_points_new.append(temp)
+            all_points_con.append(temp)
 
-        all_points = all_points_new
-        points, center_point = cpp_wrapper.radius_tour(
-            all_points_new, [tuple(i) for i in points], 5000.0)
+        points, center_point, corner_points = cpp_wrapper.radius_tour(
+            all_points_con, [tuple(i) for i in points], 3000.0)
         center_point = Coord(center_point[0], center_point[1])
         print(center_point)
         points = CONST.to_coord(points)
         if save:
             img = Img(polygon_list, points, args.height, args.width)
             img.draw_point_debugg(center_point.x, center_point.y, "red")
+            for i in corner_points:
+                c = all_points[i][0]
+                img.draw_point_debugg(c.x, c.y, "blue")
             img.save(args.name+"05_radius")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
