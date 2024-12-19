@@ -150,7 +150,7 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
             img.draw_point_debugg(center_point.x, center_point.y, "red")
             for i in corner_points:
                 c = all_points[i][0]
-                img.draw_point_debugg(c.x, c.y, "blue")
+                img.draw_cross(c, "blue")
             img.save(args.name+"05_radius")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))

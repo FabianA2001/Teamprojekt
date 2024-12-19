@@ -95,10 +95,10 @@ class Img:
                         fill=color, width=10
                         )
 
-    def _draw_cross(self, coord: Coord, color: str) -> None:
+    def draw_cross(self, coord: Coord, color: str) -> None:
         LINE_COLOR = color
         LINE_WIDTH = 4 * CONST.ANTIALIAS_FACTOR
-        SIZE = 20 // 2
+        SIZE = 200
         self._draw.line(
             (coord.x - SIZE, coord.y - SIZE, coord.x + SIZE, coord.y + SIZE),
             fill=LINE_COLOR,
