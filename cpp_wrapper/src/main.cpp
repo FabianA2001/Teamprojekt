@@ -127,48 +127,49 @@ tour two_opt(tour tour, double FACTOR)
     return tour;
 }
 
-tour two_opt_path(tour path, double FACTOR)
-{
-    bool improvement_found = true;
+// tour two_opt_path(tour path, double FACTOR)
+// {
+//     bool improvement_found = true;
 
-    // Keine Rückverbindung notwendig, da es ein Pfad ist
-    while (improvement_found)
-    {
-        improvement_found = false;
+//     // Keine Rückverbindung notwendig, da es ein Pfad ist
+//     while (improvement_found)
+//     {
+//         improvement_found = false;
 
-        for (size_t i = 0; i < path.size() - 2; ++i) // Bis zum vorletzten Element
-        {
-            for (size_t j = i + 2; j < path.size(); ++j) // Überprüfe Paare ohne Endpunkte
-            {
-                // Berechne die Kosten der aktuellen Kanten
-                double current_cost = (calculate_distance(tour[i], tour[i + 1]) +
-                                       calculate_distance(tour[j], tour[j + 1])) *
-                                          FACTOR +
-                                      calculate_angle(tour[(i - 1) % tour.size()], tour[i], tour[i + 1]) +
-                                      calculate_angle(tour[i], tour[i + 1], tour[i + 2]) +
-                                      calculate_angle(tour[(j - 1) % tour.size()], tour[j], tour[j + 1]) +
-                                      calculate_angle(tour[j], tour[j + 1], tour[j + 2]);
+//         for (size_t i = 0; i < path.size() - 2; ++i) // Bis zum vorletzten Element
+//         {
+//             for (size_t j = i + 2; j < path.size(); ++j) // Überprüfe Paare ohne Endpunkte
+//             {
+//                 // Berechne die Kosten der aktuellen Kanten
+//                 double current_cost = (calculate_distance(tour[i], tour[i + 1]) +
+//                                        calculate_distance(tour[j], tour[j + 1])) *
+//                                           FACTOR +
+//                                       calculate_angle(tour[(i - 1) % tour.size()], tour[i], tour[i + 1]) +
+//                                       calculate_angle(tour[i], tour[i + 1], tour[i + 2]) +
+//                                       calculate_angle(tour[(j - 1) % tour.size()], tour[j], tour[j + 1]) +
+//                                       calculate_angle(tour[j], tour[j + 1], tour[j + 2]);
 
-                double new_cost = (calculate_distance(tour[i], tour[j]) +
-                                   calculate_distance(tour[i + 1], tour[j + 1])) *
-                                      FACTOR +
-                                  calculate_angle(tour[(i - 1) % tour.size()], tour[i], tour[j]) +
-                                  calculate_angle(tour[i], tour[j], tour[(j - 1) % tour.size()]) +
-                                  calculate_angle(tour[i + 2], tour[i + 1], tour[j + 1]) +
-                                  calculate_angle(tour[i + 1], tour[j + 1], tour[j + 2]);
+//                 double new_cost = (calculate_distance(tour[i], tour[j]) +
+//                                    calculate_distance(tour[i + 1], tour[j + 1])) *
+//                                       FACTOR +
+//                                   calculate_angle(tour[(i - 1) % tour.size()], tour[i], tour[j]) +
+//                                   calculate_angle(tour[i], tour[j], tour[(j - 1) % tour.size()]) +
+//                                   calculate_angle(tour[i + 2], tour[i + 1], tour[j + 1]) +
+//                                   calculate_angle(tour[i + 1], tour[j + 1], tour[j + 2]);
 
-                // Wenn der Tausch die Gesamtkosten verringert, führe ihn durch
-                if (new_cost < current_cost)
-                {
-                    reverse(path.begin() + i + 1, path.begin() + j); // Drehe den Teilbereich um
-                    improvement_found = true;
-                }
-            }
-        }
-    }
+//                 // Wenn der Tausch die Gesamtkosten verringert, führe ihn durch
+//                 if (new_cost < current_cost)
+//                 {
+//                     reverse(path.begin() + i + 1, path.begin() + j); // Drehe den Teilbereich um
+//                     improvement_found = true;
+//                 }
+//             }
+//         }
+//     }
 
-    return path;
-}
+//     return path;
+// }
+
 vector<tour> get_quarter_tours(tour areas)
 {
     tour tour_up_l;

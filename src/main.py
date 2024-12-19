@@ -99,38 +99,38 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
         if print_st:
             CONST.prints_stats(name + " farthest insertion", dis, angle)
 
-    # if args.opt >= 2:
-    #     points = cpp_wrapper.ruin_and_recreate(
-    #         [tuple(i) for i in points], 3000, 0.3, 1.2)
-    #     points = CONST.to_coord(points)
-    #     if save:
-    #         img = Img(polygon_list, points, args.height, args.width)
-    #         img.save(args.name+"02_ruin&recreate")
-    #     dis, angle = solver.calculate_dis_angle(points)
-    #     result.append(Stats(dis, angle))
-    #     if print_st:
-    #         CONST.prints_stats(name + " ruin & recreate", dis, angle)
+    if args.opt >= 2:
+        points = cpp_wrapper.ruin_and_recreate(
+            [tuple(i) for i in points], 3000, 0.3, 1.2)
+        points = CONST.to_coord(points)
+        if save:
+            img = Img(polygon_list, points, args.height, args.width)
+            img.save(args.name+"02_ruin&recreate")
+        dis, angle = solver.calculate_dis_angle(points)
+        result.append(Stats(dis, angle))
+        if print_st:
+            CONST.prints_stats(name + " ruin & recreate", dis, angle)
 
-    # if args.opt >= 3:
-    #     points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
-    #     points = CONST.to_coord(points)
-    #     if save:
-    #         img = Img(polygon_list, points, args.height, args.width)
-    #         img.save(args.name+"03_two_opt")
-    #     dis, angle = solver.calculate_dis_angle(points)
-    #     result.append(Stats(dis, angle))
-    #     if print_st:
-    #         CONST.prints_stats(name + " two opt", dis, angle)
+    if args.opt >= 3:
+        points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
+        points = CONST.to_coord(points)
+        if save:
+            img = Img(polygon_list, points, args.height, args.width)
+            img.save(args.name+"03_two_opt")
+        dis, angle = solver.calculate_dis_angle(points)
+        result.append(Stats(dis, angle))
+        if print_st:
+            CONST.prints_stats(name + " two opt", dis, angle)
 
-    # if args.opt >= 4:
-    #     points = solver.gurobi_solver(all_points, points)
-    #     if save:
-    #         img = Img(polygon_list, points, args.height, args.width)
-    #         img.save(args.name+"04_gurobi")
-    #     dis, angle = solver.calculate_dis_angle(points)
-    #     result.append(Stats(dis, angle))
-    #     if print_st:
-    #         CONST.prints_stats(name + " gurobi", dis, angle)
+    if args.opt >= 4:
+        points = solver.gurobi_solver(all_points, points)
+        if save:
+            img = Img(polygon_list, points, args.height, args.width)
+            img.save(args.name+"04_gurobi")
+        dis, angle = solver.calculate_dis_angle(points)
+        result.append(Stats(dis, angle))
+        if print_st:
+            CONST.prints_stats(name + " gurobi", dis, angle)
 
     if args.opt >= 5:
         all_points_new = []
