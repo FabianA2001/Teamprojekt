@@ -2,11 +2,12 @@ import CONST
 from image import Img
 import argparse
 import file
-from CONST import Stats
+from CONST import Stats, Coord
 import solver
 import cpp_wrapper
 import generate
 from openpyxl import load_workbook
+import math
 
 
 def parse_args():
@@ -48,7 +49,7 @@ def parse_args():
         "-o",
         type=int,
         metavar="INT",
-        default=4,
+        default=math.inf,
         help=f"Wie viele Schritte ausgeführt werden sollen: 0: polygone, 1: farthest, 2: r&r, 3: 2opt, >4: alle (Default Alle)",
     )
     group = parser.add_mutually_exclusive_group()
@@ -98,38 +99,61 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
         if print_st:
             CONST.prints_stats(name + " farthest insertion", dis, angle)
 
-    if args.opt >= 2:
-        points = cpp_wrapper.ruin_and_recreate(
-            [tuple(i) for i in points], 3000, 0.3, 1.2)
+    # if args.opt >= 2:
+    #     points = cpp_wrapper.ruin_and_recreate(
+    #         [tuple(i) for i in points], 3000, 0.3, 1.2)
+    #     points = CONST.to_coord(points)
+    #     if save:
+    #         img = Img(polygon_list, points, args.height, args.width)
+    #         img.save(args.name+"02_ruin&recreate")
+    #     dis, angle = solver.calculate_dis_angle(points)
+    #     result.append(Stats(dis, angle))
+    #     if print_st:
+    #         CONST.prints_stats(name + " ruin & recreate", dis, angle)
+
+    # if args.opt >= 3:
+    #     points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
+    #     points = CONST.to_coord(points)
+    #     if save:
+    #         img = Img(polygon_list, points, args.height, args.width)
+    #         img.save(args.name+"03_two_opt")
+    #     dis, angle = solver.calculate_dis_angle(points)
+    #     result.append(Stats(dis, angle))
+    #     if print_st:
+    #         CONST.prints_stats(name + " two opt", dis, angle)
+
+    # if args.opt >= 4:
+    #     points = solver.gurobi_solver(all_points, points)
+    #     if save:
+    #         img = Img(polygon_list, points, args.height, args.width)
+    #         img.save(args.name+"04_gurobi")
+    #     dis, angle = solver.calculate_dis_angle(points)
+    #     result.append(Stats(dis, angle))
+    #     if print_st:
+    #         CONST.prints_stats(name + " gurobi", dis, angle)
+
+    if args.opt >= 5:
+        all_points_new = []
+        for area in all_points:
+            temp = []
+            for coord in area:
+                temp.append(tuple(coord))
+            all_points_new.append(temp)
+
+        all_points = all_points_new
+        points, center_point = cpp_wrapper.radius_tour(
+            all_points_new, [tuple(i) for i in points], 5000.0)
+        center_point = Coord(center_point[0], center_point[1])
+        print(center_point)
         points = CONST.to_coord(points)
         if save:
             img = Img(polygon_list, points, args.height, args.width)
-            img.save(args.name+"02_ruin&recreate")
+            img.draw_point_debugg(center_point.x, center_point.y, "red")
+            img.save(args.name+"05_radius")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
-            CONST.prints_stats(name + " ruin & recreate", dis, angle)
-
-    if args.opt >= 3:
-        points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
-        points = CONST.to_coord(points)
-        if save:
-            img = Img(polygon_list, points, args.height, args.width)
-            img.save(args.name+"03_two_opt")
-        dis, angle = solver.calculate_dis_angle(points)
-        result.append(Stats(dis, angle))
-        if print_st:
-            CONST.prints_stats(name + " two opt", dis, angle)
-
-    if args.opt >= 4:
-        points = solver.gurobi_solver(all_points, points)
-        if save:
-            img = Img(polygon_list, points, args.height, args.width)
-            img.save(args.name+"04_gurobi")
-        dis, angle = solver.calculate_dis_angle(points)
-        result.append(Stats(dis, angle))
-        if print_st:
-            CONST.prints_stats(name + " gurobi", dis, angle)
+            CONST.prints_stats(name + " radius", dis, angle)
 
     if not save:
         img = Img(polygon_list, points, args.height, args.width)
