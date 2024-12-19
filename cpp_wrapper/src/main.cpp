@@ -470,13 +470,13 @@ tuple<tour, coord, vector<int>> radius_tour(vector<tour> all_points, tour points
         {
             index = index % all_points.size();
         }
-        if (std::find(out_indices.begin(), out_indices.end(), index + 1) == out_indices.end())
+        if (std::find(out_indices.begin(), out_indices.end(), (index + 1) % all_points.size()) == out_indices.end())
         {
-            corner.push_back(index);
+            corner.push_back(index + 1);
         }
-        if (std::find(out_indices.begin(), out_indices.end(), index - 1) == out_indices.end())
+        if (std::find(out_indices.begin(), out_indices.end(), (index - 1 + all_points.size()) % all_points.size()) == out_indices.end())
         {
-            corner.push_back(index);
+            corner.push_back(index - 1);
         }
     }
 
