@@ -86,6 +86,47 @@ tour get_midpoints_from_areas(vector<area> areas)
     return _tour;
 }
 
+tour two_opt(tour tour, double FACTOR)
+{
+    tour.pop_back(); // Entferne den letzten Punkt (Tour wird geschlossen)
+    bool improvement_found = true;
+
+    while (improvement_found)
+    {
+        improvement_found = false;
+
+        for (size_t i = 0; i < tour.size() - 1; ++i)
+        {
+            for (size_t j = i + 2; j < tour.size() - 2; ++j)
+            {
+                if (j == tour.size() - 1 && i == 0)
+                    continue;
+
+                double current_cost = (calculate_distance(tour[i], tour[i + 1]) +
+                                       calculate_distance(tour[j], tour[j + 1])) *
+                                          FACTOR +
+                                      calculate_angle(tour[i], tour[i + 1], tour[i + 2]) +
+                                      calculate_angle(tour[j], tour[j + 1], tour[j + 2]);
+
+                double new_cost = (calculate_distance(tour[i], tour[j]) +
+                                   calculate_distance(tour[i + 1], tour[j + 1])) *
+                                      FACTOR +
+                                  calculate_angle(tour[i], tour[j + 1], tour[i + 2]) +
+                                  calculate_angle(tour[j], tour[i + 1], tour[j + 2]);
+
+                if (new_cost < current_cost)
+                {
+                    reverse(tour.begin() + i + 1, tour.begin() + j + 1);
+                    improvement_found = true;
+                }
+            }
+        }
+    }
+
+    tour.push_back(tour[0]); // Schließe die Tour
+    return tour;
+}
+
 tour two_opt_path(tour path, double FACTOR)
 {
     bool improvement_found = true;
@@ -100,18 +141,21 @@ tour two_opt_path(tour path, double FACTOR)
             for (size_t j = i + 2; j < path.size(); ++j) // Überprüfe Paare ohne Endpunkte
             {
                 // Berechne die Kosten der aktuellen Kanten
-                double current_cost = (calculate_distance(path[i], path[i + 1]) +
-                                       calculate_distance(path[j], path[j - 1])) *
+                double current_cost = (calculate_distance(tour[i], tour[i + 1]) +
+                                       calculate_distance(tour[j], tour[j + 1])) *
                                           FACTOR +
-                                      calculate_angle(path[i], path[i + 1], path[i + 2]) +
-                                      calculate_angle(path[j], path[j - 1], path[j - 2]);
+                                      calculate_angle(tour[(i - 1) % tour.size()], tour[i], tour[i + 1]) +
+                                      calculate_angle(tour[i], tour[i + 1], tour[i + 2]) +
+                                      calculate_angle(tour[(j - 1) % tour.size()], tour[j], tour[j + 1]) +
+                                      calculate_angle(tour[j], tour[j + 1], tour[j + 2]);
 
-                // Berechne die Kosten der neuen Kanten nach einem Tausch
-                double new_cost = (calculate_distance(path[i], path[j]) +
-                                   calculate_distance(path[i + 1], path[j - 1])) *
+                double new_cost = (calculate_distance(tour[i], tour[j]) +
+                                   calculate_distance(tour[i + 1], tour[j + 1])) *
                                       FACTOR +
-                                  calculate_angle(path[i], path[j], path[i + 1]) +
-                                  calculate_angle(path[j], path[i + 1], path[j - 1]);
+                                  calculate_angle(tour[(i - 1) % tour.size()], tour[i], tour[j]) +
+                                  calculate_angle(tour[i], tour[j], tour[(j - 1) % tour.size()]) +
+                                  calculate_angle(tour[i + 2], tour[i + 1], tour[j + 1]) +
+                                  calculate_angle(tour[i + 1], tour[j + 1], tour[j + 2]);
 
                 // Wenn der Tausch die Gesamtkosten verringert, führe ihn durch
                 if (new_cost < current_cost)
@@ -124,15 +168,6 @@ tour two_opt_path(tour path, double FACTOR)
     }
 
     return path;
-}
-tour two_opt(tour tour_p, double FACTOR)
-{
-    tour_p.pop_back(); // Entferne den letzten Punkt (Tour wird geschlossen)
-
-    tour_p = two_opt_path(tour_p, FACTOR);
-
-    tour_p.push_back(tour_p[0]); // Schließe die Tour
-    return tour_p;
 }
 vector<tour> get_quarter_tours(tour areas)
 {
