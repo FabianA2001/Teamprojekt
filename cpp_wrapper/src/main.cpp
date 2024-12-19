@@ -140,18 +140,21 @@ tour two_opt_path(tour path, double FACTOR)
             for (size_t j = i + 2; j < path.size(); ++j) // Überprüfe Paare ohne Endpunkte
             {
                 // Berechne die Kosten der aktuellen Kanten
-                double current_cost = (calculate_distance(path[i], path[i + 1]) +
-                                       calculate_distance(path[j], path[j - 1])) *
+                double current_cost = (calculate_distance(tour[i], tour[i + 1]) +
+                                       calculate_distance(tour[j], tour[j + 1])) *
                                           FACTOR +
-                                      calculate_angle(path[i], path[i + 1], path[i + 2]) +
-                                      calculate_angle(path[j], path[j - 1], path[j - 2]);
+                                      calculate_angle(tour[(i - 1) % tour.size()], tour[i], tour[i + 1]) +
+                                      calculate_angle(tour[i], tour[i + 1], tour[i + 2]) +
+                                      calculate_angle(tour[(j - 1) % tour.size()], tour[j], tour[j + 1]) +
+                                      calculate_angle(tour[j], tour[j + 1], tour[j + 2]);
 
-                // Berechne die Kosten der neuen Kanten nach einem Tausch
-                double new_cost = (calculate_distance(path[i], path[j]) +
-                                   calculate_distance(path[i + 1], path[j - 1])) *
+                double new_cost = (calculate_distance(tour[i], tour[j]) +
+                                   calculate_distance(tour[i + 1], tour[j + 1])) *
                                       FACTOR +
-                                  calculate_angle(path[i], path[j], path[i + 1]) +
-                                  calculate_angle(path[j], path[i + 1], path[j - 1]);
+                                  calculate_angle(tour[(i - 1) % tour.size()], tour[i], tour[j]) +
+                                  calculate_angle(tour[i], tour[j], tour[(j - 1) % tour.size()]) +
+                                  calculate_angle(tour[i + 2], tour[i + 1], tour[j + 1]) +
+                                  calculate_angle(tour[i + 1], tour[j + 1], tour[j + 2]);
 
                 // Wenn der Tausch die Gesamtkosten verringert, führe ihn durch
                 if (new_cost < current_cost)
