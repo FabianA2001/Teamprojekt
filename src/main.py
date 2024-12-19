@@ -123,7 +123,7 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
     #         CONST.prints_stats(name + " two opt", dis, angle)
 
     # if args.opt >= 4:
-    #     points = solver.gurobi_solver(all_points, points)
+        # points = solver.gurobi_solver(all_points, points)
     #     if save:
     #         img = Img(polygon_list, points, args.height, args.width)
     #         img.save(args.name+"04_gurobi")
@@ -133,6 +133,15 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
     #         CONST.prints_stats(name + " gurobi", dis, angle)
 
     if args.opt >= 5:
+        order: list[list[Coord]] = []
+        dist = 0
+        for opoint in points:
+            for ppoints in all_points:
+                for point in ppoints:
+                    if opoint.x == point.x and opoint.y == point.y:
+                        order.append(ppoints)
+        all_points = order
+
         all_points_con = []
         for area in all_points:
             temp = []
@@ -141,7 +150,7 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
             all_points_con.append(temp)
 
         points, center_point, corner_points = cpp_wrapper.radius_tour(
-            all_points_con, [tuple(i) for i in points], 3000.0)
+            all_points_con, [tuple(i) for i in points], 4000.0)
         center_point = Coord(center_point[0], center_point[1])
         print(center_point)
         points = CONST.to_coord(points)
@@ -151,6 +160,7 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
             for i in corner_points:
                 c = all_points[i][0]
                 img.draw_cross(c, "blue")
+
             img.save(args.name+"05_radius")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
