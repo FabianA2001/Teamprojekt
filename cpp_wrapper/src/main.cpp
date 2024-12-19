@@ -437,7 +437,7 @@ pair<tour, coord> radius_tour(vector<tour> all_points, tour points, double radiu
             position = i;
         }
     }
-    coord center_coord = points[position];
+    coord center_coord = points[(position + 1) % points.size()];
     tour new_tour;
     vector<tour> radius_areas;
     for (tour area : all_points)
