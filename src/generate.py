@@ -1,7 +1,7 @@
 import random
 from CONST import Coord, Edge, Polygon
 import CONST
-
+import math
 
 
 def cross_product(a: Coord, b:Coord, p:Coord) -> float:
@@ -101,7 +101,6 @@ def create_convex_hull(points: list[Coord]) -> list[Coord]:
     return convex_hull
 
 
-
 def is_point_inside_polygon(point: Coord, polygon: Polygon) -> bool:
         """
         Überprüft, ob ein Punkt innerhalb oder auf der Grenze des Polygon liegt.
@@ -118,20 +117,6 @@ def is_point_inside_polygon(point: Coord, polygon: Polygon) -> bool:
         return True
 
 
-def do_bouding_boxes_overlap(polygon1: Polygon, polygon2: Polygon) -> bool:
-    x1_min = min(p.x for p in polygon1.hull)
-    x1_max = max(p.x for p in polygon1.hull)
-    y1_min = min(p.y for p in polygon1.hull)
-    y1_max = max(p.y for p in polygon1.hull)
-    
-    x2_min = min(p.x for p in polygon2.hull)
-    x2_max = max(p.x for p in polygon2.hull)
-    y2_min = min(p.y for p in polygon2.hull)
-    y2_max = max(p.y for p in polygon2.hull)
-
-    return not (x1_max < x2_min or x2_max < x1_min or y1_max < y2_min or y2_max < y1_min)
-
-
 def do_polygons_overlap(polygon1: Polygon, polygon2: Polygon) -> bool:
     for point in polygon1.hull:
         if is_point_inside_polygon(point, polygon2):
@@ -142,17 +127,85 @@ def do_polygons_overlap(polygon1: Polygon, polygon2: Polygon) -> bool:
     return False
 
 
-def polygon_intersection(polygon1: Polygon, polygon2: Polygon) -> bool:
+def polygon_intersection(polygon1: Polygon, polygon2: Polygon) -> Polygon:
     edges_polygon1 = CONST.make_edges(polygon1.hull)
     edges_polygon2 = CONST.make_edges(polygon2.hull)
     overlap_points = []
     for i in range(len(edges_polygon1)):
         for j in range(len(edges_polygon2)):
             intersection = edge_intersection(edges_polygon1[i], edges_polygon2[j])
-            overlap_points.append(intersection)
-    #WIP
-    return
+            if intersection != None:
+                overlap_points.append(intersection)
+    for point in polygon1.hull:
+        if is_point_inside_polygon(point, polygon2):
+            overlap_points.append(point)
+    for point in polygon2.hull:
+        if is_point_inside_polygon(point, polygon1):
+            overlap_points.append(point)
+    hull = create_convex_hull(overlap_points)
+    if len(hull) > 2:
+        polygon = Polygon(hull)
+    else:
+        return None
+    return polygon
+
 
 def edge_intersection(edge1: Edge, edge2: Edge) -> Coord:
-    #WIP
-    return
+    determinant = ((edge1.point2.x - edge1.point1.x) * (edge2.point2.y - edge2.point1.y)
+                 - (edge1.point2.y - edge1.point1.y) * (edge2.point2.x - edge2.point1.x)
+    )
+    if determinant == 0:
+        return None
+    
+    t = (((edge2.point1.x - edge1.point1.x) * (edge2.point2.y - edge2.point1.y)
+        - (edge2.point1.y - edge1.point1.y) * (edge2.point2.x - edge2.point1.x)) / determinant
+    )
+    u = (((edge2.point1.x - edge1.point1.x) * (edge1.point2.y - edge1.point1.y)
+        - (edge2.point1.y - edge1.point1.y) * (edge1.point2.x - edge1.point1.x)) / determinant
+    )
+
+    if 0 <= t <= 1 and 0 <= u <= 1:
+        x = edge1.point1.x + t * (edge1.point2.x - edge1.point1.x)
+        y = edge1.point1.y + t * (edge1.point2.y - edge1.point1.y)
+        return Coord(int(x), int(y))
+    return None
+
+def create_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
+    MAX_POSSIBLE_DISTANCE = math.sqrt(math.pow(CONST.CLUSTER_RADIUS, 2) + math.pow(CONST.CLUSTER_RADIUS, 2)) * 2
+    new_polygon_list = []
+    for i in range(len(polygon_list)):
+        for j in range(i, len(polygon_list)):
+            if i != j and CONST.calculate_distance(polygon_list[i].centroid, polygon_list[j].centroid) <= MAX_POSSIBLE_DISTANCE:
+                if do_polygons_overlap(polygon_list[i], polygon_list[j]):
+                    intersecting_polygon = polygon_intersection(polygon_list[i], polygon_list[j])
+                    if intersecting_polygon != None:
+                        new_polygon_list.append(intersecting_polygon)
+    return new_polygon_list
+
+def find_non_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
+    MAX_POSSIBLE_DISTANCE = math.sqrt(math.pow(CONST.CLUSTER_RADIUS, 2) + math.pow(CONST.CLUSTER_RADIUS, 2)) * 2
+    new_polygon_list = []
+    for i in range(len(polygon_list)):
+        has_intersection = False
+        for j in range(len(polygon_list)):
+            if i != j and CONST.calculate_distance(polygon_list[i].centroid, polygon_list[j].centroid) <= MAX_POSSIBLE_DISTANCE:
+                if do_polygons_overlap(polygon_list[i], polygon_list[j]):
+                    has_intersection = True
+        if has_intersection == False:
+            new_polygon_list.append(polygon_list[i])
+    return new_polygon_list
+
+def create_better_polygon_list(polygon_list: list[Polygon]) -> list[Polygon]:
+    intersecting_polygons = create_intersecting_polygons(polygon_list)
+    non_intersecting_polygons = find_non_intersecting_polygons(polygon_list)
+    new_polygon_list = intersecting_polygons + non_intersecting_polygons
+    return new_polygon_list
+
+def delete_duplicate_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
+    seen = set()
+    new_polygon_list = []
+    for polygon in polygon_list:
+        if polygon.centroid not in seen:
+            new_polygon_list.append(polygon)
+            seen.add(polygon.centroid)
+    return new_polygon_list

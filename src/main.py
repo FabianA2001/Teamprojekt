@@ -144,8 +144,17 @@ if __name__ == "__main__":
 
     if args.file != None:
         polygon_list = file.read_polygons(args.file)
+        ipl = generate.create_better_polygon_list(polygon_list)
+        ipl2 = generate.create_better_polygon_list(ipl)
+        print(len(polygon_list), len(ipl), len(ipl2))
+
         img = Img(polygon_list, [], args.height, args.width)
         img.save(args.name + "00_polygons")
+        img = Img(ipl, [], args.height, args.width)
+        img.save(args.name + "00_ipl_polygons")
+        img = Img(ipl2, [], args.height, args.width)
+        img.save(args.name + "00_ipl2_polygons")
+
         if args.opt != 0:
             run_algo(polygon_list, args)
     elif args.neu:
