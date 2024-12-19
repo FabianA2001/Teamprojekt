@@ -89,10 +89,10 @@ class Img:
 
     def draw_point_debugg(self, x, y, color: str) -> None:
         self._draw.line((0, y, self.img.width, y),
-                        fill=color,
+                        fill=color, width=10
                         )
         self._draw.line((x, 0, x, self.img.height),
-                        fill=color,
+                        fill=color, width=10
                         )
 
     def _draw_cross(self, coord: Coord, color: str) -> None:
