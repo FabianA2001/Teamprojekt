@@ -424,7 +424,7 @@ bool istPunktImKreis(double punktX, double punktY, double kreisX, double kreisY,
     return abstand <= radius;
 }
 
-tour radius_tour(tour points, vector<tour> all_points)
+tour radius_tour(tour points, vector<tour> all_points, double radius)
 {
     vector<double> angles = calculate_turn_angles(points);
     double max = 0.0;
@@ -438,24 +438,17 @@ tour radius_tour(tour points, vector<tour> all_points)
         }
     }
     coord center_coord = points[position];
-    double radius = 1500;
     tour new_tour;
     vector<tour> radius_areas;
-    bool temp = 0;
     for (tour area : all_points)
     {
-
         for (coord cord : area)
         {
             if (istPunktImKreis(cord.first, cord.second, center_coord.first, center_coord.second, radius))
             {
-                temp = 1;
+                radius_areas.push_back(area);
                 break;
             }
-        }
-        if (temp)
-        {
-            radius_areas.push_back(area);
         }
     }
     new_tour = get_midpoints_from_areas(radius_areas);
