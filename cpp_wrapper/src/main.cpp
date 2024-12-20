@@ -399,6 +399,8 @@ std::vector<double> calculate_turn_angles(const tour &path)
 {
     std::vector<double> angles;
 
+    angles.push_back(calculate_angle(path[path.size() - 2], path[0], path[1]));
+
     // Schleife von Index 1 bis path.size() - 2, da drei Punkte benötigt werden
     for (size_t i = 1; i < path.size() - 1; ++i)
     {
@@ -441,11 +443,11 @@ tuple<tour, coord, vector<int>> radius_tour(vector<tour> all_points, tour points
             position = i;
         }
     }
-    coord center_coord = points[(position + 1) % points.size()];
+    coord center_coord = points[position];
     tour new_tour;
     vector<tour> radius_areas;
     vector<int> out_indices;
-    for (int i = 0; i < all_points.size(); i++)
+    for (int i = 0; i < all_points.size() - 1; i++)
     {
         tour area = all_points.at(i);
         for (coord cord : area)
@@ -462,21 +464,13 @@ tuple<tour, coord, vector<int>> radius_tour(vector<tour> all_points, tour points
     vector<int> corner;
     for (int index : out_indices)
     {
-        if (index == 0)
+        if (std::find(out_indices.begin(), out_indices.end(), (index + 1) % (all_points.size() - 1)) == out_indices.end())
         {
-            index = all_points.size();
+            corner.push_back((index + 1) % (all_points.size() - 1));
         }
-        else
+        if (std::find(out_indices.begin(), out_indices.end(), (index - 1 + (all_points.size() - 1)) % (all_points.size() - 1)) == out_indices.end())
         {
-            index = index % all_points.size();
-        }
-        if (std::find(out_indices.begin(), out_indices.end(), (index + 1) % all_points.size()) == out_indices.end())
-        {
-            corner.push_back(index + 1);
-        }
-        if (std::find(out_indices.begin(), out_indices.end(), (index - 1 + all_points.size()) % all_points.size()) == out_indices.end())
-        {
-            corner.push_back(index - 1);
+            corner.push_back((index - 1 + (all_points.size() - 1)) % (all_points.size() - 1));
         }
     }
 
