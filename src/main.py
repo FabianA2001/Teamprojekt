@@ -134,7 +134,7 @@ def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save:
 
     if not save:
         img = Img(polygon_list, points, args.height, args.width)
-        img.save(args.name+name)
+        img.save(name)
 
     return result
 
