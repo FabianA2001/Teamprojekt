@@ -56,7 +56,6 @@ def generate_polygons(count: int, height: int, width: int) -> list[Polygon]:
         polygon_list.append(polygon)
     return polygon_list
 
-
 def create_convex_hull(points: list[Coord]) -> list[Coord]:
     """
     Findet die konvexe Hülle einer Punktmenge mit dem Jarvis-March-Algorithmus.
@@ -116,7 +115,6 @@ def is_point_inside_polygon(point: Coord, polygon: Polygon) -> bool:
                 return False
         return True
 
-
 def do_polygons_overlap(polygon1: Polygon, polygon2: Polygon) -> bool:
     for point in polygon1.hull:
         if is_point_inside_polygon(point, polygon2):
@@ -125,7 +123,6 @@ def do_polygons_overlap(polygon1: Polygon, polygon2: Polygon) -> bool:
         if is_point_inside_polygon(point, polygon1):
             return True
     return False
-
 
 def polygon_intersection(polygon1: Polygon, polygon2: Polygon) -> Polygon:
     edges_polygon1 = CONST.make_edges(polygon1.hull)
@@ -148,7 +145,6 @@ def polygon_intersection(polygon1: Polygon, polygon2: Polygon) -> Polygon:
     else:
         return None
     return polygon
-
 
 def edge_intersection(edge1: Edge, edge2: Edge) -> Coord:
     determinant = ((edge1.point2.x - edge1.point1.x) * (edge2.point2.y - edge2.point1.y)
@@ -198,15 +194,6 @@ def find_non_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]
             new_polygon_list.append(polygon_list[i])
     return new_polygon_list
 
-def delete_duplicate_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
-    seen = set()
-    new_polygon_list = []
-    for polygon in polygon_list:
-        if polygon.centroid not in seen:
-            new_polygon_list.append(polygon)
-            seen.add(polygon.centroid)
-    return new_polygon_list
-
 
 def is_every_polygon_covered(original_polygon_list: list[Polygon], test_polygon_list: list[Polygon]) -> bool:
     for original_polygon in original_polygon_list:
@@ -218,7 +205,6 @@ def is_every_polygon_covered(original_polygon_list: list[Polygon], test_polygon_
         if not is_covered:
             return False
     return True
-
 
 def find_redundant_polygon(original_polygon_list: list[Polygon], current_polygon_list: list[Polygon]) -> Polygon:
     for i in range(len(current_polygon_list)):
