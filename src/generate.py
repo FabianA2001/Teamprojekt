@@ -167,7 +167,7 @@ def edge_intersection(edge1: Edge, edge2: Edge) -> Coord:
     return None
 
 def create_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
-    MAX_POSSIBLE_DISTANCE = math.sqrt(math.pow(CONST.CLUSTER_RADIUS, 2) + math.pow(CONST.CLUSTER_RADIUS, 2)) * 2
+    MAX_POSSIBLE_DISTANCE = math.sqrt(math.pow(CONST.CLUSTER_RADIUS, 2) + math.pow(CONST.CLUSTER_RADIUS, 2)) * 4
     new_polygon_list = []
     for i in range(len(polygon_list)):
         for j in range(i, len(polygon_list)):
@@ -182,7 +182,7 @@ def create_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
     return new_polygon_list
 
 def find_non_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
-    MAX_POSSIBLE_DISTANCE = math.sqrt(math.pow(CONST.CLUSTER_RADIUS, 2) + math.pow(CONST.CLUSTER_RADIUS, 2)) * 2
+    MAX_POSSIBLE_DISTANCE = math.sqrt(math.pow(CONST.CLUSTER_RADIUS, 2) + math.pow(CONST.CLUSTER_RADIUS, 2)) * 4
     new_polygon_list = []
     for i in range(len(polygon_list)):
         has_intersection = False
