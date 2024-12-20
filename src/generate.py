@@ -199,9 +199,11 @@ def is_every_polygon_covered(original_polygon_list: list[Polygon], test_polygon_
     for original_polygon in original_polygon_list:
         is_covered = False
         for test_polygon in test_polygon_list:
-            if is_point_inside_polygon(test_polygon.centroid, original_polygon):
-                is_covered = True
-                break
+            for point in test_polygon.hull:
+                if is_point_inside_polygon(point, original_polygon):
+                    is_covered = True
+                else:
+                    return False
         if not is_covered:
             return False
     return True
