@@ -81,9 +81,9 @@ def parse_args():
 
 
 
-def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
+def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
-    all_points = [i.hull for i in polygon_list]
+    all_points = [i.hull for i in best_polygon_list]
     points = cpp_wrapper.get_midpoints_from_areas(
         [[tuple(i) for i in area] for area in all_points])
     points = CONST.to_coord(points)
@@ -144,30 +144,30 @@ if __name__ == "__main__":
 
     if args.file != None:
         polygon_list = file.read_polygons(args.file)
-        ipl = generate.create_better_polygon_list(polygon_list)
-        ipl2 = generate.create_better_polygon_list(ipl)
-        print(len(polygon_list), len(ipl), len(ipl2))
-
+        best_polygon_list = generate.find_best_polygon_list(polygon_list)
+        
         img = Img(polygon_list, [], args.height, args.width)
-        img.save(args.name + "00_polygons")
-        img = Img(ipl, [], args.height, args.width)
-        img.save(args.name + "00_ipl_polygons")
-        img = Img(ipl2, [], args.height, args.width)
-        img.save(args.name + "00_ipl2_polygons")
+        img.save(args.name + "00_all_polygons")
+        img = Img(best_polygon_list, [], args.height, args.width)
+        img.save(args.name + "00_best_polygons")
 
         if args.opt != 0:
-            run_algo(polygon_list, args)
+            run_algo(polygon_list, best_polygon_list, args)
     elif args.neu:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
         polygon_list = generate.generate_polygons(args.count, height, width)
-
+        best_polygon_list = generate.find_best_polygon_list(polygon_list)
         file.write_polygons(polygon_list, f"new_{args.name}")
+
         img = Img(polygon_list, [], args.height, args.width)
-        img.save(args.name + "00_polygons")
+        img.save(args.name + "00_all_polygons")
+        img = Img(best_polygon_list, [], args.height, args.width)
+        img.save(args.name + "00_best_polygons")
         print("New polygons have been generated")
+
         if args.opt != 0:
-            run_algo(polygon_list, args)
+            run_algo(polygon_list, best_polygon_list, args)
     else:
         # Load the existing workbook
         workbook = load_workbook("result.xlsx")
@@ -179,7 +179,8 @@ if __name__ == "__main__":
 
         for i in range(20):
             polygon_list = file.read_polygons(f"standard_test_{i}")
-            result = run_algo(polygon_list, args,
+            best_polygon_list = generate.find_best_polygon_list(polygon_list)
+            result = run_algo(polygon_list, best_polygon_list, args,
                               save=False, name=f"standard_test_{i}")
             sheet[f"{COLUME_DIS}{ROW + i}"] = result[-1].dist
             sheet[f"{COLUME_ANGLE}{ROW + i}"] = result[-1].angle

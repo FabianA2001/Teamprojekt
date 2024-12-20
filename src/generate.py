@@ -180,6 +180,9 @@ def create_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
                     intersecting_polygon = polygon_intersection(polygon_list[i], polygon_list[j])
                     if intersecting_polygon != None:
                         new_polygon_list.append(intersecting_polygon)
+                    else:
+                        new_polygon_list.append(polygon_list[i])
+                        new_polygon_list.append(polygon_list[j])
     return new_polygon_list
 
 def find_non_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
@@ -195,12 +198,6 @@ def find_non_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]
             new_polygon_list.append(polygon_list[i])
     return new_polygon_list
 
-def create_better_polygon_list(polygon_list: list[Polygon]) -> list[Polygon]:
-    intersecting_polygons = create_intersecting_polygons(polygon_list)
-    non_intersecting_polygons = find_non_intersecting_polygons(polygon_list)
-    new_polygon_list = intersecting_polygons + non_intersecting_polygons
-    return new_polygon_list
-
 def delete_duplicate_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
     seen = set()
     new_polygon_list = []
@@ -209,3 +206,50 @@ def delete_duplicate_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
             new_polygon_list.append(polygon)
             seen.add(polygon.centroid)
     return new_polygon_list
+
+
+def is_every_polygon_covered(original_polygon_list: list[Polygon], test_polygon_list: list[Polygon]) -> bool:
+    for original_polygon in original_polygon_list:
+        is_covered = False
+        for test_polygon in test_polygon_list:
+            if is_point_inside_polygon(test_polygon.centroid, original_polygon):
+                is_covered = True
+                break
+        if not is_covered:
+            return False
+    return True
+
+
+def find_redundant_polygon(original_polygon_list: list[Polygon], current_polygon_list: list[Polygon]) -> Polygon:
+    for i in range(len(current_polygon_list)):
+        test_polygon_list =[elem for elem in current_polygon_list]
+        test_polygon_list.pop(i)
+        if is_every_polygon_covered(original_polygon_list, test_polygon_list):
+            return current_polygon_list[i]
+    return None
+
+def remove_redundant_polygons(original_polygon_list: list[Polygon], current_polygon_list: list[Polygon]) -> list[Polygon]:
+    while True:
+        test_polygon_list = current_polygon_list
+        redundant_polygon = find_redundant_polygon(original_polygon_list, test_polygon_list)
+        if redundant_polygon != None:
+            current_polygon_list.remove(redundant_polygon)
+        else:
+            break
+    return current_polygon_list
+
+def create_better_polygon_list(polygon_list: list[Polygon]) -> list[Polygon]:
+    intersecting_polygons = create_intersecting_polygons(polygon_list)
+    non_intersecting_polygons = find_non_intersecting_polygons(polygon_list)
+    new_polygon_list = intersecting_polygons + non_intersecting_polygons
+    return remove_redundant_polygons(polygon_list, new_polygon_list)
+
+def find_best_polygon_list(polygon_list: list[Polygon]) -> list[Polygon]:
+    current = polygon_list
+    while True:
+        new = create_better_polygon_list(current)
+        if len(new) != len(current):
+            current = new
+        else:
+            break
+    return current
