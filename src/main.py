@@ -80,6 +80,24 @@ def parse_args():
     return args
 
 
+def newPoints(polygon_list, points):
+    new_points = []
+
+    for polygon in polygon_list:
+        for point in points:
+            if generate.is_point_inside_polygon(polygon, point):
+                new_poly = []
+                new_poly.append(point)
+                i = 0
+                while i < 5:
+                    new_point = generate.random_coord_local(point, 500)
+                    if generate.is_point_inside_polygon(polygon, new_point) and new_point not in new_poly:
+                        new_poly.append(new_point)
+                        i += 1
+        new_points.append(new_poly)
+    return new_points
+
+
 def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
     all_points = [i.hull for i in polygon_list]
