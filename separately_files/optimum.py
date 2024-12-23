@@ -1,65 +1,21 @@
-from gurobipy import *
+import gurobipy as gb
 import random
-import math
+import optimum_assistance as oa
+import time
 
 
-m = Model("Optimum")
+start_time = time.time()
 
 
-def get_distance(point0, point1):
-    return math.sqrt((point0.x - point1.x) ** 2 + (point0.y - point1.y) ** 2)
+env = gb.Env(empty=True)
+env.setParam('LogToConsole', 0)
+env.start()
 
-def caluculate_angle(p1, p2, p3):
-    assert ((p1 != p2) and (p1 != p3) and (p2 != p3))
-    vec_a = (p2.x - p1.x, p2.y - p1.y)
-    vec_b = (p3.x - p2.x, p3.y - p2.y)
-
-    mag_a = math.sqrt(vec_a[0] ** 2 + vec_a[1] ** 2)
-    mag_b = math.sqrt(vec_b[0] ** 2 + vec_b[1] ** 2)
-
-    assert (mag_a != 0 and mag_b != 0)
-
-    dot_product = vec_a[0] * vec_b[0] + vec_a[1] * vec_b[1]
-    cos_theta = dot_product / (mag_a * mag_b)
-
-    cos_theta = max(-1, min(1, cos_theta))
-
-    return math.acos(cos_theta) * (180 / math.pi)
-
-def get_angle(edges_of_point):
-    sum_angles = 0
-    for i in range(len(edges_of_point)):
-        for j in range(i):
-            if edges_of_point[i].points[0] == edges_of_point[j].points[0]:
-                sum_angles += caluculate_angle(edges_of_point[i].points[1], edges_of_point[i].points[0], edges_of_point[j].points[1]) * edges_of_point[i].var * edges_of_point[j].var
-            elif edges_of_point[i].points[0] == edges_of_point[j].points[1]:
-                sum_angles += caluculate_angle(edges_of_point[i].points[1], edges_of_point[i].points[0], edges_of_point[j].points[0]) * edges_of_point[i].var * edges_of_point[j].var
-            elif edges_of_point[i].points[1] == edges_of_point[j].points[0]:
-                sum_angles += caluculate_angle(edges_of_point[i].points[0], edges_of_point[i].points[1], edges_of_point[j].points[1]) * edges_of_point[i].var * edges_of_point[j].var
-            else:
-                sum_angles += caluculate_angle(edges_of_point[i].points[0], edges_of_point[i].points[1], edges_of_point[j].points[0]) * edges_of_point[i].var * edges_of_point[j].var
-    return sum_angles
-
-
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __repr__(self):
-        return f"({self.x}, {self.y})"
-
-
-class Edge:
-    def __init__(self, points):
-        self.points = points
-        self.distance = get_distance(points[0], points[1])
-        self.var = m.addVar(vtype=GRB.BINARY)
-
+m = gb.Model(env=env)
 
 points = []
 for i in range(12):
-    points.append(Point(random.randint(0, 10000), random.randint(0, 10000)))
+    points.append(oa.Point(random.randint(0, 10000), random.randint(0, 10000)))
 
 powerset_points = [[]]
 for point in points:
@@ -72,46 +28,47 @@ for point in points:
 edges = []
 for i in range(len(points)):
     for j in range(i):
-        edges.append(Edge([points[i], points[j]]))
-
-bool_angles = True
-if bool_angles:
-    '''Min Angles'''
-    m.setObjective(quicksum(get_angle([edge for edge in edges if point in edge.points]) for point in points))
-else:
-    '''Min Distance'''
-    m.setObjective(quicksum(edge.distance * edge.var for edge in edges))
-
-
+        edges.append(oa.Edge([points[i], points[j]], m))
 
 for point in points:
-    m.addConstr(quicksum(edge.var for edge in edges if point in edge.points) == 2)
+    m.addConstr(gb.quicksum(edge.var for edge in edges if point in edge.points) == 2)
 
 for subset in powerset_points:
-    if subset != [] and subset != points:
-        m.addConstr(quicksum(edge.var for edge in edges if edge.points[0] in subset and edge.points[1] in subset) <= len(subset) - 1)
+    if len(subset) >= 3 and subset != points:
+        m.addConstr(gb.quicksum(edge.var for edge in edges if edge.points[0] in subset and edge.points[1] in subset) <= len(subset) - 1)
 
+
+m.setObjective(gb.quicksum(edge.distance * edge.var for edge in edges))
 m.optimize()
+optDist_angle, optDist_distance, optDist_tour = oa.get_angels_distance(edges, points)
 
-tour_edges = []
-for edge in edges:
-    if edge.var.X == 1.0:
-        tour_edges.append(edge)
 
-tour = []
-tour.append(tour_edges[0].points[0])
-tour.append(tour_edges[0].points[1])
-for i in range(0, len(points) - 1):
-    for te in tour_edges:
-        if te.points[0] == tour[-1] and te.points[1] != tour[-2]:
-            tour.append(te.points[1])
-            break
-        elif te.points[1] == tour[-1] and te.points[0] != tour[-2]:
-            tour.append(te.points[0])
-            break
-print(tour)
+m.setObjective(gb.quicksum(oa.get_angle([edge for edge in edges if point in edge.points]) for point in points))
+m.optimize()
+optAngle_angle, optAngle_distance, optAngle_tour = oa.get_angels_distance(edges, points)
 
-angles = caluculate_angle(tour[-2], tour[0], tour[1])
-for i in range(1, len(tour) - 1):
-    angles += caluculate_angle(tour[i - 1], tour[i], tour[i + 1])
-print(angles)
+
+ratio = 0.5
+m.setObjective(ratio * optDist_distance * gb.quicksum(oa.get_angle([edge for edge in edges if point in edge.points]) for point in points) + (1.0 - ratio) * optAngle_angle * gb.quicksum(edge.distance * edge.var for edge in edges))
+m.optimize()
+optRatio_angle, optRatio_distance, optRatio_tour = oa.get_angels_distance(edges, points)
+
+
+print("Optimal Distance:")
+print(f" Distance: {optDist_distance}")
+print(f" Angles  : {optDist_angle}")
+print(optDist_tour)
+print()
+print("Optimal Angles:")
+print(f" Distance: {optAngle_distance}")
+print(f" Angles  : {optAngle_angle}")
+print(optAngle_tour)
+print()
+print("Optimal Ratio:")
+print(f" Distance: {optRatio_distance}")
+print(f" Angles  : {optRatio_angle}")
+print(optRatio_tour)
+print()
+print("Time:")
+duration_time = time.time() - start_time
+print(f" {duration_time}")
