@@ -430,6 +430,22 @@ bool istPunktImKreis(double punktX, double punktY, double kreisX, double kreisY,
     return abstand <= radius;
 }
 
+coord get_point_with_max_angle(tour points)
+{
+    vector<double> angles = calculate_turn_angles(points);
+    double max = 0.0;
+    int position;
+    for (int i = 0; i < angles.size(); i++)
+    {
+        if (angles[i] > max)
+        {
+            max = angles[i];
+            position = i;
+        }
+    }
+    return points[position];
+}
+
 tuple<tour, coord, vector<int>> radius_tour(vector<tour> all_points, tour points, double radius)
 {
     vector<double> angles = calculate_turn_angles(points);
@@ -668,6 +684,7 @@ PYBIND11_MODULE(cpp_wrapper, m)
     m.def("get_quarter_tours", &get_quarter_tours);
     m.def("shortest_path", &shortest_path);
     m.def("radius_tour", &radius_tour);
+    m.def("get_point_with_max_angle", &get_point_with_max_angle);
 }
 #endif
 

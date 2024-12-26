@@ -8,6 +8,7 @@ import cpp_wrapper
 import generate
 from openpyxl import load_workbook
 import math
+from reconnect_folder import reconnect
 
 
 def parse_args():
@@ -133,39 +134,39 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
     #         CONST.prints_stats(name + " gurobi", dis, angle)
 
     if args.opt >= 5:
-        order: list[list[Coord]] = []
-        dist = 0
-        for opoint in points:
-            for ppoints in all_points:
-                for point in ppoints:
-                    if opoint.x == point.x and opoint.y == point.y:
-                        order.append(ppoints)
-        all_points = order
+        # order: list[list[Coord]] = []
+        # dist = 0
+        # for opoint in points:
+        #     for ppoints in all_points:
+        #         for point in ppoints:
+        #             if opoint.x == point.x and opoint.y == point.y:
+        #                 order.append(ppoints)
+        # all_points = order
 
-        all_points_con = []
-        for area in all_points:
-            temp = []
-            for coord in area:
-                temp.append(tuple(coord))
-            all_points_con.append(temp)
+        # all_points_con = []
+        # for area in all_points:
+        #     temp = []
+        #     for coord in area:
+        #         temp.append(tuple(coord))
+        #     all_points_con.append(temp)
 
-        points, center_point, corner_points = cpp_wrapper.radius_tour(
-            all_points_con, [tuple(i) for i in points], 4000.0)
+        # points, center_point, corner_points = cpp_wrapper.radius_tour(
+        #     all_points_con, [tuple(i) for i in points], 4000.0)
+
+        for i in range(3):
+            center_point = cpp_wrapper.get_point_with_max_angle([tuple(i) for i in points])
+            points = reconnect.optimize_the_closest([tuple(i) for i in points], tuple(center_point))
+
         center_point = Coord(center_point[0], center_point[1])
-        print(center_point)
         points = CONST.to_coord(points)
         if save:
             img = Img(polygon_list, points, args.height, args.width)
             img.draw_point_debugg(center_point.x, center_point.y, "red")
-            for i in corner_points:
-                c = all_points[i][0]
-                img.draw_cross(c, "blue")
-
-            img.save(args.name+"05_radius")
+            img.save(args.name+"05_reconnect_area")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
-            CONST.prints_stats(name + " radius", dis, angle)
+            CONST.prints_stats(name + " reconnect", dis, angle)
 
     if not save:
         img = Img(polygon_list, points, args.height, args.width)
