@@ -160,7 +160,9 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
         for point in small_tour:
             points.remove(point)
         solver.gurobi_tour_insert(
-            small_tour, corner_points)
+            small_tour, corner_points, points)
+
+        # print(*points, sep="\n")
         if save:
             img = Img(polygon_list, small_tour, args.height, args.width)
             img.draw_point_debugg(center_point.x, center_point.y, "red")

@@ -108,27 +108,21 @@ def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
     return retpoints
 
 
-"""
-# Plot nx Graphe
-import matplotlib.pyplot as plt
-plt.clf()
-    nx.draw(all_edges, with_labels=True, node_color='skyblue',
-            node_size=300, font_size=9, font_weight='bold')
-    plt.savefig(f"Test.png")
-"""
-
-
-def gurobi_tour_insert(points: list[Coord], corner_points: list[Coord]) -> list[Coord]:
-    points = points[:-1]
-    print(*points, sep="\n")
+def gurobi_tour_insert(new_tour_points: list[Coord], corner_points: list[Coord], old_tour_points: list[Coord]) -> list[Coord]:
+    # print(*old_tour_points, sep="\n")
+    # print("------------------")
+    # print(*corner_points, sep="\n")
+    # print("------------------")
+    # print(*new_tour_points, sep="\n")
+    new_tour_points = new_tour_points[:-1]
     new_tour = nx.Graph()
-    for point1, point2 in zip(points[:-1], points[1:]):
+    for point1, point2 in zip(new_tour_points[:-1], new_tour_points[1:]):
         new_tour.add_edge(point1, point2)
-    new_tour.add_edge(points[0], points[-1])
+    new_tour.add_edge(new_tour_points[0], new_tour_points[-1])
 
     all_edges = nx.Graph()
     for corner in corner_points:
-        for point in points:
+        for point in new_tour_points:
             all_edges.add_edge(corner, point)
 
     #############
