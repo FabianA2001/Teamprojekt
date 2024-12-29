@@ -150,10 +150,10 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
             all_points_con.append(temp)
 
         points, center_point, corner_points = cpp_wrapper.radius_tour(
-            all_points_con, [tuple(i) for i in points], 4000.0)
+            all_points_con, [tuple(i) for i in points], 7000.0)
         center_point = Coord(center_point[0], center_point[1])
-        print(center_point)
         points = CONST.to_coord(points)
+        print(corner_points)
         if save:
             img = Img(polygon_list, points, args.height, args.width)
             img.draw_point_debugg(center_point.x, center_point.y, "red")
