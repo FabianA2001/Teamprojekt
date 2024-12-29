@@ -15,6 +15,7 @@ OFFSET = 30
 
 GUROBI_MAX_TIME = 60  # sek
 
+TOUR_INSERT_RADOUS = 6000
 
 IMAGE_PRE = "image/"
 INSTANCES_PRE = "instances/"
@@ -35,6 +36,16 @@ class Coord:
 
     def __iter__(self):
         return iter((self.x, self.y))
+
+    def __eq__(self, other):
+        # Definiere, wann zwei Objekte als gleich gelten
+        if isinstance(other, Coord):
+            return self.x == other.x and self.y == other.y
+        return False
+
+    def __hash__(self):
+        # Use a hash based on the attributes used in __eq__
+        return hash(self.x * 2 + self.y)
 
 
 class Edge:

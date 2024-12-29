@@ -134,7 +134,6 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
 
     if args.opt >= 5:
         order: list[list[Coord]] = []
-        dist = 0
         for opoint in points:
             for ppoints in all_points:
                 for point in ppoints:
@@ -149,19 +148,28 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
                 temp.append(tuple(coord))
             all_points_con.append(temp)
 
-        points, center_point, corner_points = cpp_wrapper.radius_tour(
-            all_points_con, [tuple(i) for i in points], 7000.0)
+        small_tour, center_point, corner_points = cpp_wrapper.radius_tour(
+            all_points_con, [tuple(i) for i in points], CONST.TOUR_INSERT_RADOUS)
         center_point = Coord(center_point[0], center_point[1])
-        points = CONST.to_coord(points)
-        print(corner_points)
+        small_tour = CONST.to_coord(small_tour)
+        # print(*points, sep="\n")
+        # print("------------------")
+        # print(*small_tour, sep="\n")
+        # print("------------------")
+        corner_points = [points[i] for i in corner_points]
+        for point in small_tour:
+            points.remove(point)
+        solver.gurobi_tour_insert(
+            small_tour, corner_points)
         if save:
-            img = Img(polygon_list, points, args.height, args.width)
+            img = Img(polygon_list, small_tour, args.height, args.width)
             img.draw_point_debugg(center_point.x, center_point.y, "red")
             for i in corner_points:
-                c = all_points[i][0]
-                img.draw_cross(c, "blue")
+                img.draw_cross(i, "blue")
 
             img.save(args.name+"05_radius")
+            img2 = Img(polygon_list, points, args.height, args.width)
+            img2.save(args.name+"06_Test")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:

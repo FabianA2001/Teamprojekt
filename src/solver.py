@@ -3,6 +3,7 @@ import CONST
 import math
 import gurobipy as gp
 from gurobipy import GRB
+import networkx as nx
 
 
 def make_edges(points: list[Coord]) -> list[Edge]:
@@ -68,7 +69,6 @@ def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
     env.setParam('LogToConsole', 0)
     env.setParam(GRB.Param.TimeLimit, CONST.GUROBI_MAX_TIME)
     env.start()
-
     model = gp.Model(env=env)
     # Vars
     vars = {}
@@ -106,3 +106,57 @@ def gurobi_solver(pointslist: list[list[Coord]], orderlist: list[Coord]):
                 retpoints.append(point)
 
     return retpoints
+
+
+"""
+# Plot nx Graphe
+import matplotlib.pyplot as plt
+plt.clf()
+    nx.draw(all_edges, with_labels=True, node_color='skyblue',
+            node_size=300, font_size=9, font_weight='bold')
+    plt.savefig(f"Test.png")
+"""
+
+
+def gurobi_tour_insert(points: list[Coord], corner_points: list[Coord]) -> list[Coord]:
+    points = points[:-1]
+    print(*points, sep="\n")
+    new_tour = nx.Graph()
+    for point1, point2 in zip(points[:-1], points[1:]):
+        new_tour.add_edge(point1, point2)
+    new_tour.add_edge(points[0], points[-1])
+
+    all_edges = nx.Graph()
+    for corner in corner_points:
+        for point in points:
+            all_edges.add_edge(corner, point)
+
+    #############
+    # Plot nx Graphe
+    import matplotlib.pyplot as plt
+    plt.clf()
+    nx.draw(new_tour, with_labels=True, node_color='skyblue',
+            node_size=300, font_size=9, font_weight='bold')
+    plt.savefig(f"newTour.png")
+    plt.clf()
+    nx.draw(all_edges, with_labels=True, node_color='skyblue',
+            node_size=300, font_size=9, font_weight='bold')
+    plt.savefig(f"allEdges.png")
+    #############
+
+    env = gp.Env(empty=True)  # Create an environment without startup logs
+    # Disable console output for the environment
+    env.setParam('LogToConsole', 0)
+    env.setParam(GRB.Param.TimeLimit, CONST.GUROBI_MAX_TIME)
+    env.start()
+    model = gp.Model(env=env)
+
+    new_tour_vars = {}
+    for edge in new_tour.edges:
+        new_tour_vars[edge] = model.addVar(vtype=GRB.BINARY)
+
+    all_edges_vars = {}
+    for edge in all_edges.edges:
+        all_edges_vars[edge] = model.addVar(vtype=GRB.BINARY)
+
+    return []
