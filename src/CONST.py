@@ -58,7 +58,7 @@ class Polygon:
 
     def __str__(self) -> str:
         return f"{self.hull}"
-    
+
 
 class Stats:
     def __init__(self, dist, angle) -> None:
@@ -73,17 +73,20 @@ def calculate_distance(point1: Coord, point2: Coord) -> float:
     )
     return distance
 
+
 def to_coord(tuples) -> list[Coord]:
     coords = []
     for tuple in tuples:
         coords.append(Coord(tuple[0], tuple[1]))
     return coords
 
+
 def make_edges(points: list[Coord]) -> list[Edge]:
     result = []
     for i in range(len(points)):
         result.append(Edge(points[i], points[(i + 1) % len(points)]))
     return result
+
 
 def calculate_centroid(hull: list[Coord]) -> Coord:
     """Berechnet den Schwerpunkt eines Polygons"""
@@ -94,6 +97,7 @@ def calculate_centroid(hull: list[Coord]) -> Coord:
         y += hull[i].y
     centroid = Coord(int(x / len(hull)), int(y / len(hull)))
     return centroid
+
 
 def prints_stats(name: str, dis, angle):
     print(f"Distance: {round(dis, 2)}\tAngle: {round(angle, 2)}\t{name}")
