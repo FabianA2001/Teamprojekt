@@ -156,25 +156,6 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
             CONST.prints_stats(name + " gurobi", dis, angle)
 
     if args.opt >= 5:
-        # order: list[list[Coord]] = []
-        # dist = 0
-        # for opoint in points:
-        #     for ppoints in all_points:
-        #         for point in ppoints:
-        #             if opoint.x == point.x and opoint.y == point.y:
-        #                 order.append(ppoints)
-        # all_points = order
-
-        # all_points_con = []
-        # for area in all_points:
-        #     temp = []
-        #     for coord in area:
-        #         temp.append(tuple(coord))
-        #     all_points_con.append(temp)
-
-        # points, center_point, corner_points = cpp_wrapper.radius_tour(
-        #     all_points_con, [tuple(i) for i in points], 4000.0)
-
         for i in range(6):
             center_point = cpp_wrapper.get_point_with_max_angle(
                 [tuple(i) for i in points])
@@ -191,6 +172,17 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
         result.append(Stats(dis, angle))
         if print_st:
             CONST.prints_stats(name + " reconnect", dis, angle)
+
+    if args.opt >= 6:
+        points = newPoints(polygon_list, points)
+        if save:
+            print(points)
+            img = Img(polygon_list, points, args.height, args.width)
+            img.save(args.name+"06_new_points")
+        dis, angle = solver.calculate_dis_angle(points)
+        result.append(Stats(dis, angle))
+        if print_st:
+            CONST.prints_stats(name + " new_points", dis, angle)
 
     if not save:
         img = Img(polygon_list, points, args.height, args.width)

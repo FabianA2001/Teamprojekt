@@ -3,40 +3,46 @@ from CONST import Coord, Polygon
 import CONST
 
 
-
-def cross_product(a: Coord, b:Coord, p:Coord) -> float:
+def cross_product(a: Coord, b: Coord, p: Coord) -> float:
     return (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)
 
+
 def random_coord_global(height: int, width: int) -> Coord:
-    OFFSET = int((CONST.OFFSET + CONST.CLUSTER_RADIUS / 2) * CONST.ANTIALIAS_FACTOR)
+    OFFSET = int((CONST.OFFSET + CONST.CLUSTER_RADIUS / 2)
+                 * CONST.ANTIALIAS_FACTOR)
     return Coord(random.randint(OFFSET, height - OFFSET), random.randint(OFFSET, width - OFFSET))
 
-def random_coord_local(center: Coord, radius: int, form: int) -> Coord:
+
+def random_coord_local(center: Coord, radius: int, form: int = 6) -> Coord:
     if form == 1 or form == 2:
         coord = Coord(random.randint(center.x - radius * 2, center.x + radius * 2),
                       random.randint(center.y - radius, center.y + radius),
-        )
+                      )
     elif form == 3 or form == 4:
         coord = Coord(random.randint(center.x - radius, center.x + radius),
-                      random.randint(center.y - radius * 2, center.y + radius * 2),
-        )
+                      random.randint(center.y - radius * 2,
+                                     center.y + radius * 2),
+                      )
     elif form == 5:
         coord = Coord(random.randint(center.x - radius * 2, center.x + radius * 2),
-                      random.randint(center.y - radius * 2, center.y + radius * 2),
-        )
+                      random.randint(center.y - radius * 2,
+                                     center.y + radius * 2),
+                      )
     elif form >= 6:
         coord = Coord(random.randint(center.x - radius, center.x + radius),
                       random.randint(center.y - radius, center.y + radius),
-        )
+                      )
     return coord
+
 
 def random_cluster(center: Coord, count: int) -> list[Coord]:
     cluster = []
-    form = random.randint(1,10)
+    form = random.randint(1, 10)
     for _ in range(count):
         new_point = random_coord_local(center, CONST.CLUSTER_RADIUS, form)
         cluster.append(new_point)
     return cluster
+
 
 def generate_polygons(count: int, height: int, width: int) -> list[Polygon]:
     """
@@ -80,9 +86,9 @@ def create_convex_hull(points: list[Coord]) -> list[Coord]:
         if cross == 0:
             return 0
         return 1 if cross > 0 else -1
-    
-    start_point = min(points, key = lambda points: (points.x, points.y))
-    convex_hull =[]
+
+    start_point = min(points, key=lambda points: (points.x, points.y))
+    convex_hull = []
     current_point = start_point
     while True:
         convex_hull.append(current_point)
@@ -90,9 +96,11 @@ def create_convex_hull(points: list[Coord]) -> list[Coord]:
         for pot_next_point in points:
             if pot_next_point == current_point:
                 continue
-            orientation_value = orientation(current_point, next_point, pot_next_point)
+            orientation_value = orientation(
+                current_point, next_point, pot_next_point)
             if orientation_value == -1 or (orientation_value == 0 and
-                                           CONST.calculate_distance(pot_next_point, current_point)
+                                           CONST.calculate_distance(
+                                               pot_next_point, current_point)
                                            > CONST.calculate_distance(next_point, current_point)):
                 next_point = pot_next_point
         current_point = next_point
@@ -101,18 +109,17 @@ def create_convex_hull(points: list[Coord]) -> list[Coord]:
     return convex_hull
 
 
-
 def is_point_inside_polygon(polygon: Polygon, point: Coord) -> bool:
-        """
-        Überprüft, ob ein Punkt innerhalb oder auf der Grenze des Polygon liegt.
+    """
+    Überprüft, ob ein Punkt innerhalb oder auf der Grenze des Polygon liegt.
 
-        :param Polygon polygon: Das zu überprüfende Polygon.
-        :param Coord point: Der zu überprüfende Punkt.
-        :return bool: True, wenn der Punkt innerhalb oder auf der Grenze der Hülle liegt, sonst False.
-        """
-        for i in range(len(polygon.hull)):
-            A = polygon.hull[i]
-            B = polygon.hull[(i + 1) % len(polygon.hull)]
-            if cross_product(A, B, point) < 0:
-                return False
-        return True
+    :param Polygon polygon: Das zu überprüfende Polygon.
+    :param Coord point: Der zu überprüfende Punkt.
+    :return bool: True, wenn der Punkt innerhalb oder auf der Grenze der Hülle liegt, sonst False.
+    """
+    for i in range(len(polygon.hull)):
+        A = polygon.hull[i]
+        B = polygon.hull[(i + 1) % len(polygon.hull)]
+        if cross_product(A, B, point) < 0:
+            return False
+    return True
