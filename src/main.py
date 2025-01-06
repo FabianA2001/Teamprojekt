@@ -111,82 +111,74 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
         [[tuple(i) for i in area] for area in all_points])
     points = CONST.to_coord(points)
 
-    if args.opt >= 1:
-        points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
-        points = CONST.to_coord(points)
-        if save:
+    for i in range(2):
+        if args.opt >= 1:
+            points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
+            points = CONST.to_coord(points)
+            if save:
+                img = Img(polygon_list, points, args.height, args.width)
+                img.save(args.name+"01_farthest_insertion")
+            dis, angle = solver.calculate_dis_angle(points)
+            result.append(Stats(dis, angle))
+            if print_st:
+                CONST.prints_stats(name + " farthest insertion", dis, angle)
+
+        if args.opt >= 2:
+            points = cpp_wrapper.ruin_and_recreate(
+                [tuple(i) for i in points], 3000, 0.3, 1.2)
+            points = CONST.to_coord(points)
+            if save:
+                img = Img(polygon_list, points, args.height, args.width)
+                img.save(args.name+"02_ruin&recreate")
+            dis, angle = solver.calculate_dis_angle(points)
+            # result.append(Stats(dis, angle))
+            if print_st:
+                CONST.prints_stats(name + " ruin & recreate", dis, angle)
+
+        if args.opt >= 3:
+            points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
+            points = CONST.to_coord(points)
+            if save:
+                img = Img(polygon_list, points, args.height, args.width)
+                img.save(args.name+"03_two_opt")
+            dis, angle = solver.calculate_dis_angle(points)
+            result.append(Stats(dis, angle))
+            if print_st:
+                CONST.prints_stats(name + " two opt", dis, angle)
+
+        if args.opt >= 4:
+            points = solver.gurobi_solver(all_points, points)
+            if save:
+                img = Img(polygon_list, points, args.height, args.width)
+                img.save(args.name+"04_gurobi")
+            dis, angle = solver.calculate_dis_angle(points)
+            result.append(Stats(dis, angle))
+            if print_st:
+                CONST.prints_stats(name + " gurobi", dis, angle)
+
+        if args.opt >= 5:
+            for i in range(6):
+                center_point = cpp_wrapper.get_point_with_max_angle(
+                    [tuple(i) for i in points])
+                points = reconnect.optimize_the_closest(
+                    [tuple(i) for i in points], tuple(center_point))
+
+            center_point = Coord(center_point[0], center_point[1])
+            points = CONST.to_coord(points)
+            if save:
+                img = Img(polygon_list, points, args.height, args.width)
+                img.draw_point_debugg(center_point.x, center_point.y, "red")
+                img.save(args.name+"05_reconnect_area")
+            dis, angle = solver.calculate_dis_angle(points)
+            result.append(Stats(dis, angle))
+            if print_st:
+                CONST.prints_stats(name + " reconnect", dis, angle)
+
+        all_points = newPoints(polygon_list, points)
+
+        if not save:
             img = Img(polygon_list, points, args.height, args.width)
-            img.save(args.name+"01_farthest_insertion")
-        dis, angle = solver.calculate_dis_angle(points)
-        result.append(Stats(dis, angle))
-        if print_st:
-            CONST.prints_stats(name + " farthest insertion", dis, angle)
-
-    if args.opt >= 2:
-        points = cpp_wrapper.ruin_and_recreate(
-            [tuple(i) for i in points], 3000, 0.3, 1.2)
-        points = CONST.to_coord(points)
-        if save:
-            img = Img(polygon_list, points, args.height, args.width)
-            img.save(args.name+"02_ruin&recreate")
-        dis, angle = solver.calculate_dis_angle(points)
-        # result.append(Stats(dis, angle))
-        if print_st:
-            CONST.prints_stats(name + " ruin & recreate", dis, angle)
-
-    if args.opt >= 3:
-        points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
-        points = CONST.to_coord(points)
-        if save:
-            img = Img(polygon_list, points, args.height, args.width)
-            img.save(args.name+"03_two_opt")
-        dis, angle = solver.calculate_dis_angle(points)
-        result.append(Stats(dis, angle))
-        if print_st:
-            CONST.prints_stats(name + " two opt", dis, angle)
-
-    if args.opt >= 4:
-        points = solver.gurobi_solver(all_points, points)
-        if save:
-            img = Img(polygon_list, points, args.height, args.width)
-            img.save(args.name+"04_gurobi")
-        dis, angle = solver.calculate_dis_angle(points)
-        result.append(Stats(dis, angle))
-        if print_st:
-            CONST.prints_stats(name + " gurobi", dis, angle)
-
-    if args.opt >= 5:
-        for i in range(6):
-            center_point = cpp_wrapper.get_point_with_max_angle(
-                [tuple(i) for i in points])
-            points = reconnect.optimize_the_closest(
-                [tuple(i) for i in points], tuple(center_point))
-
-        center_point = Coord(center_point[0], center_point[1])
-        points = CONST.to_coord(points)
-        if save:
-            img = Img(polygon_list, points, args.height, args.width)
-            img.draw_point_debugg(center_point.x, center_point.y, "red")
-            img.save(args.name+"05_reconnect_area")
-        dis, angle = solver.calculate_dis_angle(points)
-        result.append(Stats(dis, angle))
-        if print_st:
-            CONST.prints_stats(name + " reconnect", dis, angle)
-
-    if args.opt >= 6:
-        points = newPoints(polygon_list, points)
-        if save:
-            print(points)
-            img = Img(polygon_list, points, args.height, args.width)
-            img.save(args.name+"06_new_points")
-        dis, angle = solver.calculate_dis_angle(points)
-        result.append(Stats(dis, angle))
-        if print_st:
-            CONST.prints_stats(name + " new_points", dis, angle)
-
-    if not save:
-        img = Img(polygon_list, points, args.height, args.width)
-        img.save(args.name+name)
+            img.save(args.name+name+"_" + str(i))
 
     return result
 
@@ -200,7 +192,7 @@ if __name__ == "__main__":
         img = Img(polygon_list, [], args.height, args.width)
         img.save(args.name + "00_polygons")
         if args.opt != 0:
-            run_algo(polygon_list, args)
+            run_algo(polygon_list, args, save=False)
     elif args.neu:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
