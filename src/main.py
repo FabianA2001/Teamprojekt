@@ -88,30 +88,43 @@ def parse_args():
 
 def newPoints(polygon_list, points):
     new_points = []
-
+    allpoints = []
     for polygon in polygon_list:
+
         for point in points:
             if generate.is_point_inside_polygon(polygon, point):
                 new_poly = []
-                new_poly.append(point)
+                if point not in allpoints:
+                    new_poly.append(point)
+                    allpoints.append(point)
                 i = 0
                 while i < 5:
                     new_point = generate.random_coord_local(point, 500)
-                    if generate.is_point_inside_polygon(polygon, new_point) and new_point not in new_poly:
+                    if generate.is_point_inside_polygon(polygon, new_point) and new_point not in new_poly and new_point not in allpoints:
                         new_poly.append(new_point)
+                        allpoints.append(new_point)
                         i += 1
         new_points.append(new_poly)
+    # for points in new_points:
+    #     for point in points:
+    #         c = 0
+    #         for points2 in new_points:
+    #             for point2 in points2:
+    #                 if point.x == point2.x and point.y == point2.y:
+    #                     c += 1
+    #         print(c)
+
     return new_points
 
 
 def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
     all_points = [i.hull for i in polygon_list]
-    points = cpp_wrapper.get_midpoints_from_areas(
-        [[tuple(i) for i in area] for area in all_points])
-    points = CONST.to_coord(points)
-
     for i in range(2):
+        points = cpp_wrapper.get_midpoints_from_areas(
+            [[tuple(i) for i in area] for area in all_points])
+        points = CONST.to_coord(points)
+
         if args.opt >= 1:
             points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
             points = CONST.to_coord(points)
