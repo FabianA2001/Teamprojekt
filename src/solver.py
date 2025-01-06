@@ -26,7 +26,7 @@ def calculate_tour_distance(tour: list[Coord]):
 
 
 def calculate_turn_angles(path):
-    angles = []
+    angles = [caluculate_angle(path[-2], path[0], path[1])]
     for i in range(1, len(path) - 1):
         # Hole Koordinaten der drei aufeinanderfolgenden Punkte
         p1, p2, p3 = path[i - 1], path[i], path[i + 1]
