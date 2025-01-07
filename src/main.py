@@ -116,6 +116,67 @@ def newPoints(polygon_list, points):
 
     return new_points
 
+# geht nicht
+
+
+def new_points_2(polygon_list, points):
+    if points[0].x == points[len(points)-1].x:
+        points.pop
+    for i, point in enumerate(points):
+        m = (points[(i+1) % len(points)].y-points[(i-1) % len(points)].y) / \
+            (points[(i+1) % len(points)].x-points[(i-1) % len(points)].x)
+        b = points[i-1].y - m * points[i-1].x
+
+        for j, polygon in enumerate(polygon_list):
+            if generate.is_point_inside_polygon(polygon, point):
+                poly = j
+        for x in range(points[(i-1) % len(points)].x, points[(i+1) % len(points)].x):
+            new_point = Coord(x, int(m*x+b))
+            if generate.is_point_inside_polygon(polygon_list[poly], new_point) and new_point not in points:
+                points[(i) % len(points)] = new_point
+                break
+    points.append(points[0])
+    return points
+
+# macht nicht was es soll,aber verbessert
+
+
+def punkte_verschieben(polygon_list, points):
+    for point in points:
+        for p, polygon in enumerate(polygon_list):
+            if generate.is_point_inside_polygon(polygon, point):
+                print(p)
+    for i in range(1, len(points)-2):
+        current_angle = solver.caluculate_angle(
+            points[i-1], points[i], points[i+1])
+        for p, polygon in enumerate(polygon_list):
+            if generate.is_point_inside_polygon(polygon, points[i]):
+                poly = p
+                break
+
+        for j in range(3):
+            new_points = []
+            new_points.append(points[i])
+            k = 0
+            while k < 5:
+                new_point = generate.random_coord_local(points[i], 500-(100*j))
+                if generate.is_point_inside_polygon(polygon_list[poly], new_point):
+                    new_points.append(new_point)
+                    k += 1
+            for point in new_points:
+                new_angle = solver.caluculate_angle(
+                    points[i-1], point, points[i+1])
+                if new_angle < current_angle:
+                    current_angle = new_angle
+                    points[i] = point
+    print("neu")
+    for point in points:
+        for p, polygon in enumerate(polygon_list):
+            if generate.is_point_inside_polygon(polygon, point):
+                print(p)
+
+    return points
+
 
 def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
