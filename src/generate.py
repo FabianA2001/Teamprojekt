@@ -106,6 +106,7 @@ def is_point_inside_polygon(point: Coord, polygon: Polygon) -> bool:
 
         :param Polygon polygon: Das zu überprüfende Polygon.
         :param Coord point: Der zu überprüfende Punkt.
+
         :return bool: True, wenn der Punkt innerhalb oder auf der Grenze der Hülle liegt, sonst False.
         """
         for i in range(len(polygon.hull)):
@@ -115,7 +116,22 @@ def is_point_inside_polygon(point: Coord, polygon: Polygon) -> bool:
                 return False
         return True
 
+def is_polygon_inside_polygon(polygon_in: Polygon, polygon_out: Polygon) -> bool:
+    for point in polygon_in.hull:
+        if not is_point_inside_polygon(point, polygon_out):
+            return False
+    return True
+
+
 def do_polygons_overlap(polygon1: Polygon, polygon2: Polygon) -> bool:
+    """
+    Überprüft, ob sich zwei Polygone überlappen. (WIP wenn zwei polygone sich kreuzen aber keine punkte ineinander sind)
+
+    :param Polygon polygon1: Das erste zu überprüfende Polygon.
+    :param Polygon polygon2: Das zweite zu überprüfende Polygon.
+
+    :return bool: True wenn die Polygone sich überlappen, sonst False.
+    """
     for point in polygon1.hull:
         if is_point_inside_polygon(point, polygon2):
             return True
@@ -125,6 +141,14 @@ def do_polygons_overlap(polygon1: Polygon, polygon2: Polygon) -> bool:
     return False
 
 def polygon_intersection(polygon1: Polygon, polygon2: Polygon) -> Polygon:
+    """
+    Berechnet das Polygon, das die Schnittmenge zweier Polygone bildet.
+
+    :param Polygon polygon1: Das erste zu überprüfende Polygon.
+    :param Polygon polygon2: Das zweite zu überprüfende Polygon.
+
+    :return Polygon: Das Polygon, das die Schnittmenge darstellt, oder None wenn das Schnittpolygon weniger als 3 Punkte hat.
+    """
     edges_polygon1 = CONST.make_edges(polygon1.hull)
     edges_polygon2 = CONST.make_edges(polygon2.hull)
     overlap_points = []
@@ -147,6 +171,14 @@ def polygon_intersection(polygon1: Polygon, polygon2: Polygon) -> Polygon:
     return polygon
 
 def edge_intersection(edge1: Edge, edge2: Edge) -> Coord:
+    """
+    Berechnet den Schnittpunkt von zwei Linien fals vorhanden.
+
+    :param Edge edge1: Die erste Linie.
+    :param Edge edge2: Die zweite Linie.
+
+    :return Coord: Der Punkt an dem sich die Lininen Schnieden, oder None wenn sie sich nicht scheiden.
+    """
     determinant = ((edge1.point2.x - edge1.point1.x) * (edge2.point2.y - edge2.point1.y)
                  - (edge1.point2.y - edge1.point1.y) * (edge2.point2.x - edge2.point1.x)
     )
@@ -163,10 +195,17 @@ def edge_intersection(edge1: Edge, edge2: Edge) -> Coord:
     if 0 <= t <= 1 and 0 <= u <= 1:
         x = edge1.point1.x + t * (edge1.point2.x - edge1.point1.x)
         y = edge1.point1.y + t * (edge1.point2.y - edge1.point1.y)
-        return Coord(int(x), int(y))
+        return Coord(round(x), round(y))
     return None
 
 def create_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
+    """
+    Berechnet alle Schnittpolygone zwischen den Polygonen in der gegebenen Liste.
+
+    :param list[Polygon] polygon_list: Die übergebene Liste an Polygonen.
+
+    :return list[Polygon]: Eine Liste mit allen Schnittpolygonen.
+    """
     MAX_POSSIBLE_DISTANCE = math.sqrt(math.pow(CONST.CLUSTER_RADIUS, 2) + math.pow(CONST.CLUSTER_RADIUS, 2)) * 4
     new_polygon_list = []
     for i in range(len(polygon_list)):
@@ -182,6 +221,13 @@ def create_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
     return new_polygon_list
 
 def find_non_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
+    """
+    Findet alle Polygone in einer Liste, die sich mit keinem anderen Polygon überschneiden.
+
+    :param list[Polygon] polygon_list: Die übergebene Liste an Polygonen.
+
+    :return list[Polygon]: Eine Liste mit allen Polygonen die keine Überschneidungen haben.
+    """
     MAX_POSSIBLE_DISTANCE = math.sqrt(math.pow(CONST.CLUSTER_RADIUS, 2) + math.pow(CONST.CLUSTER_RADIUS, 2)) * 4
     new_polygon_list = []
     for i in range(len(polygon_list)):
@@ -195,22 +241,23 @@ def find_non_intersecting_polygons(polygon_list: list[Polygon]) -> list[Polygon]
     return new_polygon_list
 
 
+def is_polygon_covered(polygon: Polygon, test_polygon_list: list[Polygon]) -> bool:
+    for test_polygon in test_polygon_list:
+        if is_polygon_inside_polygon(test_polygon, polygon):
+            return True
+    return False
+    
 def is_every_polygon_covered(original_polygon_list: list[Polygon], test_polygon_list: list[Polygon]) -> bool:
     for original_polygon in original_polygon_list:
-        is_covered = False
-        for test_polygon in test_polygon_list:
-            for point in test_polygon.hull:
-                if is_point_inside_polygon(point, original_polygon):
-                    is_covered = True
-                else:
-                    return False
-        if not is_covered:
+        if is_polygon_covered(original_polygon, test_polygon_list):
+            continue
+        else:
             return False
     return True
 
 def find_redundant_polygon(original_polygon_list: list[Polygon], current_polygon_list: list[Polygon]) -> Polygon:
     for i in range(len(current_polygon_list)):
-        test_polygon_list =[elem for elem in current_polygon_list]
+        test_polygon_list = [elem for elem in current_polygon_list]
         test_polygon_list.pop(i)
         if is_every_polygon_covered(original_polygon_list, test_polygon_list):
             return current_polygon_list[i]
@@ -218,26 +265,51 @@ def find_redundant_polygon(original_polygon_list: list[Polygon], current_polygon
 
 def remove_redundant_polygons(original_polygon_list: list[Polygon], current_polygon_list: list[Polygon]) -> list[Polygon]:
     while True:
-        test_polygon_list = current_polygon_list
+        test_polygon_list = [elem for elem in current_polygon_list]
         redundant_polygon = find_redundant_polygon(original_polygon_list, test_polygon_list)
         if redundant_polygon != None:
+            print("remove")
             current_polygon_list.remove(redundant_polygon)
         else:
             break
     return current_polygon_list
 
-def create_better_polygon_list(polygon_list: list[Polygon]) -> list[Polygon]:
+def is_same_polygon(polygon1: Polygon, polygon2: Polygon) -> bool:
+    if -2 <= polygon1.centroid.x - polygon2.centroid.x <= 2 or -2 <= polygon1.centroid.y - polygon2.centroid.y <= 2:
+        return True
+    return False
+
+def remove_duplicate_polygons(polygon_list: list[Polygon]) -> list[Polygon]:
+    no_duplicants_list = []
+    for polygon in polygon_list:
+        for nd_polygon in no_duplicants_list:
+            if is_same_polygon(polygon, nd_polygon):
+                break
+        no_duplicants_list.append(polygon)
+    return no_duplicants_list
+
+def create_better_polygon_list(original_polygon_list: list[Polygon], polygon_list: list[Polygon]) -> list[Polygon]:
     intersecting_polygons = create_intersecting_polygons(polygon_list)
     non_intersecting_polygons = find_non_intersecting_polygons(polygon_list)
-    new_polygon_list = intersecting_polygons + non_intersecting_polygons
-    return remove_redundant_polygons(polygon_list, new_polygon_list)
+    combined_list = intersecting_polygons + non_intersecting_polygons
+    new_polygon_list = remove_duplicate_polygons(combined_list)
+    return remove_redundant_polygons(original_polygon_list, new_polygon_list
+    
+    
+    )
 
 def find_best_polygon_list(polygon_list: list[Polygon]) -> list[Polygon]:
-    current = polygon_list
+    current = [elem for elem in polygon_list]
+    iteration = 0
     while True:
-        new = create_better_polygon_list(current)
-        if len(new) != len(current):
-            current = new
-        else:
+        new = create_better_polygon_list(polygon_list, current)
+        if iteration >= 2:
+            if len(new) != len(current):
+                current = [elem for elem in new]
+            else:
+                break
+        current = [elem for elem in new]
+        iteration += 1
+        if len(current) >= 100:
             break
     return current

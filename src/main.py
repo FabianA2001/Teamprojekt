@@ -49,7 +49,7 @@ def parse_args():
         type = int,
         metavar = "INT",
         default = 4,
-        help = f"Wie viele Schritte ausgeführt werden sollen: 0: polygone, 1: farthest, 2: r&r, 3: 2opt, >4: alle (Default Alle)",
+        help = f"Wie viele Schritte ausgeführt werden sollen: <0: keine Images 0: polygone, 1: farthest, 2: r&r, 3: 2opt, >4: alle (Default Alle)",
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
@@ -145,13 +145,21 @@ if __name__ == "__main__":
     if args.file != None:
         polygon_list = file.read_polygons(args.file)
         best_polygon_list = generate.find_best_polygon_list(polygon_list)
-        
-        img = Img(polygon_list, [], args.height, args.width)
-        img.save(args.name + "00_all_polygons")
-        img = Img(best_polygon_list, [], args.height, args.width)
-        img.save(args.name + "00_best_polygons")
+        print(f"Polygons have been read from {args.file} and {len(best_polygon_list)} intersections are essential")
 
-        if args.opt != 0:
+        file.write_polygons(best_polygon_list, f"best_polygons_{args.name}")
+
+        #need = file.read_polygons("test_einlesen")
+        #bool_need = generate.is_polygon_inside_polygon(need[1], need[0])
+        #print(generate.is_same_polygon(need[1], need[2]))
+
+        if args.opt >= 0:
+            img = Img(polygon_list, [], args.height, args.width)
+            img.save(args.name + "00_all_polygons")
+            img = Img(best_polygon_list, best_polygon_list[1].hull, args.height, args.width)
+            img.save(args.name + "00_best_polygons")
+
+        if args.opt > 0:
             run_algo(polygon_list, best_polygon_list, args)
     elif args.neu:
         height = args.height * CONST.ANTIALIAS_FACTOR
@@ -159,14 +167,16 @@ if __name__ == "__main__":
         polygon_list = generate.generate_polygons(args.count, height, width)
         best_polygon_list = generate.find_best_polygon_list(polygon_list)
         file.write_polygons(polygon_list, f"new_{args.name}")
+        print(f"New polygons have been generated and {len(best_polygon_list)} intersections are essential")
 
-        img = Img(polygon_list, [], args.height, args.width)
-        img.save(args.name + "00_all_polygons")
-        img = Img(best_polygon_list, [], args.height, args.width)
-        img.save(args.name + "00_best_polygons")
-        print("New polygons have been generated")
+        if args.opt >= 0:
+            img = Img(polygon_list, [], args.height, args.width)
+            img.save(args.name + "00_all_polygons")
+            img = Img(best_polygon_list, [], args.height, args.width)
+            img.save(args.name + "00_best_polygons")
 
-        if args.opt != 0:
+
+        if args.opt > 0:
             run_algo(polygon_list, best_polygon_list, args)
     else:
         # Load the existing workbook
