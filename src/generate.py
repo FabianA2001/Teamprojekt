@@ -359,7 +359,7 @@ def find_best_polygon_list_2(own_polygon_list: list[Polygon]) -> list[Polygon]:
                 return True
         return False
 
-    MAX_INTERATIONS = 100
+    MAX_INTERATIONS = 300
     polygon_list = []
 
     for old_poly in own_polygon_list:

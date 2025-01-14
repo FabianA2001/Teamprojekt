@@ -55,7 +55,7 @@ class Img:
 
     def _draw_route(self) -> None:
         for edge in self.edges:
-            self._draw_edge(edge, "black")
+            self._draw_edge(edge, "red")
 
         # for coord in self.points_in_route:
         #     self._draw_ellipse(coord, "red")

@@ -89,9 +89,10 @@ def parse_args():
 def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
     all_points = [i.hull for i in best_polygon_list]
-    points = cpp_wrapper.get_midpoints_from_areas(
-        [[tuple(i) for i in area] for area in all_points])
-    points = CONST.to_coord(points)
+    points = [i.centroid for i in best_polygon_list]
+
+    for index, point in enumerate(points):
+        all_points[index].append(point)
 
     if args.opt >= 1:
         points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
@@ -168,7 +169,7 @@ if __name__ == "__main__":
 
     if args.file != None:
         polygon_list = file.read_polygons(args.file)
-        best_polygon_list = generate.find_best_polygon_list(polygon_list)
+        best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
         print(f"Polygons have been read from {args.file} and {
               len(best_polygon_list)} intersections are essential")
 
