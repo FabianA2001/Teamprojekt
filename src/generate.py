@@ -1,7 +1,9 @@
+import shapely.geometry as shap
 import random
 from CONST import Coord, Edge, Polygon
 import CONST
 import math
+import itertools
 
 
 def cross_product(a: Coord, b: Coord, p: Coord) -> float:
@@ -338,3 +340,40 @@ def find_best_polygon_list(polygon_list: list[Polygon]) -> list[Polygon]:
         if len(current) >= 100:
             break
     return current
+
+
+def find_best_polygon_list_2(own_polygon_list: list[Polygon]) -> list[Polygon]:
+    def find_intersection() -> bool:
+        for x, y in itertools.combinations(range(len(polygon_list)), 2):
+            # Berechne die Schnittmenge
+            intersection = polygon_list[x].intersection(polygon_list[y])
+
+            # Prüfen, ob eine Schnittmenge existiert
+            if not intersection.is_empty:
+                del polygon_list[x]
+                if x < y:
+                    del polygon_list[y-1]
+                else:
+                    del polygon_list[y]
+                polygon_list.append(intersection)
+                return True
+        return False
+
+    MAX_INTERATIONS = 100
+    polygon_list = []
+
+    for old_poly in own_polygon_list:
+        polygon_list.append(shap.Polygon(
+            [(coord.x, coord.y) for coord in old_poly.hull]))
+
+    for _ in range(MAX_INTERATIONS):
+        if not find_intersection():
+            break
+        print(len(polygon_list))
+
+    result = []
+    for poly in polygon_list:
+        hull_coords = list(poly.convex_hull.exterior.coords)
+        result.append(
+            Polygon([Coord(int(point[0]), int(point[1])) for point in hull_coords]))
+    return result

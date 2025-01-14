@@ -15,54 +15,54 @@ def parse_args():
     parser.add_argument(
         "-height",
         "-he",
-        type = int,
-        metavar = "INT",
-        default = CONST.SCREEN_HEIGHT,
-        help = f"int als Höhe (Default {CONST.SCREEN_HEIGHT})",
+        type=int,
+        metavar="INT",
+        default=CONST.SCREEN_HEIGHT,
+        help=f"int als Höhe (Default {CONST.SCREEN_HEIGHT})",
     )
     parser.add_argument(
         "-width",
         "-w",
-        type = int,
-        metavar = "INT",
-        default = CONST.SCREEN_WIDTH,
-        help = f"int als Breite (Default {CONST.SCREEN_WIDTH})",
+        type=int,
+        metavar="INT",
+        default=CONST.SCREEN_WIDTH,
+        help=f"int als Breite (Default {CONST.SCREEN_WIDTH})",
     )
     parser.add_argument(
         "-count",
         "-c",
-        type = int,
-        metavar = "INT",
-        default = CONST.POLYGON_COUNT,
-        help = f"anzahl der kreuze (Default {CONST.POLYGON_COUNT})",
+        type=int,
+        metavar="INT",
+        default=CONST.POLYGON_COUNT,
+        help=f"anzahl der kreuze (Default {CONST.POLYGON_COUNT})",
     )
     parser.add_argument(
         "-name",
-        type = str,
-        metavar = "STR",
-        default = CONST.DATEI_NAME,
-        help = f"Name der output Datei (Default {CONST.DATEI_NAME})",
+        type=str,
+        metavar="STR",
+        default=CONST.DATEI_NAME,
+        help=f"Name der output Datei (Default {CONST.DATEI_NAME})",
     )
     parser.add_argument(
         "-opt",
         "-o",
-        type = int,
-        metavar = "INT",
-        default = 4,
-        help = f"Wie viele Schritte ausgeführt werden sollen: <0: keine Images 0: polygone, 1: farthest, 2: r&r, 3: 2opt, >4: alle (Default Alle)",
+        type=int,
+        metavar="INT",
+        default=4,
+        help=f"Wie viele Schritte ausgeführt werden sollen: <0: keine Images 0: polygone, 1: farthest, 2: r&r, 3: 2opt, >4: alle (Default Alle)",
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "-file",
         "-f",
-        type = str,
-        metavar = "STR",
-        help = "Name der input Datei",
+        type=str,
+        metavar="STR",
+        help="Name der input Datei",
     )
     group.add_argument(
         "-neu", "-n",
-        action = "store_true",
-        help = "ob neue Punkte generiert werden sollen"
+        action="store_true",
+        help="ob neue Punkte generiert werden sollen"
     )
 
     args = parser.parse_args()
@@ -78,7 +78,6 @@ def parse_args():
         raise argparse.ArgumentTypeError("Bitte keinene leeren file Namen")
 
     return args
-
 
 
 def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
@@ -122,7 +121,7 @@ def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save:
         if print_st:
             CONST.prints_stats(name + " two opt", dis, angle)
 
-    if args.opt >=4:
+    if args.opt >= 4:
         points = solver.gurobi_solver(all_points, points)
         if save:
             img = Img(polygon_list, points, args.height, args.width)
@@ -145,18 +144,20 @@ if __name__ == "__main__":
     if args.file != None:
         polygon_list = file.read_polygons(args.file)
         best_polygon_list = generate.find_best_polygon_list(polygon_list)
-        print(f"Polygons have been read from {args.file} and {len(best_polygon_list)} intersections are essential")
+        print(f"Polygons have been read from {args.file} and {
+              len(best_polygon_list)} intersections are essential")
 
         file.write_polygons(best_polygon_list, f"best_polygons_{args.name}")
 
-        #need = file.read_polygons("test_einlesen")
-        #bool_need = generate.is_polygon_inside_polygon(need[1], need[0])
-        #print(generate.is_same_polygon(need[1], need[2]))
+        # need = file.read_polygons("test_einlesen")
+        # bool_need = generate.is_polygon_inside_polygon(need[1], need[0])
+        # print(generate.is_same_polygon(need[1], need[2]))
 
         if args.opt >= 0:
             img = Img(polygon_list, [], args.height, args.width)
             img.save(args.name + "00_all_polygons")
-            img = Img(best_polygon_list, best_polygon_list[1].hull, args.height, args.width)
+            img = Img(best_polygon_list,
+                      best_polygon_list[1].hull, args.height, args.width)
             img.save(args.name + "00_best_polygons")
 
         if args.opt > 0:
@@ -165,16 +166,16 @@ if __name__ == "__main__":
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
         polygon_list = generate.generate_polygons(args.count, height, width)
-        best_polygon_list = generate.find_best_polygon_list(polygon_list)
+        best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
         file.write_polygons(polygon_list, f"new_{args.name}")
-        print(f"New polygons have been generated and {len(best_polygon_list)} intersections are essential")
+        print(f"New polygons have been generated and {
+              len(best_polygon_list)} intersections are essential")
 
         if args.opt >= 0:
             img = Img(polygon_list, [], args.height, args.width)
             img.save(args.name + "00_all_polygons")
             img = Img(best_polygon_list, [], args.height, args.width)
             img.save(args.name + "00_best_polygons")
-
 
         if args.opt > 0:
             run_algo(polygon_list, best_polygon_list, args)
