@@ -43,6 +43,10 @@ class Img:
     def _draw_polygons(self) -> None:
         for i in range(len(self.polygon_list)):
             self._draw_hull(self.polygon_list[i].hull, self._random_color())
+            if i <= 2:
+                self._draw_number(self.polygon_list[i].centroid, i, "pink")
+            else:
+                self._draw_number(self.polygon_list[i].centroid, i, "red")
 
     def _draw_hull(self, points: list[Coord], color: str) -> None:
         hull = CONST.make_edges(points)

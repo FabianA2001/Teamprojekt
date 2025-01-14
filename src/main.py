@@ -86,9 +86,9 @@ def parse_args():
     return args
 
 
-def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
+def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
-    all_points = [i.hull for i in polygon_list]
+    all_points = [i.hull for i in best_polygon_list]
     points = cpp_wrapper.get_midpoints_from_areas(
         [[tuple(i) for i in area] for area in all_points])
     points = CONST.to_coord(points)
@@ -176,7 +176,7 @@ def run_algo(polygon_list, args, print_st: bool = True, save: bool = True, name=
 
     if not save:
         img = Img(polygon_list, points, args.height, args.width)
-        img.save(args.name+name)
+        img.save(name)
 
     return result
 
@@ -187,21 +187,42 @@ if __name__ == "__main__":
 
     if args.file != None:
         polygon_list = file.read_polygons(args.file)
-        img = Img(polygon_list, [], args.height, args.width)
-        img.save(args.name + "00_polygons")
-        if args.opt != 0:
-            run_algo(polygon_list, args)
+        best_polygon_list = generate.find_best_polygon_list(polygon_list)
+        print(f"Polygons have been read from {args.file} and {
+              len(best_polygon_list)} intersections are essential")
+
+        file.write_polygons(best_polygon_list, f"best_polygons_{args.name}")
+
+        # need = file.read_polygons("test_einlesen")
+        # bool_need = generate.is_polygon_inside_polygon(need[1], need[0])
+        # print(generate.is_same_polygon(need[1], need[2]))
+
+        if args.opt >= 0:
+            img = Img(polygon_list, [], args.height, args.width)
+            img.save(args.name + "00_all_polygons")
+            img = Img(best_polygon_list,
+                      best_polygon_list[1].hull, args.height, args.width)
+            img.save(args.name + "00_best_polygons")
+
+        if args.opt > 0:
+            run_algo(polygon_list, best_polygon_list, args)
     elif args.neu:
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
         polygon_list = generate.generate_polygons(args.count, height, width)
-
+        best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
         file.write_polygons(polygon_list, f"new_{args.name}")
-        img = Img(polygon_list, [], args.height, args.width)
-        img.save(args.name + "00_polygons")
-        print("New polygons have been generated")
-        if args.opt != 0:
-            run_algo(polygon_list, args)
+        print(f"New polygons have been generated and {
+              len(best_polygon_list)} intersections are essential")
+
+        if args.opt >= 0:
+            img = Img(polygon_list, [], args.height, args.width)
+            img.save(args.name + "00_all_polygons")
+            img = Img(best_polygon_list, [], args.height, args.width)
+            img.save(args.name + "00_best_polygons")
+
+        if args.opt > 0:
+            run_algo(polygon_list, best_polygon_list, args)
     else:
         # Load the existing workbook
         workbook = load_workbook("result.xlsx")
@@ -213,7 +234,8 @@ if __name__ == "__main__":
 
         for i in range(20):
             polygon_list = file.read_polygons(f"standard_test_{i}")
-            result = run_algo(polygon_list, args,
+            best_polygon_list = generate.find_best_polygon_list(polygon_list)
+            result = run_algo(polygon_list, best_polygon_list, args,
                               save=False, name=f"standard_test_{i}")
             assert (len(COLUME_ANGLE) == len(result))
             for dis, angle, stat in zip(COLUME_DIS, COLUME_ANGLE, result):

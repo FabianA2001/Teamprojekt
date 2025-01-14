@@ -4,8 +4,6 @@ SCREEN_HEIGHT = 5000
 SCREEN_WIDTH = 5000
 POLYGON_COUNT = 60
 CLUSTER_SIZE = 10
-MIN_DISTANCE_POLYGONS = 1000
-MIN_DISTANCE_CLUSTER = 30
 CLUSTER_RADIUS = 800
 DATEI_NAME = "test"
 
@@ -57,7 +55,7 @@ class Polygon:
         self.centroid = calculate_centroid(self.hull)
 
     def __str__(self) -> str:
-        return f"{self.hull}"
+        return f"{self.hull} mit Schwerpunkt: {self.centroid}"
 
 
 class Stats:
