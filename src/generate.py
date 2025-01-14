@@ -375,5 +375,5 @@ def find_best_polygon_list_2(own_polygon_list: list[Polygon]) -> list[Polygon]:
     for poly in polygon_list:
         hull_coords = list(poly.convex_hull.exterior.coords)
         result.append(
-            Polygon([Coord(int(point[0]), int(point[1])) for point in hull_coords]))
+            Polygon([Coord(int(point[0]), int(point[1])) for point in hull_coords[:-1]]))
     return result

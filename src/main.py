@@ -138,25 +138,6 @@ def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save:
             CONST.prints_stats(name + " gurobi", dis, angle)
 
     if args.opt >= 5:
-        # order: list[list[Coord]] = []
-        # dist = 0
-        # for opoint in points:
-        #     for ppoints in all_points:
-        #         for point in ppoints:
-        #             if opoint.x == point.x and opoint.y == point.y:
-        #                 order.append(ppoints)
-        # all_points = order
-
-        # all_points_con = []
-        # for area in all_points:
-        #     temp = []
-        #     for coord in area:
-        #         temp.append(tuple(coord))
-        #     all_points_con.append(temp)
-
-        # points, center_point, corner_points = cpp_wrapper.radius_tour(
-        #     all_points_con, [tuple(i) for i in points], 4000.0)
-
         for i in range(6):
             center_point = cpp_wrapper.get_point_with_max_angle(
                 [tuple(i) for i in points])
@@ -212,6 +193,7 @@ if __name__ == "__main__":
         polygon_list = generate.generate_polygons(args.count, height, width)
         best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
         file.write_polygons(polygon_list, f"new_{args.name}")
+        file.write_polygons(best_polygon_list, f"new_{args.name}_best_poly")
         print(f"New polygons have been generated and {
               len(best_polygon_list)} intersections are essential")
 
