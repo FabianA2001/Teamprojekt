@@ -9,6 +9,7 @@ import generate
 from openpyxl import load_workbook
 import math
 from reconnect_folder import reconnect
+import shapely.geometry as shap
 
 import time
 # Record the start time
@@ -86,6 +87,62 @@ def parse_args():
     return args
 
 
+def punkte_verschieben(polygon_list, points):
+    # for point in points:
+    # for p, polygon in enumerate(polygon_list):
+    #     if generate.is_point_inside_polygon(point, polygon):
+    #         print(p)
+    polygon_list_neu = []
+    points_neu = []
+    for point in points:
+        points_neu.append(shap.Point(point.x, point.y))
+
+    for old_poly in polygon_list:
+        polygon_list_neu.append(shap.Polygon(
+            [(coord.x, coord.y) for coord in old_poly.hull]))
+    for i in range(1, len(points)-2):
+        current_angle = solver.caluculate_angle(
+            points[i-1], points[i], points[i+1])
+        poly = -1
+        for p, polygon in enumerate(polygon_list_neu):
+            # print(points[i])
+            # print(polygon)
+            if (polygon.contains(points_neu[i]) or polygon.boundary.contains(points_neu[i])):
+                poly = p
+                break
+
+            # if generate.is_point_inside_polygon(points[i], polygon):
+            #     poly = p
+            #     break
+        # print(poly)
+        for j in range(3):
+            new_points = []
+            new_points.append(points[i])
+            k = 0
+            while k < 5:
+                new_point = generate.random_coord_local(
+                    points[i], 500-(100*j), 6)
+                # if generate.is_point_inside_polygon(new_point, polygon_list[poly],):
+                #     new_points.append(new_point)
+                #     k += 1
+                if polygon_list_neu[poly].contains(shap.Point(new_point.x, new_point.y)) or polygon_list_neu[poly].boundary.contains(shap.Point(new_point.x, new_point.y)):
+                    new_points.append(new_point)
+                    k += 1
+            for point in new_points:
+                new_angle = solver.caluculate_angle(
+                    points[i-1], point, points[i+1])
+                if new_angle < current_angle:
+                    current_angle = new_angle
+                    points[i] = point
+    print("neu")
+    # for point in points:
+    #     for p, polygon in enumerate(polygon_list):
+    #         if generate.is_point_inside_polygon(polygon, point):
+    #             print(p)
+
+    return points
+
+
 def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
     all_points = [i.hull for i in best_polygon_list]
@@ -155,6 +212,15 @@ def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save:
         result.append(Stats(dis, angle))
         if print_st:
             CONST.prints_stats(name + " reconnect", dis, angle)
+    if args.opt >= 6:
+        points = punkte_verschieben(best_polygon_list, points)
+        if save:
+            img = Img(polygon_list, points, args.height, args.width)
+            img.save(args.name+"06_punkte_verschieben")
+        dis, angle = solver.calculate_dis_angle(points)
+        result.append(Stats(dis, angle))
+        if print_st:
+            CONST.prints_stats(name + " Punkte Verschieben", dis, angle)
 
     if not save:
         img = Img(polygon_list, points, args.height, args.width)
