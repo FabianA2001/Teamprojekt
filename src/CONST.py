@@ -72,10 +72,10 @@ def calculate_distance(point1: Coord, point2: Coord) -> float:
     return distance
 
 
-def to_coord(tuples) -> list[Coord]:
+def to_coord(points) -> list[Coord]:
     coords = []
-    for tuple in tuples:
-        coords.append(Coord(tuple[0], tuple[1]))
+    for point in points:
+        coords.append(Coord(int(point[0]), int(point[1])))
     return coords
 
 

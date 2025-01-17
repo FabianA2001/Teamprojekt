@@ -4,6 +4,7 @@ from CONST import Coord, Edge, Polygon
 import CONST
 import math
 import itertools
+import solver
 
 
 def cross_product(a: Coord, b: Coord, p: Coord) -> float:
@@ -376,3 +377,45 @@ def find_best_polygon_list_2(own_polygon_list: list[Polygon]) -> list[Polygon]:
         result.append(
             Polygon([Coord(int(point[0]), int(point[1])) for point in hull_coords[:-1]]))
     return result
+
+
+def bypass_polygon(old_poly: Polygon, start: Coord, end: Coord):
+    polygon = shap.Polygon([(coord.x, coord.y) for coord in old_poly.hull])
+    line = shap.LineString([tuple(start), tuple(end)])
+    intersection = polygon.intersection(line)
+    assert (not intersection.is_empty)
+    assert (intersection.geom_type == 'LineString')
+    intersection = list(intersection.coords)
+
+    point1 = shap.Point(intersection[0])
+    point2 = shap.Point(intersection[1])
+    polygon_exterior = list(polygon.exterior.coords)[:-1]
+
+    def get_tour(point1, point2):
+        def get_index(point, liste):
+            # Berechne die Entfernungen und finde den nächsten Eckpunkt
+            nearest_point = min(
+                liste, key=lambda vertex: point.distance(shap.Point(vertex)))
+            return liste.index(nearest_point)
+
+        points = polygon_exterior.copy()
+        start_index = get_index(point1, points)
+        points = points[start_index:] + points[:start_index]
+        end_index = get_index(point2, points)
+        del points[end_index+1:]
+
+        tour = CONST.to_coord(points)
+
+        if start_index < end_index:
+            return tour
+        else:
+            return list(reversed(tour))
+
+    tour1 = get_tour(point1, point2)
+    tour2 = get_tour(point2, point1)
+
+    tour = tour1
+    if solver.calculate_tour_distance(tour1) > solver.calculate_tour_distance(tour2):
+        tour = tour2
+
+    return tour
