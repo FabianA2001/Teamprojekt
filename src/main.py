@@ -134,7 +134,6 @@ def punkte_verschieben(polygon_list, points):
                 if new_angle < current_angle:
                     current_angle = new_angle
                     points[i] = point
-    print("neu")
     # for point in points:
     #     for p, polygon in enumerate(polygon_list):
     #         if generate.is_point_inside_polygon(polygon, point):
@@ -278,12 +277,12 @@ if __name__ == "__main__":
         # Select the active worksheet (or specify by name: workbook["SheetName"])
         sheet = workbook.active
         ROW = 8
-        COLUME_DIS = ["C", "E", "G", "I"]
-        COLUME_ANGLE = ["D", "F", "H", "J"]
+        COLUME_DIS = ["C", "E", "G", "I", "K"]
+        COLUME_ANGLE = ["D", "F", "H", "J", "L"]
 
         for i in range(20):
             polygon_list = file.read_polygons(f"standard_test_{i}")
-            best_polygon_list = generate.find_best_polygon_list(polygon_list)
+            best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
             result = run_algo(polygon_list, best_polygon_list, args,
                               save=False, name=f"standard_test_{i}")
             assert (len(COLUME_ANGLE) == len(result))

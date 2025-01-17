@@ -369,7 +369,6 @@ def find_best_polygon_list_2(own_polygon_list: list[Polygon]) -> list[Polygon]:
     for _ in range(MAX_INTERATIONS):
         if not find_intersection():
             break
-        print(len(polygon_list))
 
     result = []
     for poly in polygon_list:
