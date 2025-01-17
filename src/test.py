@@ -14,9 +14,9 @@ if __name__ == "__main__":
         Coord(7270, 2162)
     ])
     points = [
-        Coord(6500, 2000),
-        Coord(9000, 1600),
-        Coord(7771, 3000),
+        Coord(6500, 1000),
+        Coord(8700, 1600),
+        Coord(7900, 3000),
     ]
 
     img = Img([poly], points, CONST.SCREEN_WIDTH, CONST.SCREEN_HEIGHT)

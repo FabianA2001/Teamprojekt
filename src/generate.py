@@ -418,4 +418,27 @@ def bypass_polygon(old_poly: Polygon, start: Coord, end: Coord):
     if solver.calculate_tour_distance(tour1) > solver.calculate_tour_distance(tour2):
         tour = tour2
 
+    for _ in range(len(tour)-2):
+        if len(tour) <= 2:
+            break
+        line = shap.LineString([tuple(start), tuple(tour[1])])
+        intersection = polygon.intersection(line)
+        if intersection.geom_type == 'Point':
+            del tour[0]
+        else:
+            break
+
+    if len(tour) <= 1:
+        return tour
+
+    for _ in range(len(tour)-1):
+        if len(tour) <= 1:
+            break
+        line = shap.LineString([tuple(end), tuple(tour[-2])])
+        intersection = polygon.intersection(line)
+        if intersection.geom_type == 'Point':
+            del tour[-1]
+        else:
+            break
+
     return tour
