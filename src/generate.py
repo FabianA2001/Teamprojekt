@@ -378,6 +378,9 @@ def find_best_polygon_list_2(own_polygon_list: list[Polygon]) -> list[Polygon]:
             Polygon([Coord(int(point[0]), int(point[1])) for point in hull_coords[:-1]]))
     return result
 
+# bekommt die aktuelle Tour und die hinzdernisse übergeben
+# gibt Tuple aus Coordinaten zurück, zwischen denen sich ein Hinternis befindet
+
 
 def find_obstacle(tour: list[Coord], obstacles_list: list[Polygon]):
     obstacles = []
