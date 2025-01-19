@@ -3,17 +3,20 @@ from CONST import Coord, Edge, Polygon
 import file
 import CONST
 import random
+import generate
 
 
 class Img:
     def __init__(
         self,
         polygon_list: list[Polygon],
+        obstacle_list: list[Polygon],
         points_in_route: list[Coord],
         height: int = CONST.SCREEN_HEIGHT,
         width: int = CONST.SCREEN_WIDTH
     ) -> None:
         self.polygon_list = polygon_list
+        self.obstacle_list = obstacle_list
         self.points_in_route = points_in_route
         self.HEIGHT = height * CONST.ANTIALIAS_FACTOR
         self.WIDTH = width * CONST.ANTIALIAS_FACTOR
@@ -27,6 +30,7 @@ class Img:
         self.edges = CONST.make_edges(self.points_in_route)
 
         self._draw_polygons()
+        self._draw_obstacles(obstacle_list)
         self._draw_route()
 
     def show(self) -> None:
@@ -43,15 +47,44 @@ class Img:
     def _draw_polygons(self) -> None:
         for i in range(len(self.polygon_list)):
             self._draw_hull(self.polygon_list[i].hull, self._random_color())
+            """
             if i <= 2:
                 self._draw_number(self.polygon_list[i].centroid, i, "pink")
             else:
                 self._draw_number(self.polygon_list[i].centroid, i, "red")
+            """
 
     def _draw_hull(self, points: list[Coord], color: str) -> None:
         hull = CONST.make_edges(points)
         for edge in hull:
             self._draw_edge(edge, color)
+
+    
+    def _draw_obstacles(self, obstacles: list[Polygon]) -> None:
+        LINE_COLOR = "brown"
+        for i in range(len(obstacles)):
+            self._draw_hull(obstacles[i].hull, LINE_COLOR)
+            self._draw_cross_in_polygon(obstacles[i], LINE_COLOR)
+        return
+
+    def _draw_cross_in_polygon(self, polygon: Polygon, color: str) -> None:
+        min_x = min(x for x, y in polygon.hull)
+        max_x = max(x for x, y in polygon.hull)
+        min_y = min(y for x, y in polygon.hull)
+        max_y = max(y for x, y in polygon.hull)
+        edge1 = Edge(Coord(min_x, polygon.centroid.y), polygon.centroid)
+        edge2 = Edge(Coord(max_x, polygon.centroid.y), polygon.centroid)
+        edge3 = Edge(Coord(polygon.centroid.x, min_y), polygon.centroid)
+        edge4 = Edge(Coord(polygon.centroid.x, max_y), polygon.centroid)
+        edges_from_centroid = [edge1, edge2, edge3, edge4]
+        polygon_hull = CONST.make_edges(polygon.hull)
+        for edge_fc in edges_from_centroid:
+            for edge_ph in polygon_hull:
+                if generate.edge_intersection(edge_ph, edge_fc) != None:
+                    point_on_hull = generate.edge_intersection(edge_ph, edge_fc)
+            edge_to_hull = Edge(point_on_hull, polygon.centroid)
+            self._draw_edge(edge_to_hull, color)
+        return
 
     def _draw_route(self) -> None:
         for edge in self.edges:
