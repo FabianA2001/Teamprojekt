@@ -21,12 +21,15 @@ if __name__ == "__main__":
 
     img = Img([poly], points, CONST.SCREEN_WIDTH, CONST.SCREEN_HEIGHT)
     img.save("testen")
+    polys = []
+    polys.append(poly)
+    problem_points = generate.find_obstacle(points, polys)
 
     # der Letze Punkt in der Tour der nicht das Polygon schneidet
-    start = points[0]
+    start = problem_points[0][0]
 
     # der erste Punkt in der Tour der wieder nicht schneidet
-    end = points[1]
+    end = problem_points[0][1]
 
     bypass_points = generate.bypass_polygon(poly, start, end)
 

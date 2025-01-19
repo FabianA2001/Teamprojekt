@@ -379,6 +379,22 @@ def find_best_polygon_list_2(own_polygon_list: list[Polygon]) -> list[Polygon]:
     return result
 
 
+def find_obstacle(tour: list[Coord], obstacles_list: list[Polygon]):
+    obstacles = []
+    problem_points = []
+    for polygon in obstacles_list:
+        obstacle = shap.Polygon([(coord.x, coord.y) for coord in polygon.hull])
+        obstacles.append(obstacle)
+    for i in range(len(tour)-1):
+        line = shap.LineString([
+            (tour[i].x, tour[i].y), (tour[i+1].x, tour[i+1].y)])
+        for obstacle in obstacles:
+            if line.intersects(obstacle):
+                problem_points.append((tour[i], tour[i+1]))
+
+    return problem_points
+
+
 def bypass_polygon(old_poly: Polygon, start: Coord, end: Coord):
     polygon = shap.Polygon([(coord.x, coord.y) for coord in old_poly.hull])
     line = shap.LineString([tuple(start), tuple(end)])
