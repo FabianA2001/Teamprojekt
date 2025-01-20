@@ -262,9 +262,9 @@ if __name__ == "__main__":
         # print(generate.is_same_polygon(need[1], need[2]))
 
         if args.opt >= 0:
-            img = Img(polygon_list, [], args.height, args.width)
+            img = Img(polygon_list, obstacle_list, [], args.height, args.width)
             img.save(args.name + "00_all_polygons")
-            img = Img(best_polygon_list,
+            img = Img(best_polygon_list, obstacle_list,
                       best_polygon_list[1].hull, args.height, args.width)
             img.save(args.name + "00_best_polygons")
 
