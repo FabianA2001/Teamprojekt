@@ -19,11 +19,13 @@ def calculate_distance(point1: Coord, point2: Coord):
     """Berechnet die euklidische Distanz zwischen zwei Punkten."""
     return math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2)
 
+
 def calculate_tour_distance(tour: list[Coord]):
     summ = 0
     for i, t in enumerate(tour):
         summ += calculate_distance(t, tour[(i+1) % len(tour)])
     return summ
+
 
 def calculate_turn_angles(path):
     angles = [caluculate_angle(path[-2], path[0], path[1])]
@@ -34,8 +36,10 @@ def calculate_turn_angles(path):
         angles.append(caluculate_angle(p1, p2, p3))
     return angles
 
+
 def calculate_dis_angle(points: list[Coord]):
     return calculate_tour_distance(points), sum(calculate_turn_angles(points))
+
 
 def caluculate_angle(p1, p2, p3):
     assert ((p1 != p2) and (p1 != p3) and (p2 != p3))
@@ -180,6 +184,7 @@ def find_obstacle(tour: list[Coord], obstacles_list: list[Polygon]):
 
     return problem_points
 
+
 def find_obstacle_plus_bypass(tour: list[Coord], obstacles_list: list[Polygon]):
     obstacles = []
     new_tour = tour.copy()
@@ -191,10 +196,13 @@ def find_obstacle_plus_bypass(tour: list[Coord], obstacles_list: list[Polygon]):
             (tour[i].x, tour[i].y), (tour[i + 1].x, tour[i + 1].y)])
         for obstacle in obstacles:
             if line.intersects(obstacle):
-                bypass_points = bypass_polygon_for_found_obstacle(obstacle, tour[i], tour[i + 1])
-                new_tour = new_tour[:(new_tour.index(tour[i]) + 1)] + bypass_points + new_tour[new_tour.index(tour[i + 1]):]
+                bypass_points = bypass_polygon_for_found_obstacle(
+                    obstacle, tour[i], tour[i + 1])
+                new_tour = new_tour[:(new_tour.index(
+                    tour[i]) + 1)] + bypass_points + new_tour[new_tour.index(tour[i + 1]):]
                 break
     return new_tour
+
 
 def bypass_polygon_for_found_obstacle(polygon: shap.Polygon, start: Coord, end: Coord):
     line = shap.LineString([tuple(start), tuple(end)])
@@ -278,25 +286,37 @@ def change_point_in_obstacle(tour: list[Coord], obstacles_list: list[Polygon], p
                         poly = i
                         break
                 points = []
+                res = []
                 l = 1
                 loop = 1
                 while (loop):
-                    for _ in range(10):
+                    for k in range(10):
+                        print("loop")
                         point1 = generate.random_coord_local(point, 100*l, 6)
                         # while obstacle.contains(shap.Point(point1.x, point1.y)) or obstacle.boundary.contains(shap.Point(point1.x, point1.y)):
                         # point1 = random_coord_local(point, 100*l, 6)
                         points.append(point1)
-                    for p, point in enumerate(points):
-                        if not (polygons[poly].contains(shap.Point(point.x, point.y)) or polygons[poly].boundary.contains(shap.Point(point.x, point.y))) or (obstacle.contains(shap.Point(point1.x, point1.y)) or obstacle.boundary.contains(shap.Point(point1.x, point1.y))):
-                            points.pop(p)
-                    if points == []:
-                        l += 1
-                    else:
 
+                    for p, point in enumerate(points):
+                        if not (polygons[poly].contains(shap.Point(point.x, point.y)) or polygons[poly].boundary.contains(shap.Point(point.x, point.y))):
+                            # points.pop(p)
+                            kom = 0
+                        elif obstacle.contains(shap.Point(point.x, point.y)) or obstacle.boundary.contains(shap.Point(point.x, point.y)):
+                            # points.pop(p)
+                            kom = 1
+                        else:
+                            res.append(point)
+                    if res == []:
+                        l += 1
+                        print("no change")
+                    else:
+                        print("change")
                         loop = 0
-                break
+                # break
         if points != []:
-            tour[j] = points[0]
+            print("change happened")
+            tour[j] = res[0]
             points = []
+            res = []
 
     return tour
