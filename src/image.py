@@ -1,9 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 from CONST import Coord, Edge, Polygon
-import file
 import CONST
 import random
-import generate
 
 
 class Img:
@@ -29,8 +27,8 @@ class Img:
         self._draw = ImageDraw.Draw(self.img)
         self.edges = CONST.make_edges(self.points_in_route)
 
-        self._draw_polygons()
         self._draw_obstacles(obstacle_list)
+        self._draw_polygons()
         self._draw_route()
 
     def show(self) -> None:
@@ -41,8 +39,6 @@ class Img:
             (self.HEIGHT_ORGINAL, self.WIDTH_ORGINAL), Image.LANCZOS
         )
         self.img.save(CONST.IMAGE_PRE+name + ".jpg")
-        # TODO write anpassen
-        # file.write(self.points_in_route, name)
 
     def _draw_polygons(self) -> None:
         for i in range(len(self.polygon_list)):
@@ -61,29 +57,11 @@ class Img:
 
     
     def _draw_obstacles(self, obstacles: list[Polygon]) -> None:
-        LINE_COLOR = "brown"
+        FILL_COLOR = "grey"
         for i in range(len(obstacles)):
-            self._draw_hull(obstacles[i].hull, LINE_COLOR)
-            self._draw_cross_in_polygon(obstacles[i], LINE_COLOR)
-        return
-
-    def _draw_cross_in_polygon(self, polygon: Polygon, color: str) -> None:
-        min_x = min(x for x, y in polygon.hull)
-        max_x = max(x for x, y in polygon.hull)
-        min_y = min(y for x, y in polygon.hull)
-        max_y = max(y for x, y in polygon.hull)
-        edge1 = Edge(Coord(min_x, polygon.centroid.y), polygon.centroid)
-        edge2 = Edge(Coord(max_x, polygon.centroid.y), polygon.centroid)
-        edge3 = Edge(Coord(polygon.centroid.x, min_y), polygon.centroid)
-        edge4 = Edge(Coord(polygon.centroid.x, max_y), polygon.centroid)
-        edges_from_centroid = [edge1, edge2, edge3, edge4]
-        polygon_hull = CONST.make_edges(polygon.hull)
-        for edge_fc in edges_from_centroid:
-            for edge_ph in polygon_hull:
-                if generate.edge_intersection(edge_ph, edge_fc) != None:
-                    point_on_hull = generate.edge_intersection(edge_ph, edge_fc)
-            edge_to_hull = Edge(point_on_hull, polygon.centroid)
-            self._draw_edge(edge_to_hull, color)
+            polygon_points = [(coord.x, coord.y) for coord in obstacles[i].hull]
+            self._draw.polygon(polygon_points, fill=FILL_COLOR, outline=FILL_COLOR)
+            self._draw_hull(obstacles[i].hull, "black")
         return
 
     def _draw_route(self) -> None:
@@ -150,6 +128,6 @@ class Img:
     def _random_color(self):
         red = random.randint(0, 50)
         green = random.randint(50, 255)
-        blue = random.randint(50, 255)
+        blue = random.randint(50, 200)
         color = "#{:02x}{:02x}{:02x}".format(red, green, blue)
         return color

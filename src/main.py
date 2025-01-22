@@ -9,7 +9,6 @@ import generate
 from openpyxl import load_workbook
 import math
 from reconnect_folder import reconnect
-import shapely.geometry as shap
 
 import time
 # Record the start time
@@ -87,127 +86,6 @@ def parse_args():
     return args
 
 
-def punkte_verschieben(polygon_list, points):
-    # for point in points:
-    # for p, polygon in enumerate(polygon_list):
-    #     if generate.is_point_inside_polygon(point, polygon):
-    #         print(p)
-    polygon_list_neu = []
-    points_neu = []
-    for point in points:
-        points_neu.append(shap.Point(point.x, point.y))
-
-    for old_poly in polygon_list:
-        polygon_list_neu.append(shap.Polygon(
-            [(coord.x, coord.y) for coord in old_poly.hull]))
-    for i in range(1, len(points)-2):
-        current_angle = solver.caluculate_angle(
-            points[i-1], points[i], points[i+1])
-        poly = -1
-        for p, polygon in enumerate(polygon_list_neu):
-            # print(points[i])
-            # print(polygon)
-            if (polygon.contains(points_neu[i]) or polygon.boundary.contains(points_neu[i])):
-                poly = p
-                break
-
-            # if generate.is_point_inside_polygon(points[i], polygon):
-            #     poly = p
-            #     break
-        # print(poly)
-        for j in range(3):
-            new_points = []
-            new_points.append(points[i])
-            k = 0
-            while k < 5:
-                new_point = generate.random_coord_local(
-                    points[i], 500-(100*j), 6)
-                # if generate.is_point_inside_polygon(new_point, polygon_list[poly],):
-                #     new_points.append(new_point)
-                #     k += 1
-                if polygon_list_neu[poly].contains(shap.Point(new_point.x, new_point.y)) or polygon_list_neu[poly].boundary.contains(shap.Point(new_point.x, new_point.y)):
-                    new_points.append(new_point)
-                    k += 1
-            for point in new_points:
-                new_angle = solver.caluculate_angle(
-                    points[i-1], point, points[i+1])
-                if new_angle < current_angle:
-                    current_angle = new_angle
-                    points[i] = point
-    # for point in points:
-    #     for p, polygon in enumerate(polygon_list):
-    #         if generate.is_point_inside_polygon(polygon, point):
-    #             print(p)
-
-    return points
-
-
-
-def tour_around_obstacles(obstacles, points):
-    return generate.find_obstacle_plus_bypass(points, obstacles)
-
-
-
-def punkte_verschieben(polygon_list, points):
-    # for point in points:
-    # for p, polygon in enumerate(polygon_list):
-    #     if generate.is_point_inside_polygon(point, polygon):
-    #         print(p)
-    polygon_list_neu = []
-    points_neu = []
-    for point in points:
-        points_neu.append(shap.Point(point.x, point.y))
-
-    for old_poly in polygon_list:
-        polygon_list_neu.append(shap.Polygon(
-            [(coord.x, coord.y) for coord in old_poly.hull]))
-    for i in range(1, len(points)-2):
-        current_angle = solver.caluculate_angle(
-            points[i-1], points[i], points[i+1])
-        poly = -1
-        for p, polygon in enumerate(polygon_list_neu):
-            # print(points[i])
-            # print(polygon)
-            if (polygon.contains(points_neu[i]) or polygon.boundary.contains(points_neu[i])):
-                poly = p
-                break
-
-            # if generate.is_point_inside_polygon(points[i], polygon):
-            #     poly = p
-            #     break
-        # print(poly)
-        for j in range(3):
-            new_points = []
-            new_points.append(points[i])
-            k = 0
-            while k < 5:
-                new_point = generate.random_coord_local(
-                    points[i], 500-(100*j), 6)
-                # if generate.is_point_inside_polygon(new_point, polygon_list[poly],):
-                #     new_points.append(new_point)
-                #     k += 1
-                if polygon_list_neu[poly].contains(shap.Point(new_point.x, new_point.y)) or polygon_list_neu[poly].boundary.contains(shap.Point(new_point.x, new_point.y)):
-                    new_points.append(new_point)
-                    k += 1
-            for point in new_points:
-                new_angle = solver.caluculate_angle(
-                    points[i-1], point, points[i+1])
-                if new_angle < current_angle:
-                    current_angle = new_angle
-                    points[i] = point
-    # for point in points:
-    #     for p, polygon in enumerate(polygon_list):
-    #         if generate.is_point_inside_polygon(polygon, point):
-    #             print(p)
-
-    return points
-
-
-
-def tour_around_obstacles(obstacles, points):
-    return generate.find_obstacle_plus_bypass(points, obstacles)
-
-
 
 def run_algo(polygon_list, best_polygon_list, obstacle_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
@@ -279,17 +157,17 @@ def run_algo(polygon_list, best_polygon_list, obstacle_list, args, print_st: boo
         if print_st:
             CONST.prints_stats(name + " reconnect", dis, angle)
     if args.opt >= 6:
-        points = punkte_verschieben(best_polygon_list, points)
+        points = solver.move_points(best_polygon_list, points)
         if save:
             img = Img(polygon_list, obstacle_list, points, args.height, args.width)
-            img.save(args.name+"06_punkte_verschieben")
+            img.save(args.name+"06_move_points")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
-            CONST.prints_stats(name + " Punkte Verschieben", dis, angle)
+            CONST.prints_stats(name + " move points", dis, angle)
 
     if args.opt >= 7:
-        points = tour_around_obstacles(obstacle_list, points)
+        points = generate.find_obstacle_plus_bypass(points, obstacle_list)
         if save:
             img = Img(polygon_list, obstacle_list, points, args.height, args.width)
             img.save(args.name+"07_around_obstacles")
@@ -312,8 +190,6 @@ if __name__ == "__main__":
     if args.file != None:
 
         polygon_list = file.read_polygons(args.file)
-        obstacle_list = file.read_polygons(f"{args.file}_obstacles")
-        best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
         obstacle_list = file.read_polygons(f"{args.file}_obstacles")
         best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
         print(f"Polygons have been read from {args.file} and {
@@ -342,9 +218,7 @@ if __name__ == "__main__":
 
         if args.opt >= 0:
             img = Img(polygon_list, obstacle_list, [], args.height, args.width)
-            img = Img(polygon_list, obstacle_list, [], args.height, args.width)
             img.save(args.name + "00_all_polygons")
-            img = Img(best_polygon_list, obstacle_list, [], args.height, args.width)
             img = Img(best_polygon_list, obstacle_list, [], args.height, args.width)
             img.save(args.name + "00_best_polygons")
 
@@ -352,6 +226,7 @@ if __name__ == "__main__":
             run_algo(polygon_list, best_polygon_list, obstacle_list, args)
 
     else:
+
         # Load the existing workbook
         workbook = load_workbook("result.xlsx")
         # Select the active worksheet (or specify by name: workbook["SheetName"])
@@ -372,10 +247,11 @@ if __name__ == "__main__":
                 sheet[f"{angle}{ROW + i}"] = stat.angle
         # Save the changes
             workbook.save("result.xlsx")
-            # Calculate the elapsed time
-            elapsed_time = int(time.time() - start_time)
-            # Print the elapsed time
-            print(f"Fertig nach {int(elapsed_time/60)}m {elapsed_time % 60}s")
+
+    # Calculate the elapsed time
+    elapsed_time = int(time.time() - start_time)
+    # Print the elapsed time
+    print(f"Fertig nach {int(elapsed_time/60)}m {elapsed_time % 60}s")
 
 
 """
