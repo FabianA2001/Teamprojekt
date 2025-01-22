@@ -258,3 +258,45 @@ def bypass_polygon_for_found_obstacle(polygon: shap.Polygon, start: Coord, end: 
             break
 
     return tour
+
+
+def change_point_in_obstacle(tour: list[Coord], obstacles_list: list[Polygon], polygon_list: list[Polygon]):
+    obstacles = []
+    polygons = []
+    for polygon in obstacles_list:
+        obstacle = shap.Polygon([(coord.x, coord.y) for coord in polygon.hull])
+        obstacles.append(obstacle)
+    points = []
+    for polygon in polygon_list:
+        polygonn = shap.Polygon([(coord.x, coord.y) for coord in polygon.hull])
+        polygons.append(polygonn)
+    for j, point in enumerate(tour):
+        for obstacle in obstacles:
+            if obstacle.contains(shap.Point(point.x, point.y)) or obstacle.boundary.contains(shap.Point(point.x, point.y)):
+                for i, polygon in enumerate(polygons):
+                    if polygon.contains(shap.Point(point.x, point.y)) or polygon.boundary.contains(shap.Point(point.x, point.y)):
+                        poly = i
+                        break
+                points = []
+                l = 1
+                loop = 1
+                while (loop):
+                    for _ in range(10):
+                        point1 = generate.random_coord_local(point, 100*l, 6)
+                        # while obstacle.contains(shap.Point(point1.x, point1.y)) or obstacle.boundary.contains(shap.Point(point1.x, point1.y)):
+                        # point1 = random_coord_local(point, 100*l, 6)
+                        points.append(point1)
+                    for p, point in enumerate(points):
+                        if not (polygons[poly].contains(shap.Point(point.x, point.y)) or polygons[poly].boundary.contains(shap.Point(point.x, point.y))) or (obstacle.contains(shap.Point(point1.x, point1.y)) or obstacle.boundary.contains(shap.Point(point1.x, point1.y))):
+                            points.pop(p)
+                    if points == []:
+                        l += 1
+                    else:
+
+                        loop = 0
+                break
+        if points != []:
+            tour[j] = points[0]
+            points = []
+
+    return tour

@@ -2,7 +2,7 @@ import CONST
 from image import Img
 import argparse
 import file
-from CONST import Stats, Coord
+from CONST import Stats, Coord, Polygon
 import solver
 import cpp_wrapper
 import generate
@@ -86,11 +86,13 @@ def parse_args():
     return args
 
 
-def tour_around_obstacles(obstacles, points):
-    return generate.find_obstacle_plus_bypass(points, obstacles)
-
-
-def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
+def run_algo(polygon_list: list[Polygon],
+             best_polygon_list: list[Polygon],
+             obstacle_list: list[Polygon],
+             args: str,
+             print_st: bool = True,
+             save: bool = True,
+             name: str = "") -> list[Stats]:
     result = []
     all_points = [i.hull for i in best_polygon_list]
     points = [i.centroid for i in best_polygon_list]
@@ -102,8 +104,7 @@ def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save:
         points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
         points = CONST.to_coord(points)
         if save:
-            img = Img(polygon_list, obstacle_list,
-                      points, args.height, args.width)
+            img = Img(polygon_list, obstacle_list, points, args.height, args.width)
             img.save(args.name+"01_farthest_insertion")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
@@ -115,8 +116,7 @@ def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save:
             [tuple(i) for i in points], 3000, 0.3, 1.2)
         points = CONST.to_coord(points)
         if save:
-            img = Img(polygon_list, obstacle_list,
-                      points, args.height, args.width)
+            img = Img(polygon_list, obstacle_list, points, args.height, args.width)
             img.save(args.name+"02_ruin&recreate")
         dis, angle = solver.calculate_dis_angle(points)
         # result.append(Stats(dis, angle))
@@ -127,8 +127,7 @@ def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save:
         points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
         points = CONST.to_coord(points)
         if save:
-            img = Img(polygon_list, obstacle_list,
-                      points, args.height, args.width)
+            img = Img(polygon_list, obstacle_list, points, args.height, args.width)
             img.save(args.name+"03_two_opt")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
@@ -138,8 +137,7 @@ def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save:
     if args.opt >= 4:
         points = solver.gurobi_solver(all_points, points)
         if save:
-            img = Img(polygon_list, obstacle_list,
-                      points, args.height, args.width)
+            img = Img(polygon_list, obstacle_list, points, args.height, args.width)
             img.save(args.name+"04_gurobi")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
@@ -147,7 +145,7 @@ def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save:
             CONST.prints_stats(name + " gurobi", dis, angle)
 
     if args.opt >= 5:
-        for i in range(6):
+        for _ in range(6):
             center_point = cpp_wrapper.get_point_with_max_angle(
                 [tuple(i) for i in points])
             points = reconnect.optimize_the_closest(
@@ -156,8 +154,7 @@ def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save:
         center_point = Coord(center_point[0], center_point[1])
         points = CONST.to_coord(points)
         if save:
-            img = Img(polygon_list, obstacle_list,
-                      points, args.height, args.width)
+            img = Img(polygon_list, obstacle_list, points, args.height, args.width)
             img._draw_point_debugg(center_point.x, center_point.y, "red")
             img.save(args.name+"05_reconnect_area")
         dis, angle = solver.calculate_dis_angle(points)
@@ -167,25 +164,19 @@ def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save:
     if args.opt >= 6:
         points = solver.move_points(best_polygon_list, points)
         if save:
-            img = Img(polygon_list, obstacle_list,
-                      points, args.height, args.width)
+            img = Img(polygon_list, obstacle_list, points, args.height, args.width)
             img.save(args.name+"06_move_points")
-            img = Img(polygon_list, obstacle_list,
-                      points, args.height, args.width)
-            img.save(args.name+"06_punkte_verschieben")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
             CONST.prints_stats(name + " move points", dis, angle)
 
     if args.opt >= 7:
-        points = generate.find_obstacle_plus_bypass(points, obstacle_list)
-        points = generate.change_point_in_obstacle(
+        points = solver.find_obstacle_plus_bypass(points, obstacle_list)
+        points = solver.change_point_in_obstacle(
             points, obstacle_list, best_polygon_list)
-        points = tour_around_obstacles(obstacle_list, points)
         if save:
-            img = Img(polygon_list, obstacle_list,
-                      points, args.height, args.width)
+            img = Img(polygon_list, obstacle_list, points, args.height, args.width)
             img.save(args.name+"07_around_obstacles")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
@@ -214,8 +205,7 @@ if __name__ == "__main__":
         if args.opt >= 0:
             img = Img(polygon_list, obstacle_list, [], args.height, args.width)
             img.save(args.name + "00_all_polygons")
-            img = Img(best_polygon_list, obstacle_list,
-                      [], args.height, args.width)
+            img = Img(best_polygon_list, obstacle_list, [], args.height, args.width)
             img.save(args.name + "00_best_polygons")
 
         if args.opt > 0:
@@ -226,8 +216,7 @@ if __name__ == "__main__":
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
         polygon_list = generate.generate_polygons(args.count, height, width)
-        obstacle_list = generate.generate_polygons(
-            CONST.OBSTACLE_COUNT, height, width)
+        obstacle_list = generate.generate_polygons(CONST.OBSTACLE_COUNT, height, width)
         best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
         file.write_polygons(polygon_list, f"new_{args.name}")
         file.write_polygons(obstacle_list, f"new_{args.name}_obstacles")
@@ -237,8 +226,7 @@ if __name__ == "__main__":
         if args.opt >= 0:
             img = Img(polygon_list, obstacle_list, [], args.height, args.width)
             img.save(args.name + "00_all_polygons")
-            img = Img(best_polygon_list, obstacle_list,
-                      [], args.height, args.width)
+            img = Img(best_polygon_list, obstacle_list, [], args.height, args.width)
             img.save(args.name + "00_best_polygons")
 
         if args.opt > 0:
