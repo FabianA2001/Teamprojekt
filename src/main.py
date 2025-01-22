@@ -90,7 +90,7 @@ def tour_around_obstacles(obstacles, points):
     return generate.find_obstacle_plus_bypass(points, obstacles)
 
 
-def run_algo(polygon_list, best_polygon_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
+def run_algo(polygon_list, best_polygon_list, obstacle_list, args, print_st: bool = True, save: bool = True, name="") -> list[Stats]:
     result = []
     all_points = [i.hull for i in best_polygon_list]
     points = [i.centroid for i in best_polygon_list]
