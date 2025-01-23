@@ -223,9 +223,9 @@ if __name__ == "__main__":
 
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
-        polygon_list = generate.generate_polygons(args.count, height, width)
+        polygon_list = generate.generate_polygons(args.count, height, width, True)
         obstacle_list = generate.generate_polygons(
-            CONST.OBSTACLE_COUNT, height, width)
+            CONST.OBSTACLE_COUNT, height, width, False)
         best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
         file.write_polygons(polygon_list, f"new_{args.name}")
         file.write_polygons(obstacle_list, f"new_{args.name}_obstacles")

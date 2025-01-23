@@ -4,7 +4,6 @@ from CONST import Coord, Edge, Polygon
 import CONST
 import math
 import itertools
-import solver
 
 
 def cross_product(a: Coord, b: Coord, p: Coord) -> float:
@@ -48,24 +47,38 @@ def random_cluster(center: Coord, count: int) -> list[Coord]:
     return cluster
 
 
-def generate_polygons(count: int, height: int, width: int) -> list[Polygon]:
+def generate_polygons(count: int, height: int, width: int, overlap: bool) -> list[Polygon]:
     """
     Generiert zufällige Polygone auf dem Screen.
 
     :param int count: Die Anzahl an Polygons die generiert wird.
     :param int height: Die Höhe des Bereiches in dem die Polygone generiert werden können.
     :param int width: Die Breite des Bereiches in dem die Polygone generiert werden können.
+    :param bool overlap: Ob die generierten Polygone sich überlappen dürfen:
 
     :return list[Polygon]: Eine Liste, die die genrierten Polygone enthält.
     """
     polygon_list = []
     for _ in range(count):
-        center = random_coord_global(height, width)
-        hull = create_convex_hull(random_cluster(center, CONST.CLUSTER_SIZE))
-        polygon = Polygon(hull)
-        polygon_list.append(polygon)
+        while True:
+            center = random_coord_global(height, width)
+            hull = create_convex_hull(random_cluster(center, CONST.CLUSTER_SIZE))
+            polygon = Polygon(hull)
+            if overlap == False:
+                i = 0
+                for polygon_l in polygon_list:
+                    if do_bounding_boxes_overlap(polygon_l, polygon):
+                        break
+                    else:
+                        i += 1
+                if i == len(polygon_list):
+                    polygon_list.append(polygon)
+                    break
+            else:
+                polygon_list.append(polygon)
+                break
     return polygon_list
-
+    
 
 def create_convex_hull(points: list[Coord]) -> list[Coord]:
     """
@@ -153,6 +166,12 @@ def do_polygons_overlap(polygon1: Polygon, polygon2: Polygon) -> bool:
         if is_point_inside_polygon(point, polygon1):
             return True
     return False
+
+
+def do_bounding_boxes_overlap(polygon1: Polygon, polygon2: Polygon):
+    minx1, miny1, maxx1, maxy1 = shap.Polygon([(coord.x, coord.y) for coord in polygon1.hull]).bounds
+    minx2, miny2, maxx2, maxy2 = shap.Polygon([(coord.x, coord.y) for coord in polygon2.hull]).bounds
+    return not (maxx1 < minx2 or maxx2 < minx1 or maxy1 < miny2 or maxy2 < miny1)
 
 
 def polygon_intersection(polygon1: Polygon, polygon2: Polygon) -> Polygon | None:
