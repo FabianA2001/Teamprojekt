@@ -190,6 +190,18 @@ def run_algo(polygon_list: list[Polygon],
         if print_st:
             CONST.prints_stats(name + " around obstacles", dis, angle)
 
+    if args.opt >= 8:
+        points = solver.delete_possible_points([tuple(i) for i in points], polygon_list, obstacle_list)
+        points = CONST.to_coord(points)
+        if save:
+            img = Img(polygon_list, obstacle_list, points, args.height, args.width)
+            img.save(args.name+"08_deleted_points")
+        dis, angle = solver.calculate_dis_angle(points)
+        result.append(Stats(dis, angle))
+        if print_st:
+            CONST.prints_stats(name + " deleted points", dis, angle)
+
+
     if not save:
         img = Img(polygon_list, obstacle_list, points, args.height, args.width)
         img.save(name)
