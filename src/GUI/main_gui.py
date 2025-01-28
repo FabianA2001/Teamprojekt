@@ -19,15 +19,21 @@ class GraphEditorApp:
         self.current_polygon = []  # Punkte des aktuellen Polygons
 
         self.button_frame = tk.Frame(self.root)
-        self.button_frame.grid(row=0, column=0)
+        self.button_frame.grid(row=0, column=0, padx=50)
         # Buttons
         self.draw_polygon_btn = tk.Button(
-            self.button_frame, text="Start Polygon", command=self.toggle_drawing_mode)
+            self.button_frame, text="Draw", command=self.toggle_drawing_mode)
         self.clear_btn = tk.Button(
             self.button_frame, text="Clear Canvas", command=self.clear_canvas)
+        self.remove_btn = tk.Button(
+            self.button_frame, text="Remove", command=self.remove)
+        self.generate_btn = tk.Button(
+            self.button_frame, text="Generate", command=self.generate)
 
         self.draw_polygon_btn.pack(side='left')
         self.clear_btn.pack(side='left')
+        self.remove_btn.pack(side='left')
+        self.generate_btn.pack(side='left')
 
         # Canvas für Graph
         self.canvas = tk.Canvas(
@@ -61,6 +67,10 @@ class GraphEditorApp:
         # Canvas-Klick-Event binden
         self.canvas.bind("<Button-1>", self.on_canvas_click)
 
+    def draw_polygon(self, poly):
+        self.canvas.create_polygon(
+            poly, outline="black", fill="", width=2)
+
     def toggle_drawing_mode(self):
         """Aktiviert oder deaktiviert den Polygon-Zeichenmodus."""
         if not self.drawing_mode:
@@ -70,9 +80,7 @@ class GraphEditorApp:
             if len(self.current_polygon) <= 2:  # Nur gültig, wenn mehr als 2 Punkte
                 return
             self.polygons.append(self.current_polygon)
-            self.canvas.create_polygon(
-                self.current_polygon, outline="black", fill="", width=2)
-
+            self.draw_polygon(self.current_polygon)
             self.draw_polygon_btn.config(text="Start Polygon")
             self.current_polygon = []
         self.drawing_mode = not self.drawing_mode
@@ -90,6 +98,17 @@ class GraphEditorApp:
         self.canvas.delete("all")
         self.polygons.clear()
         self.current_polygon.clear()
+
+    def generate(self):
+        self.show_popup("gen", "generate")
+
+    def remove(self):
+        if len(self.polygons) == 0:
+            return
+        self.canvas.delete("all")
+        del self.polygons[-1]
+        for poly in self.polygons:
+            self.draw_polygon(poly)
 
     # Funktion, die ausgeführt wird, wenn ein Element angeklickt wird
     def on_item_selected(self, event):
