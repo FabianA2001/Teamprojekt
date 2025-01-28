@@ -7,8 +7,10 @@ class GraphEditorApp:
         self.root = tk.Tk()
         self.root.title("Graph Editor")
         # Bildschirmbreite abrufen
-        self.SCREEN_WIDTH = self.root.winfo_screenwidth()
-        self.SCREEN_HEIGHT = self.root.winfo_screenheight()
+        # self.SCREEN_WIDTH = self.root.winfo_screenwidth()
+        # self.SCREEN_HEIGHT = self.root.winfo_screenheight()
+        self.SCREEN_WIDTH = 2000
+        self.SCREEN_HEIGHT = 1000
 
         # Hauptvariablen
         # Liste der Polygone (jeweils als Liste von Punkten)
@@ -96,8 +98,36 @@ class GraphEditorApp:
         if selected_indices:
             # Text des ausgewählten Elements
             selected_item = self.listbox.get(selected_indices[0])
-            messagebox.showinfo("Element ausgewählt", f"Du hast '{
-                                selected_item}' ausgewählt!")
+            self.show_popup("Element ausgewählt", f"Du hast '{
+                            selected_item}' ausgewählt!")
+
+    # Function to show the popup
+    def show_popup(self, titel, text):
+        # Fenstergröße ermitteln
+        window_width = 300
+        window_height = 150
+        # Bildschirmgröße ermitteln
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        # Berechne die Position, um das Fenster in der Mitte zu platzieren
+        position_top = int(screen_height / 2 - window_height / 2)
+        position_right = int(screen_width / 2 - window_width / 2)
+
+        # Create a popup window
+        popup = tk.Toplevel()
+        popup.title(titel)
+        # Fenster positionieren
+        popup.geometry(f'{window_width}x{
+                       window_height}+{position_right}+{position_top}')
+
+        # Add a label in the popup window
+        label = tk.Label(popup, text=text)
+        label.pack(pady=20)
+
+        # Add a button to close the popup
+        button = tk.Button(popup, text="Close", command=popup.destroy)
+        button.pack()
 
 
 # Hauptprogramm
