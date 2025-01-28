@@ -15,14 +15,14 @@ class GraphEditorApp:
         # Hauptvariablen
         # Liste der Polygone (jeweils als Liste von Punkten)
         self.polygons = []
-        self.drawing_mode = False  # Zeichnen aktivieren/deaktivieren
+        self.drawing_mode = True  # Zeichnen aktivieren/deaktivieren
         self.current_polygon = []  # Punkte des aktuellen Polygons
 
         self.button_frame = tk.Frame(self.root)
         self.button_frame.grid(row=0, column=0, padx=50)
         # Buttons
         self.draw_polygon_btn = tk.Button(
-            self.button_frame, text="Draw", command=self.toggle_drawing_mode)
+            self.button_frame, text="Draw", command=self.draw)
         self.clear_btn = tk.Button(
             self.button_frame, text="Clear Canvas", command=self.clear_canvas)
         self.remove_btn = tk.Button(
@@ -71,19 +71,16 @@ class GraphEditorApp:
         self.canvas.create_polygon(
             poly, outline="black", fill="", width=2)
 
-    def toggle_drawing_mode(self):
+    def draw(self):
         """Aktiviert oder deaktiviert den Polygon-Zeichenmodus."""
         if not self.drawing_mode:
-            self.draw_polygon_btn.config(text="Finish Polygon")
-            self.current_polygon = []  # Leere Punkte für neues Polygon
-        else:
-            if len(self.current_polygon) <= 2:  # Nur gültig, wenn mehr als 2 Punkte
-                return
-            self.polygons.append(self.current_polygon)
-            self.draw_polygon(self.current_polygon)
-            self.draw_polygon_btn.config(text="Start Polygon")
-            self.current_polygon = []
-        self.drawing_mode = not self.drawing_mode
+            return
+        if len(self.current_polygon) <= 2:  # Nur gültig, wenn mehr als 2 Punkte
+            self.show_popup("Error", "mehr als zwei Punkte")
+            return
+        self.polygons.append(self.current_polygon)
+        self.draw_polygon(self.current_polygon)
+        self.current_polygon = []
 
     def on_canvas_click(self, event):
         """Fügt einen Punkt zum Polygon hinzu, wenn der Zeichenmodus aktiv ist."""
@@ -100,6 +97,10 @@ class GraphEditorApp:
         self.current_polygon.clear()
 
     def generate(self):
+        self.drawing_mode = False
+        self.draw_polygon_btn.config(state="disabled")
+        self.remove_btn.config(state="disabled")
+        self.clear_btn.config(state="disabled")
         self.show_popup("gen", "generate")
 
     def remove(self):
