@@ -47,7 +47,7 @@ def random_cluster(center: Coord, count: int) -> list[Coord]:
     return cluster
 
 
-def generate_polygons(count: int, height: int, width: int, overlap: bool) -> list[Polygon]:
+def generate_polygons(count: int, height: int, width: int, overlap: bool, poly_list: list[Polygon] = []) -> list[Polygon]:
     """
     Generiert zufällige Polygone auf dem Screen.
 
@@ -59,10 +59,11 @@ def generate_polygons(count: int, height: int, width: int, overlap: bool) -> lis
     :return list[Polygon]: Eine Liste, die die genrierten Polygone enthält.
     """
     polygon_list = []
-    for _ in range(count):
+    for i in range(count):
         while True:
             center = random_coord_global(height, width)
-            hull = create_convex_hull(random_cluster(center, CONST.CLUSTER_SIZE))
+            hull = create_convex_hull(
+                random_cluster(center, CONST.CLUSTER_SIZE))
             polygon = Polygon(hull)
             if overlap == False:
                 i = 0
@@ -75,10 +76,19 @@ def generate_polygons(count: int, height: int, width: int, overlap: bool) -> lis
                     polygon_list.append(polygon)
                     break
             else:
-                polygon_list.append(polygon)
+                poly_in_obstacle = 0
+                for poly in poly_list:
+                    if shap.Polygon(
+                        [(coord.x, coord.y) for coord in poly.hull]).within(shap.Polygon(
+                            [(coord.x, coord.y) for coord in polygon.hull])):
+                        poly_in_obstacle = 1
+                if not poly_in_obstacle:
+                    polygon_list.append(polygon)
+                else:
+                    i = i-1
                 break
     return polygon_list
-    
+
 
 def create_convex_hull(points: list[Coord]) -> list[Coord]:
     """
@@ -169,8 +179,10 @@ def do_polygons_overlap(polygon1: Polygon, polygon2: Polygon) -> bool:
 
 
 def do_bounding_boxes_overlap(polygon1: Polygon, polygon2: Polygon):
-    minx1, miny1, maxx1, maxy1 = shap.Polygon([(coord.x, coord.y) for coord in polygon1.hull]).bounds
-    minx2, miny2, maxx2, maxy2 = shap.Polygon([(coord.x, coord.y) for coord in polygon2.hull]).bounds
+    minx1, miny1, maxx1, maxy1 = shap.Polygon(
+        [(coord.x, coord.y) for coord in polygon1.hull]).bounds
+    minx2, miny2, maxx2, maxy2 = shap.Polygon(
+        [(coord.x, coord.y) for coord in polygon2.hull]).bounds
     return not (maxx1 < minx2 or maxx2 < minx1 or maxy1 < miny2 or maxy2 < miny1)
 
 
@@ -362,7 +374,7 @@ def find_best_polygon_list(polygon_list: list[Polygon]) -> list[Polygon]:
     return current
 
 
-def find_best_polygon_list_2(own_polygon_list: list[Polygon]) -> list[Polygon]:
+def find_best_polygon_list_2(own_polygon_list: list[Polygon], own_obstacle_list: list[Polygon]) -> list[Polygon]:
     def find_intersection() -> bool:
         for x, y in itertools.combinations(range(len(polygon_list)), 2):
             # Berechne die Schnittmenge
@@ -370,21 +382,29 @@ def find_best_polygon_list_2(own_polygon_list: list[Polygon]) -> list[Polygon]:
 
             # Prüfen, ob eine Schnittmenge existiert
             if not intersection.is_empty:
-                del polygon_list[x]
-                if x < y:
-                    del polygon_list[y-1]
-                else:
-                    del polygon_list[y]
-                polygon_list.append(intersection)
-                return True
+                in_obstacle = 0
+                for obs in obstacle_list:
+                    if intersection.within(obs):
+                        in_obstacle = 1
+                if not in_obstacle:
+                    del polygon_list[x]
+                    if x < y:
+                        del polygon_list[y-1]
+                    else:
+                        del polygon_list[y]
+                    polygon_list.append(intersection)
+                    return True
         return False
 
     MAX_INTERATIONS = 300
     polygon_list = []
-
+    obstacle_list = []
     for old_poly in own_polygon_list:
         polygon_list.append(shap.Polygon(
             [(coord.x, coord.y) for coord in old_poly.hull]))
+    for old_obs in own_obstacle_list:
+        obstacle_list.append(shap.Polygon(
+            [(coord.x, coord.y) for coord in old_obs.hull]))
 
     for _ in range(MAX_INTERATIONS):
         if not find_intersection():
