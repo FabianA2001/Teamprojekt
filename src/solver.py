@@ -42,7 +42,8 @@ def calculate_dis_angle(points: list[Coord]):
 
 
 def caluculate_angle(p1, p2, p3):
-    assert ((p1 != p2) and (p1 != p3) and (p2 != p3))
+    if not ((p1 != p2) and (p1 != p3) and (p2 != p3)):
+        return 0
     # Berechne die Vektoren zwischen den Punkten
     vec_a = (p2.x - p1.x, p2.y - p1.y)
     vec_b = (p3.x - p2.x, p3.y - p2.y)
