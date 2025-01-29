@@ -1,4 +1,5 @@
 import tkinter as tk
+import generate
 import random
 
 import CONST
@@ -119,17 +120,18 @@ class GraphEditorApp:
         self.clear_btn.config(state="disabled")
         self.canvas.delete("all")
 
-        polys_poly = []
+        polygon_list = []
         for poly in self.polygons:
             poly_coord: list[CONST.Coord] = []
             for point in poly:
                 poly_coord.append(CONST.Coord(point[0], point[1]))
-            polys_poly.append(CONST.Polygon(poly_coord))
-        inst = Instanze("Blank", polys_poly)
+            polygon_list.append(CONST.Polygon(poly_coord))
+        inst = Instanze("Blank", polygon_list)
         self.instes.append(inst)
         self.listbox.insert(tk.END, self.instes[0].name)
+        best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
 
-        self.instes.append(Instanze("zwei", poly=polys_poly[:2]))
+        self.instes.append(Instanze("überschneidung", poly=best_polygon_list))
         self.listbox.insert(tk.END, self.instes[1].name)
 
     def remove(self):
