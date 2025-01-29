@@ -63,14 +63,36 @@ class GraphEditorApp:
 
         self.lower_frame = tk.Frame(
             self.root)
-        self.lower_frame.pack(pady=10)
+        self.lower_frame.pack(pady=10, side='left')
+
+        self.listbox_frame = tk.Frame(self.lower_frame)
+        self.listbox_frame.pack(side='left', fill="y", padx=4)
         # Listbox erstellen
-        self.listbox = tk.Listbox(self.lower_frame, font=(
+        self.listbox = tk.Listbox(self.listbox_frame, font=(
             "Arial", 12), selectmode=tk.SINGLE, width=30)
         # sticky sorgt dafür, dass die Listbox den Frame füllt
-        self.listbox.pack(side='left', fill="y", pady=3)
+        self.listbox.pack(fill="both", expand=True, pady=3)
         # Ereignisbindung für die Auswahl
         self.listbox.bind("<<ListboxSelect>>", self.on_item_selected)
+
+        self.stats_frame = tk.Frame(self.listbox_frame)
+        self.stats_frame.pack(fill="both", expand=True, pady=3)
+
+        self.dis_box = tk.Listbox(self.stats_frame, font=(
+            "Arial", 12), justify="right")
+        self.dis_box.pack(fill="both", side="left",
+                          expand=True, pady=3, padx=2)
+
+        self.angle_box = tk.Listbox(self.stats_frame, font=(
+            "Arial", 12), justify="right")
+        # sticky sorgt dafür, dass die Listbox den Frame füllt
+        self.angle_box.pack(fill="both", side="left",
+                            expand=True, pady=3, padx=2)
+
+        self.dis_box.insert(tk.END, "Distanze ")
+        self.dis_box.insert(tk.END, "-"*30 + "  ")
+        self.angle_box.insert(tk.END, "Winkel ")
+        self.angle_box.insert(tk.END, "-" * 30 + "  ")
 
         # Canvas für Graph
         self.canvas = tk.Canvas(
@@ -126,13 +148,15 @@ class GraphEditorApp:
             for point in poly:
                 poly_coord.append(CONST.Coord(point[0], point[1]))
             polygon_list.append(CONST.Polygon(poly_coord))
-        inst = Instanze("Blank", polygon_list)
-        self.instes.append(inst)
-        self.listbox.insert(tk.END, self.instes[0].name)
-        best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
 
+        self.instes.append(Instanze("Blank", polygon_list))
+        self.listbox.insert(tk.END, self.instes[0].name)
+        self.print_stats(1234.234, 1231718923)
+
+        best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
         self.instes.append(Instanze("überschneidung", poly=best_polygon_list))
         self.listbox.insert(tk.END, self.instes[1].name)
+        self.print_stats(12000034.234, 1231)
 
     def remove(self):
         if len(self.polygons) == 0:
@@ -180,6 +204,10 @@ class GraphEditorApp:
         # Add a button to close the popup
         button = tk.Button(popup, text="Close", command=popup.destroy)
         button.pack()
+
+    def print_stats(self, dis: float, angle: float):
+        self.dis_box.insert(tk.END, str(round(dis, 2)) + " ")
+        self.angle_box.insert(tk.END, str(round(angle, 2)) + " ")
 
 
 # Hauptprogramm
