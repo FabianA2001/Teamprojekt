@@ -206,8 +206,8 @@ class GraphEditorApp:
         button.pack()
 
     def print_stats(self, dis: float, angle: float):
-        self.dis_box.insert(tk.END, str(round(dis, 2)) + " ")
-        self.angle_box.insert(tk.END, str(round(angle, 2)) + " ")
+        self.dis_box.insert(tk.END, f" {dis:.2f}")
+        self.angle_box.insert(tk.END, f" {angle:.2f}")
 
 
 # Hauptprogramm
