@@ -425,6 +425,11 @@ def change_point_in_obstacle(tour: list[Coord], obstacles_list: list[Polygon], p
                             kom = 1
                         else:
                             res.append(point)
+
+                    if l >= 5:
+                        for pointt in list(polygons[poly].exterior.coords):
+                            if (not obstacle.contains(shap.Point(pointt[0], pointt[1]))) and (not obstacle.boundary.contains(shap.Point(pointt[0], pointt[1]))):
+                                res.append(Coord(pointt[0], pointt[1]))
                     if res == []:
                         l += 1
                         # print("no change")
