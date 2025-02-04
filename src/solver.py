@@ -155,7 +155,7 @@ def move_points(polygon_list, points):
             for point in new_points:
                 new_angle = caluculate_angle(
                     points[i-1], point, points[i+1])
-                if new_angle < current_angle:
+                if new_angle <= current_angle-1:
                     current_angle = new_angle
                     points[i] = point
     # for point in points:
