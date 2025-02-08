@@ -3,6 +3,10 @@ import generate
 import random
 
 import CONST
+import cpp_wrapper
+import solver
+from reconnect_folder import reconnect
+# from Formatted_listbox import EditableFormattedListbox
 
 
 class Instanze:
@@ -56,10 +60,14 @@ class GraphEditorApp:
             self.button_frame, text="Remove", command=self.remove)
         self.generate_btn = tk.Button(
             self.button_frame, text="Generate", command=self.generate)
+        self.reset_btn = tk.Button(
+            self.button_frame, text="reset", command=self.reset)
+
         self.draw_polygon_btn.pack(side='left')
         self.clear_btn.pack(side='left')
         self.remove_btn.pack(side='left')
         self.generate_btn.pack(side='left')
+        self.reset_btn.pack(side='left')
 
         self.lower_frame = tk.Frame(
             self.root)
@@ -77,6 +85,8 @@ class GraphEditorApp:
 
         self.stats_frame = tk.Frame(self.listbox_frame)
         self.stats_frame.pack(fill="both", expand=True, pady=3)
+#
+        # self.dis_box = EditableFormattedListbox
 
         self.dis_box = tk.Listbox(self.stats_frame, font=(
             "Arial", 12), justify="right")
@@ -140,7 +150,7 @@ class GraphEditorApp:
         self.draw_polygon_btn.config(state="disabled")
         self.remove_btn.config(state="disabled")
         self.clear_btn.config(state="disabled")
-        self.canvas.delete("all")
+        self.generate_btn.config(state="disabled")
 
         polygon_list = []
         for poly in self.polygons:
@@ -151,12 +161,84 @@ class GraphEditorApp:
 
         self.instes.append(Instanze("Blank", polygon_list))
         self.listbox.insert(tk.END, self.instes[0].name)
-        self.print_stats(1234.234, 1231718923)
+        self.print_stats(0, 0)
 
         best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
         self.instes.append(Instanze("überschneidung", poly=best_polygon_list))
-        self.listbox.insert(tk.END, self.instes[1].name)
-        self.print_stats(12000034.234, 1231)
+        self.listbox.insert(tk.END, self.instes[-1].name)
+        self.print_stats(0, 0)
+
+        all_points = [i.hull.copy() for i in best_polygon_list]
+        points = [poly.centroid for poly in best_polygon_list]
+        for index, point in enumerate(points):
+            all_points[index].append(point)
+
+        points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
+        points = CONST.to_coord(points)
+        dis, angle = solver.calculate_dis_angle(points)
+        self.print_stats(dis, angle)
+        self.instes.append(
+            Instanze("farthest_insertion", poly=best_polygon_list, points=points))
+        self.listbox.insert(tk.END, self.instes[-1].name)
+
+        points = cpp_wrapper.ruin_and_recreate(
+            [tuple(i) for i in points], 3000, 0.3, 1.2)
+        points = CONST.to_coord(points)
+        dis, angle = solver.calculate_dis_angle(points)
+        self.print_stats(dis, angle)
+        self.instes.append(
+            Instanze("ruin and recreate", poly=best_polygon_list, points=points))
+        self.listbox.insert(tk.END, self.instes[-1].name)
+
+        points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
+        points = CONST.to_coord(points)
+        dis, angle = solver.calculate_dis_angle(points)
+        self.print_stats(dis, angle)
+        self.instes.append(
+            Instanze("two opt", poly=best_polygon_list, points=points))
+        self.listbox.insert(tk.END, self.instes[-1].name)
+
+        points = solver.gurobi_solver(all_points, points)
+        dis, angle = solver.calculate_dis_angle(points)
+        self.print_stats(dis, angle)
+        self.instes.append(
+            Instanze("Gurobi", poly=best_polygon_list, points=points))
+        self.listbox.insert(tk.END, self.instes[-1].name)
+
+        for _ in range(6):
+            center_point = cpp_wrapper.get_point_with_max_angle(
+                [tuple(i) for i in points])
+            points = reconnect.optimize_the_closest(
+                [tuple(i) for i in points], tuple(center_point))
+
+        center_point = CONST.Coord(center_point[0], center_point[1])
+        points = CONST.to_coord(points)
+        dis, angle = solver.calculate_dis_angle(points)
+        self.print_stats(dis, angle)
+        self.instes.append(
+            Instanze("second run and recreate", poly=best_polygon_list, points=points))
+        self.listbox.insert(tk.END, self.instes[-1].name)
+
+        points = solver.move_points(best_polygon_list, points)
+        dis, angle = solver.calculate_dis_angle(points)
+        self.print_stats(dis, angle)
+        self.instes.append(
+            Instanze("move points", poly=best_polygon_list, points=points))
+        self.listbox.insert(tk.END, self.instes[-1].name)
+
+    def reset(self):
+        self.canvas.delete("all")
+        self.polygons.clear()
+        self.drawing_mode = True  # Zeichnen aktivieren/deaktivieren
+        self.current_polygon.clear()
+        self.instes.clear()
+        self.draw_polygon_btn.config(state="normal")
+        self.remove_btn.config(state="normal")
+        self.clear_btn.config(state="normal")
+        self.generate_btn.config(state="normal")
+        self.listbox.delete(0, tk.END)
+        self.angle_box.delete(2, tk.END)
+        self.dis_box.delete(2, tk.END)
 
     def remove(self):
         if len(self.polygons) == 0:
@@ -171,13 +253,24 @@ class GraphEditorApp:
         # Ausgewählte Elemente abrufen
         selected_indices = self.listbox.curselection()  # Index der ausgewählten Elemente
         if selected_indices:
-            inst = self.instes[selected_indices[0]]
+            index = selected_indices[0]
+            inst = self.instes[index]
             # Text des ausgewählten Elements
             self.canvas.delete("all")
-            for poly in inst.polygone_tuple:
-                self.draw_polygon(poly)
+            self.draw_instanze(inst)
+            self.dis_box.selection_set(index + 2)
+            self.angle_box.selection_set(index + 2)
+
+    def draw_instanze(self, inst: Instanze) -> None:
+        for poly in inst.polygone_tuple:
+            self.draw_polygon(poly)
+
+        if len(inst.points_tuple) >= 3:
+            self.canvas.create_polygon(
+                inst.points_tuple, outline="red", fill="", width=2)
 
     # Function to show the popup
+
     def show_popup(self, titel, text):
         # Fenstergröße ermitteln
         window_width = 300
