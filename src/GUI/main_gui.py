@@ -61,11 +61,14 @@ class GraphEditorApp:
         self.generate_btn = tk.Button(
             self.button_frame, text="Generate", command=self.generate)
         self.reset_btn = tk.Button(
-            self.button_frame, text="reset", command=self.reset)
+            self.button_frame, text="Reset", command=self.reset)
+        self.random_btn = tk.Button(
+            self.button_frame, text="Random", command=self.random)
 
         self.draw_polygon_btn.pack(side='left')
         self.clear_btn.pack(side='left')
         self.remove_btn.pack(side='left')
+        self.random_btn.pack(side='left')
         self.generate_btn.pack(side='left')
         self.reset_btn.pack(side='left')
 
@@ -145,12 +148,39 @@ class GraphEditorApp:
         self.polygons.clear()
         self.current_polygon.clear()
 
+    def random(self):
+        self.drawing_mode = False
+        self.draw_polygon_btn.config(state="disabled")
+        self.remove_btn.config(state="disabled")
+        self.clear_btn.config(state="disabled")
+        self.generate_btn.config(state="disabled")
+        self.random_btn.config(state="disabled")
+
+        height = self.SCREEN_HEIGHT * CONST.ANTIALIAS_FACTOR
+        width = self.SCREEN_WIDTH * CONST.ANTIALIAS_FACTOR
+        polygon_list: list[CONST.Polygon] = generate.generate_polygons(
+            10, height, width, True)
+        print("pol")
+        print(type(polygon_list[0]))
+        # obstacle_list = generate.generate_polygons(
+        # 4, height, width, False)
+        print("obs")
+        self.polygons = polygon_list
+
+        self.instes.append(
+            Instanze("Random", poly=polygon_list))
+        print("app")
+        self.listbox.insert(tk.END, self.instes[0].name)
+        print("list")
+        self.print_stats(0, 0)
+
     def generate(self):
         self.drawing_mode = False
         self.draw_polygon_btn.config(state="disabled")
         self.remove_btn.config(state="disabled")
         self.clear_btn.config(state="disabled")
         self.generate_btn.config(state="disabled")
+        self.random_btn.config(state="disabled")
 
         polygon_list = []
         for poly in self.polygons:
@@ -178,7 +208,7 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("farthest_insertion", poly=best_polygon_list, points=points))
+            Instanze("farthest_insertion", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         points = cpp_wrapper.ruin_and_recreate(
@@ -187,7 +217,7 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("ruin and recreate", poly=best_polygon_list, points=points))
+            Instanze("ruin and recreate", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
@@ -195,14 +225,14 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("two opt", poly=best_polygon_list, points=points))
+            Instanze("two opt", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         points = solver.gurobi_solver(all_points, points)
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("Gurobi", poly=best_polygon_list, points=points))
+            Instanze("Gurobi", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         for _ in range(6):
@@ -216,14 +246,14 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("second run and recreate", poly=best_polygon_list, points=points))
+            Instanze("second run and recreate", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
-        points = solver.move_points(best_polygon_list, points)
+        points = solver.move_points(polygon_list, points)
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("move points", poly=best_polygon_list, points=points))
+            Instanze("move points", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
     def reset(self):
@@ -236,6 +266,7 @@ class GraphEditorApp:
         self.remove_btn.config(state="normal")
         self.clear_btn.config(state="normal")
         self.generate_btn.config(state="normal")
+        self.random_btn.config(state="normal")
         self.listbox.delete(0, tk.END)
         self.angle_box.delete(2, tk.END)
         self.dis_box.delete(2, tk.END)
