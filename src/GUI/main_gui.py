@@ -156,10 +156,12 @@ class GraphEditorApp:
         self.generate_btn.config(state="disabled")
         self.random_btn.config(state="disabled")
 
-        height = self.SCREEN_HEIGHT * CONST.ANTIALIAS_FACTOR
-        width = self.SCREEN_WIDTH * CONST.ANTIALIAS_FACTOR
+        height = self.SCREEN_HEIGHT  # * CONST.ANTIALIAS_FACTOR
+        width = self.SCREEN_WIDTH  # * CONST.ANTIALIAS_FACTOR
+        print(self.SCREEN_HEIGHT, self.SCREEN_WIDTH)
+        print(height, width)
         polygon_list: list[CONST.Polygon] = generate.generate_polygons(
-            10, height, width, True)
+            CONST.POLYGON_COUNT, height, width, True)
         print("pol")
         print(type(polygon_list[0]))
         # obstacle_list = generate.generate_polygons(
@@ -172,6 +174,7 @@ class GraphEditorApp:
         print("app")
         self.listbox.insert(tk.END, self.instes[0].name)
         print("list")
+        self.draw_instanze(self.instes[0])
         self.print_stats(0, 0)
 
     def generate(self):
