@@ -45,6 +45,7 @@ class GraphEditorApp:
         # Hauptvariablen
         # Liste der Polygone (jeweils als Liste von Punkten)
         self.polygons = []
+        self.obsticles = []
         self.drawing_mode = True  # Zeichnen aktivieren/deaktivieren
         self.current_polygon = []  # Punkte des aktuellen Polygons
         self.instes: list[Instanze] = []
@@ -125,7 +126,7 @@ class GraphEditorApp:
 
     def draw_obstacle(self, poly):
         self.canvas.create_polygon(
-            poly, outline="red", fill="", width=2)
+            poly, outline="darkred", fill="", width=2)
 
     def draw(self):
         """Aktiviert oder deaktiviert den Polygon-Zeichenmodus."""
@@ -157,7 +158,7 @@ class GraphEditorApp:
         self.draw_polygon_btn.config(state="disabled")
         self.remove_btn.config(state="disabled")
         self.clear_btn.config(state="disabled")
-        self.generate_btn.config(state="disabled")
+        # self.generate_btn.config(state="disabled")
         self.random_btn.config(state="disabled")
 
         height = self.SCREEN_HEIGHT  # * CONST.ANTIALIAS_FACTOR
@@ -173,6 +174,7 @@ class GraphEditorApp:
             4, width, height, False)
         print("obs")
         self.polygons = polygon_list
+        self.obsticles = obstacle_list
 
         self.instes.append(
             Instanze("Random", poly=polygon_list, obsticales=obstacle_list))
@@ -191,18 +193,20 @@ class GraphEditorApp:
         self.random_btn.config(state="disabled")
 
         polygon_list = []
-        for poly in self.polygons:
-            poly_coord: list[CONST.Coord] = []
-            for point in poly:
-                poly_coord.append(CONST.Coord(point[0], point[1]))
-            polygon_list.append(CONST.Polygon(poly_coord))
+        polygon_list = self.polygons
+        # for poly in self.polygons:
+        #     poly_coord: list[CONST.Coord] = []
+        #     for point in poly:
+        #         poly_coord.append(CONST.Coord(point[0], point[1]))
+        #     polygon_list.append(CONST.Polygon(poly_coord))
 
         self.instes.append(Instanze("Blank", polygon_list))
         self.listbox.insert(tk.END, self.instes[0].name)
         self.print_stats(0, 0)
 
         best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
-        self.instes.append(Instanze("überschneidung", poly=best_polygon_list))
+        self.instes.append(
+            Instanze("überschneidung", poly=best_polygon_list, obsticales=self.obsticles))
         self.listbox.insert(tk.END, self.instes[-1].name)
         self.print_stats(0, 0)
 
@@ -216,7 +220,7 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("farthest_insertion", poly=polygon_list, points=points))
+            Instanze("farthest_insertion", poly=polygon_list, obsticales=self.obsticles, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         points = cpp_wrapper.ruin_and_recreate(
@@ -225,7 +229,7 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("ruin and recreate", poly=polygon_list, points=points))
+            Instanze("ruin and recreate", poly=polygon_list, obsticales=self.obsticles, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
@@ -233,14 +237,14 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("two opt", poly=polygon_list, points=points))
+            Instanze("two opt", poly=polygon_list, obsticales=self.obsticles, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         points = solver.gurobi_solver(all_points, points)
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("Gurobi", poly=polygon_list, points=points))
+            Instanze("Gurobi", poly=polygon_list, obsticales=self.obsticles, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         for _ in range(6):
@@ -254,14 +258,23 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("second run and recreate", poly=polygon_list, points=points))
+            Instanze("second run and recreate", poly=polygon_list, obsticales=self.obsticles, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         points = solver.move_points(polygon_list, points)
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("move points", poly=polygon_list, points=points))
+            Instanze("move points", poly=polygon_list, obsticales=self.obsticles, points=points))
+        self.listbox.insert(tk.END, self.instes[-1].name)
+
+        points = solver.change_point_in_obstacle(
+            points, self.obsticles, best_polygon_list)
+        points = solver.find_obstacle_plus_bypass(points, self.obsticles)
+        dis, angle = solver.calculate_dis_angle(points)
+        self.print_stats(dis, angle)
+        self.instes.append(
+            Instanze("move around obstacles", poly=polygon_list, obsticales=self.obsticles, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
     def reset(self):
