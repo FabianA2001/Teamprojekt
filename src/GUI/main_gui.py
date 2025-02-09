@@ -123,6 +123,10 @@ class GraphEditorApp:
         self.canvas.create_polygon(
             poly, outline="black", fill="", width=2)
 
+    def draw_obstacle(self, poly):
+        self.canvas.create_polygon(
+            poly, outline="red", fill="", width=2)
+
     def draw(self):
         """Aktiviert oder deaktiviert den Polygon-Zeichenmodus."""
         if not self.drawing_mode:
@@ -161,16 +165,17 @@ class GraphEditorApp:
         print(self.SCREEN_HEIGHT, self.SCREEN_WIDTH)
         print(height, width)
         polygon_list: list[CONST.Polygon] = generate.generate_polygons(
-            CONST.POLYGON_COUNT, height, width, True)
+            20, width, height, True)
         print("pol")
-        print(type(polygon_list[0]))
-        # obstacle_list = generate.generate_polygons(
-        # 4, height, width, False)
+        for poly in polygon_list:
+            print(poly.centroid)
+        obstacle_list = generate.generate_polygons(
+            4, width, height, False)
         print("obs")
         self.polygons = polygon_list
 
         self.instes.append(
-            Instanze("Random", poly=polygon_list))
+            Instanze("Random", poly=polygon_list, obsticales=obstacle_list))
         print("app")
         self.listbox.insert(tk.END, self.instes[0].name)
         print("list")
@@ -298,6 +303,9 @@ class GraphEditorApp:
     def draw_instanze(self, inst: Instanze) -> None:
         for poly in inst.polygone_tuple:
             self.draw_polygon(poly)
+
+        for obs in inst.obsticales_tuple:
+            self.draw_polygon(obs)
 
         if len(inst.points_tuple) >= 3:
             self.canvas.create_polygon(
