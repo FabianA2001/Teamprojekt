@@ -226,10 +226,11 @@ class GraphEditorApp:
                 poly_coord: list[CONST.Coord] = []
                 for point in poly:
                     poly_coord.append(CONST.Coord(point[0], point[1]))
-                polygon_list.append(CONST.Polygon(poly_coord))
+                obs_list.append(CONST.Polygon(poly_coord))
             self.obsticles = obs_list
 
-        self.instes.append(Instanze("Blank", polygon_list))
+        self.instes.append(
+            Instanze("Blank", polygon_list, obsticales=self.obsticles))
         self.listbox.insert(tk.END, self.instes[0].name)
         self.print_stats(0, 0)
 
