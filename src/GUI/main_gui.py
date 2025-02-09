@@ -49,12 +49,16 @@ class GraphEditorApp:
         self.drawing_mode = True  # Zeichnen aktivieren/deaktivieren
         self.current_polygon = []  # Punkte des aktuellen Polygons
         self.instes: list[Instanze] = []
+        self.drawP = False
+        self.drawO = False
 
         self.button_frame = tk.Frame(self.root)
         self.button_frame.pack()
         # Buttons
         self.draw_polygon_btn = tk.Button(
             self.button_frame, text="Draw", command=self.draw)
+        self.draw_obstacle_btn = tk.Button(
+            self.button_frame, text="Draw Obstacle", command=self.draw_obs)
         self.clear_btn = tk.Button(
             self.button_frame, text="Clear Canvas", command=self.clear_canvas)
         self.remove_btn = tk.Button(
@@ -67,6 +71,7 @@ class GraphEditorApp:
             self.button_frame, text="Random", command=self.random)
 
         self.draw_polygon_btn.pack(side='left')
+        self.draw_obstacle_btn.pack(side='left')
         self.clear_btn.pack(side='left')
         self.remove_btn.pack(side='left')
         self.random_btn.pack(side='left')
@@ -130,6 +135,7 @@ class GraphEditorApp:
 
     def draw(self):
         """Aktiviert oder deaktiviert den Polygon-Zeichenmodus."""
+        self.drawP = True
         if not self.drawing_mode:
             return
         if len(self.current_polygon) <= 2:  # Nur gültig, wenn mehr als 2 Punkte
@@ -137,6 +143,18 @@ class GraphEditorApp:
             return
         self.polygons.append(self.current_polygon)
         self.draw_polygon(self.current_polygon)
+        self.current_polygon = []
+
+    def draw_obs(self):
+        """Aktiviert oder deaktiviert den Polygon-Zeichenmodus."""
+        self.drawO = True
+        if not self.drawing_mode:
+            return
+        if len(self.current_polygon) <= 2:  # Nur gültig, wenn mehr als 2 Punkte
+            self.show_popup("Error", "mehr als zwei Punkte")
+            return
+        self.obsticles.append(self.current_polygon)
+        self.draw_obstacle(self.current_polygon)
         self.current_polygon = []
 
     def on_canvas_click(self, event):
@@ -194,11 +212,22 @@ class GraphEditorApp:
 
         polygon_list = []
         polygon_list = self.polygons
-        # for poly in self.polygons:
-        #     poly_coord: list[CONST.Coord] = []
-        #     for point in poly:
-        #         poly_coord.append(CONST.Coord(point[0], point[1]))
-        #     polygon_list.append(CONST.Polygon(poly_coord))
+
+        if self.drawP:
+            polygon_list = []
+            for poly in self.polygons:
+                poly_coord: list[CONST.Coord] = []
+                for point in poly:
+                    poly_coord.append(CONST.Coord(point[0], point[1]))
+                polygon_list.append(CONST.Polygon(poly_coord))
+        if self.drawO:
+            obs_list = []
+            for poly in self.obsticles:
+                poly_coord: list[CONST.Coord] = []
+                for point in poly:
+                    poly_coord.append(CONST.Coord(point[0], point[1]))
+                polygon_list.append(CONST.Polygon(poly_coord))
+            self.obsticles = obs_list
 
         self.instes.append(Instanze("Blank", polygon_list))
         self.listbox.insert(tk.END, self.instes[0].name)
