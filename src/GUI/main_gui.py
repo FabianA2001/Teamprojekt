@@ -305,7 +305,7 @@ class GraphEditorApp:
             self.draw_polygon(poly)
 
         for obs in inst.obsticales_tuple:
-            self.draw_polygon(obs)
+            self.draw_obstacle(obs)
 
         if len(inst.points_tuple) >= 3:
             self.canvas.create_polygon(
