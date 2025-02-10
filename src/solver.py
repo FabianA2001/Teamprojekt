@@ -58,8 +58,6 @@ def caluculate_angle(p1, p2, p3):
     if mag_a == 0 or mag_b == 0:
         return 0
 
-    assert (mag_a != 0 and mag_b != 0)
-
     # Berechne den Winkel zwischen den Vektoren
     dot_product = vec_a[0] * vec_b[0] + vec_a[1] * vec_b[1]
     cos_theta = dot_product / (mag_a * mag_b)
