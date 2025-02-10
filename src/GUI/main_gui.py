@@ -337,7 +337,7 @@ class GraphEditorApp:
 
         if len(inst.points_tuple) >= 3:
             self.canvas.create_polygon(
-                inst.points_tuple, outline="red", fill="", width=2)
+                inst.points_tuple, outline="red", fill="", width=4)
 
     # Function to show the popup
 
