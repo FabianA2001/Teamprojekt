@@ -9,21 +9,22 @@ from reconnect_folder import reconnect
 # from Formatted_listbox import EditableFormattedListbox
 
 
+def get_poly_tupel(polys: list[CONST.Polygon]):
+    result = []
+    for poly in polys:
+        poly_list = []
+        for point in poly.hull:
+            poly_list.append(tuple(point))
+        result.append(poly_list)
+    return result
+
+
 class Instanze:
     def __init__(self, name: str, poly=[], points=[], obsticales=[]) -> None:
         self.name = name
-        self.polygone_tuple = self.get_poly_tupel(poly)
-        self.obsticales_tuple = self.get_poly_tupel(obsticales)
+        self.polygone_tuple = get_poly_tupel(poly)
+        self.obsticales_tuple = get_poly_tupel(obsticales)
         self.points_tuple = self.get_points_tuple(points)
-
-    def get_poly_tupel(self, polys: list[CONST.Polygon]):
-        result = []
-        for poly in polys:
-            poly_list = []
-            for point in poly.hull:
-                poly_list.append(tuple(point))
-            result.append(poly_list)
-        return result
 
     def get_points_tuple(self, points):
         result = []
@@ -172,35 +173,14 @@ class GraphEditorApp:
         self.current_polygon.clear()
 
     def random(self):
-        self.drawing_mode = False
-        self.draw_polygon_btn.config(state="disabled")
-        self.remove_btn.config(state="disabled")
-        self.clear_btn.config(state="disabled")
-        # self.generate_btn.config(state="disabled")
-        self.random_btn.config(state="disabled")
-
         height = self.SCREEN_HEIGHT  # * CONST.ANTIALIAS_FACTOR
         width = self.SCREEN_WIDTH  # * CONST.ANTIALIAS_FACTOR
-        print(self.SCREEN_HEIGHT, self.SCREEN_WIDTH)
-        print(height, width)
         polygon_list: list[CONST.Polygon] = generate.generate_polygons(
             20, width, height, True)
-        print("pol")
-        for poly in polygon_list:
-            print(poly.centroid)
-        obstacle_list = generate.generate_polygons(
-            4, width, height, False)
-        print("obs")
-        self.polygons = polygon_list
-        self.obsticles = obstacle_list
-
-        self.instes.append(
-            Instanze("Random", poly=polygon_list, obsticales=obstacle_list))
-        print("app")
-        self.listbox.insert(tk.END, self.instes[0].name)
-        print("list")
-        self.draw_instanze(self.instes[0])
-        self.print_stats(0, 0)
+        polys_tuple = get_poly_tupel(polygon_list)
+        self.polygons.append(polys_tuple)
+        for poly in polys_tuple:
+            self.draw_polygon(poly)
 
     def generate(self):
         self.drawing_mode = False
@@ -209,6 +189,7 @@ class GraphEditorApp:
         self.clear_btn.config(state="disabled")
         self.generate_btn.config(state="disabled")
         self.random_btn.config(state="disabled")
+        self.draw_obstacle_btn.config(state="disabled")
 
         polygon_list = []
         polygon_list = self.polygons
@@ -318,6 +299,7 @@ class GraphEditorApp:
         self.clear_btn.config(state="normal")
         self.generate_btn.config(state="normal")
         self.random_btn.config(state="normal")
+        self.draw_obstacle_btn.config(state="normal")
         self.listbox.delete(0, tk.END)
         self.angle_box.delete(2, tk.END)
         self.dis_box.delete(2, tk.END)
