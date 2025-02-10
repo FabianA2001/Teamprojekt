@@ -275,12 +275,12 @@ class GraphEditorApp:
             Instanze("second run and recreate", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
-        # points = solver.move_points(polygon_list, points)
-        # dis, angle = solver.calculate_dis_angle(points)
-        # self.print_stats(dis, angle)
-        # self.instes.append(
-        #     Instanze("move points", poly=polygon_list, obsticales=self.obsticles, points=points))
-        # self.listbox.insert(tk.END, self.instes[-1].name)
+        points = solver.move_points(best_polygon_list, points)
+        dis, angle = solver.calculate_dis_angle(points)
+        self.print_stats(dis, angle)
+        self.instes.append(
+            Instanze("move points", poly=polygon_list, points=points))
+        self.listbox.insert(tk.END, self.instes[-1].name)
 
         # points = solver.change_point_in_obstacle(
         #     points, self.obsticles, best_polygon_list)

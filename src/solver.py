@@ -149,7 +149,7 @@ def move_points(polygon_list, points):
             k = 0
             while k < 5:
                 new_point = generate.random_coord_local(
-                    points[i], 500-(100*j), 6)
+                    points[i], 100-(10*j), 6)
                 # if generate.is_point_inside_polygon(new_point, polygon_list[poly],):
                 #     new_points.append(new_point)
                 #     k += 1
