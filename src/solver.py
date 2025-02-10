@@ -33,7 +33,12 @@ def calculate_turn_angles(path):
         # Hole Koordinaten der drei aufeinanderfolgenden Punkte
         p1, p2, p3 = path[i - 1], path[i], path[i + 1]
 
-        angles.append(caluculate_angle(p1, p2, p3))
+        angle = caluculate_angle(p1, p2, p3)
+
+        if p1.x == p2.x and p1.y == p2.y:
+            angle = caluculate_angle(path[i - 2], p2, p3)
+
+        angles.append(angle)
     return angles
 
 
@@ -42,8 +47,6 @@ def calculate_dis_angle(points: list[Coord]):
 
 
 def caluculate_angle(p1, p2, p3):
-    if not ((p1 != p2) and (p1 != p3) and (p2 != p3)):
-        return 0
     # Berechne die Vektoren zwischen den Punkten
     vec_a = (p2.x - p1.x, p2.y - p1.y)
     vec_b = (p3.x - p2.x, p3.y - p2.y)
@@ -51,6 +54,9 @@ def caluculate_angle(p1, p2, p3):
     # Berechne die Länge der Vektoren
     mag_a = math.sqrt(vec_a[0] ** 2 + vec_a[1] ** 2)
     mag_b = math.sqrt(vec_b[0] ** 2 + vec_b[1] ** 2)
+
+    if mag_a == 0 or mag_b == 0:
+        return 0
 
     assert (mag_a != 0 and mag_b != 0)
 
