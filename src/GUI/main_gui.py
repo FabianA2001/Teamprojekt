@@ -6,10 +6,11 @@ import CONST
 import cpp_wrapper
 import solver
 from reconnect_folder import reconnect
+import file
 # from Formatted_listbox import EditableFormattedListbox
 
 
-def get_poly_tupel(polys: list[CONST.Polygon]):
+def get_tuple_from_poly(polys: list[CONST.Polygon]):
     result = []
     for poly in polys:
         poly_list = []
@@ -19,11 +20,21 @@ def get_poly_tupel(polys: list[CONST.Polygon]):
     return result
 
 
+def get_poly_from_tuple(polys):
+    polygon_list = []
+    for poly in polys:
+        poly_coord: list[CONST.Coord] = []
+        for point in poly:
+            poly_coord.append(CONST.Coord(point[0], point[1]))
+        polygon_list.append(CONST.Polygon(poly_coord))
+    return polygon_list
+
+
 class Instanze:
     def __init__(self, name: str, poly=[], points=[], obsticales=[]) -> None:
         self.name = name
-        self.polygone_tuple = get_poly_tupel(poly)
-        self.obsticales_tuple = get_poly_tupel(obsticales)
+        self.polygone_tuple = get_tuple_from_poly(poly)
+        self.obsticales_tuple = get_tuple_from_poly(obsticales)
         self.points_tuple = self.get_points_tuple(points)
 
     def get_points_tuple(self, points):
@@ -63,21 +74,27 @@ class GraphEditorApp:
         self.clear_btn = tk.Button(
             self.button_frame, text="Clear Canvas", command=self.clear_canvas)
         self.remove_btn = tk.Button(
-            self.button_frame, text="Remove", command=self.remove)
+            self.button_frame, text="Remove Obstacle", command=self.remove)
         self.generate_btn = tk.Button(
             self.button_frame, text="Generate", command=self.generate)
         self.reset_btn = tk.Button(
             self.button_frame, text="Reset", command=self.reset)
         self.random_btn = tk.Button(
             self.button_frame, text="Random", command=self.random)
+        self.save_btn = tk.Button(
+            self.button_frame, text="save", command=self.save)
+        self.load_btn = tk.Button(
+            self.button_frame, text="load", command=self.load)
 
         self.draw_polygon_btn.pack(side='left')
         self.draw_obstacle_btn.pack(side='left')
-        self.clear_btn.pack(side='left')
+        # self.clear_btn.pack(side='left')
         self.remove_btn.pack(side='left')
         self.random_btn.pack(side='left')
         self.generate_btn.pack(side='left')
         self.reset_btn.pack(side='left')
+        self.save_btn.pack(side='left')
+        self.load_btn.pack(side='left')
 
         self.lower_frame = tk.Frame(
             self.root)
@@ -177,27 +194,18 @@ class GraphEditorApp:
         width = self.SCREEN_WIDTH  # * CONST.ANTIALIAS_FACTOR
         polygon_list: list[CONST.Polygon] = generate.generate_polygons(
             20, width, height, True)
-        polys_tuple = get_poly_tupel(polygon_list)
+        polys_tuple = get_tuple_from_poly(polygon_list)
         self.polygons += polys_tuple
         for poly in polys_tuple:
             self.draw_polygon(poly)
 
     def generate(self):
 
-        polygon_list = []
-        for poly in self.polygons:
-            poly_coord: list[CONST.Coord] = []
-            for point in poly:
-                poly_coord.append(CONST.Coord(point[0], point[1]))
-            polygon_list.append(CONST.Polygon(poly_coord))
+        polygon_list = get_poly_from_tuple(self.polygons)
 
         obst_list = []
         if len(self.obsticles) >= 1:
-            for poly in self.obsticles:
-                poly_coord: list[CONST.Coord] = []
-                for point in poly:
-                    poly_coord.append(CONST.Coord(point[0], point[1]))
-                obst_list.append(CONST.Polygon(poly_coord))
+            obst_list = get_poly_from_tuple(self.obsticles)
 
         best_polygon_list = generate.find_best_polygon_list_2(
             polygon_list, obst_list)
@@ -213,6 +221,8 @@ class GraphEditorApp:
         self.generate_btn.config(state="disabled")
         self.random_btn.config(state="disabled")
         self.draw_obstacle_btn.config(state="disabled")
+        self.load_btn.config(state="disabled")
+        self.save_btn.config(state="disabled")
 
         self.instes.append(
             Instanze("Blank", polygon_list, obsticales=obst_list))
@@ -314,7 +324,9 @@ class GraphEditorApp:
         self.clear_btn.config(state="normal")
         self.generate_btn.config(state="normal")
         self.random_btn.config(state="normal")
+        self.save_btn.config(state="normal")
         self.draw_obstacle_btn.config(state="normal")
+        self.load_btn.config(state="normal")
         self.listbox.delete(0, tk.END)
         self.angle_box.delete(2, tk.END)
         self.dis_box.delete(2, tk.END)
@@ -323,7 +335,7 @@ class GraphEditorApp:
         if len(self.polygons) == 0:
             return
         self.canvas.delete("all")
-        del self.polygons[-1]
+        del self.obsticles[-1]
         for poly in self.polygons:
             self.draw_polygon(poly)
 
@@ -384,8 +396,19 @@ class GraphEditorApp:
         self.dis_box.insert(tk.END, f" {dis:.2f}")
         self.angle_box.insert(tk.END, f" {angle:.2f}")
 
+    def load(self):
+        self.polygons = get_tuple_from_poly(file.read_polygons("GUI_POLYS"))
+        self.obsticles = get_tuple_from_poly(file.read_polygons("GUI_OBST"))
+        for poly in self.polygons:
+            self.draw_polygon(poly)
+        for obst in self.obsticles:
+            self.draw_obstacle(obst)
 
-# Hauptprogramm
+    def save(self):
+        file.write_polygons(get_poly_from_tuple(self.polygons), "GUI_POLYS")
+        file.write_polygons(get_poly_from_tuple(self.obsticles), "GUI_OBST")
+
+
 def main():
     app = GraphEditorApp()
     app.root.mainloop()
