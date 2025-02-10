@@ -132,7 +132,7 @@ class GraphEditorApp:
 
     def draw_obstacle(self, poly):
         self.canvas.create_polygon(
-            poly, outline="darkred", fill="", width=2)
+            poly, outline="darkred", fill="darkred", width=2)
 
     def draw(self):
         """Aktiviert oder deaktiviert den Polygon-Zeichenmodus."""
