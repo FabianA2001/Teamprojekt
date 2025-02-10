@@ -116,6 +116,7 @@ def run_algo(polygon_list: list[Polygon],
         points = cpp_wrapper.ruin_and_recreate(
             [tuple(i) for i in points], 3000, 0.3, 1.2)
         points = CONST.to_coord(points)
+        # print(points)
         if save:
             img = Img(polygon_list, obstacle_list,
                       points, args.height, args.width)
@@ -128,6 +129,7 @@ def run_algo(polygon_list: list[Polygon],
     if args.opt >= 3:
         points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
         points = CONST.to_coord(points)
+        # print(points)
         if save:
             img = Img(polygon_list, obstacle_list,
                       points, args.height, args.width)
@@ -139,6 +141,7 @@ def run_algo(polygon_list: list[Polygon],
 
     if args.opt >= 4:
         points = solver.gurobi_solver(all_points, points)
+        # print(points)
         if save:
             img = Img(polygon_list, obstacle_list,
                       points, args.height, args.width)
@@ -190,6 +193,19 @@ def run_algo(polygon_list: list[Polygon],
         if print_st:
             CONST.prints_stats(name + " around obstacles", dis, angle)
 
+    if args.opt >= 8:
+        points = solver.delete_possible_points(
+            [tuple(i) for i in points], polygon_list, obstacle_list)
+        points = CONST.to_coord(points)
+        if save:
+            img = Img(polygon_list, obstacle_list,
+                      points, args.height, args.width)
+            img.save(args.name+"08_deleted_points")
+        dis, angle = solver.calculate_dis_angle(points)
+        result.append(Stats(dis, angle))
+        if print_st:
+            CONST.prints_stats(name + " deleted points", dis, angle)
+
     if not save:
         img = Img(polygon_list, obstacle_list, points, args.height, args.width)
         img.save(name)
@@ -205,7 +221,8 @@ if __name__ == "__main__":
 
         polygon_list = file.read_polygons(args.file)
         obstacle_list = file.read_polygons(f"{args.file}_obstacles")
-        best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
+        best_polygon_list = generate.find_best_polygon_list_2(
+            polygon_list, obstacle_list)
         print(f"Polygons have been read from {args.file} and {
               len(best_polygon_list)} intersections are essential")
 
@@ -223,10 +240,12 @@ if __name__ == "__main__":
 
         height = args.height * CONST.ANTIALIAS_FACTOR
         width = args.width * CONST.ANTIALIAS_FACTOR
-        polygon_list = generate.generate_polygons(args.count, height, width, True)
+        polygon_list = generate.generate_polygons(
+            args.count, height, width, True)
         obstacle_list = generate.generate_polygons(
-            CONST.OBSTACLE_COUNT, height, width, False)
-        best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
+            CONST.OBSTACLE_COUNT, height, width, False, polygon_list)
+        best_polygon_list = generate.find_best_polygon_list_2(
+            polygon_list, obstacle_list)
         file.write_polygons(polygon_list, f"new_{args.name}")
         file.write_polygons(obstacle_list, f"new_{args.name}_obstacles")
         print(f"New polygons have been generated and {
@@ -255,7 +274,8 @@ if __name__ == "__main__":
         for i in range(20):
             polygon_list = file.read_polygons(f"standard_test_{i}")
             obstacle_list = file.read_polygons(f"standard_test_{i}_obstacles")
-            best_polygon_list = generate.find_best_polygon_list(polygon_list)
+            best_polygon_list = generate.find_best_polygon_list_2(
+                polygon_list, obstacle_list)
             result = run_algo(polygon_list, best_polygon_list, obstacle_list, args,
                               save=False, name=f"standard_test_{i}")
             assert (len(COLUME_ANGLE) == len(result))

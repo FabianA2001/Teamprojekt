@@ -33,7 +33,12 @@ def calculate_turn_angles(path):
         # Hole Koordinaten der drei aufeinanderfolgenden Punkte
         p1, p2, p3 = path[i - 1], path[i], path[i + 1]
 
-        angles.append(caluculate_angle(p1, p2, p3))
+        angle = caluculate_angle(p1, p2, p3)
+
+        if p1.x == p2.x and p1.y == p2.y:
+            angle = caluculate_angle(path[i - 2], p2, p3)
+
+        angles.append(angle)
     return angles
 
 
@@ -42,7 +47,6 @@ def calculate_dis_angle(points: list[Coord]):
 
 
 def caluculate_angle(p1, p2, p3):
-    assert ((p1 != p2) and (p1 != p3) and (p2 != p3))
     # Berechne die Vektoren zwischen den Punkten
     vec_a = (p2.x - p1.x, p2.y - p1.y)
     vec_b = (p3.x - p2.x, p3.y - p2.y)
@@ -51,7 +55,8 @@ def caluculate_angle(p1, p2, p3):
     mag_a = math.sqrt(vec_a[0] ** 2 + vec_a[1] ** 2)
     mag_b = math.sqrt(vec_b[0] ** 2 + vec_b[1] ** 2)
 
-    assert (mag_a != 0 and mag_b != 0)
+    if mag_a == 0 or mag_b == 0:
+        return 0
 
     # Berechne den Winkel zwischen den Vektoren
     dot_product = vec_a[0] * vec_b[0] + vec_a[1] * vec_b[1]
@@ -154,7 +159,7 @@ def move_points(polygon_list, points):
             for point in new_points:
                 new_angle = caluculate_angle(
                     points[i-1], point, points[i+1])
-                if new_angle < current_angle:
+                if new_angle <= current_angle-1:
                     current_angle = new_angle
                     points[i] = point
     # for point in points:
@@ -196,74 +201,192 @@ def find_obstacle_plus_bypass(tour: list[Coord], obstacles_list: list[Polygon]):
             (tour[i].x, tour[i].y), (tour[i + 1].x, tour[i + 1].y)])
         for obstacle in obstacles:
             if line.intersects(obstacle):
+                other_obstacles = obstacles.copy()
+                other_obstacles.remove(obstacle)
                 bypass_points = bypass_polygon_for_found_obstacle(
-                    obstacle, tour[i], tour[i + 1])
+                    obstacle, tour[i], tour[i + 1], other_obstacles)
+                if bypass_points == None:
+                    break
+                bypass_points = CONST.to_coord(bypass_points)
                 new_tour = new_tour[:(new_tour.index(
                     tour[i]) + 1)] + bypass_points + new_tour[new_tour.index(tour[i + 1]):]
                 break
     return new_tour
 
 
-def bypass_polygon_for_found_obstacle(polygon: shap.Polygon, start: Coord, end: Coord):
+def bypass_polygon_for_found_obstacle(polygon: shap.Polygon, start: Coord, end: Coord, other_obstacles: list[shap.Polygon]):
     line = shap.LineString([tuple(start), tuple(end)])
     intersection = polygon.intersection(line)
     assert (not intersection.is_empty)
     assert (intersection.geom_type == 'LineString')
+
+    if polygon.contains(shap.Point(start.x, start.y)) or polygon.contains(shap.Point(end.x, end.y)):
+        return None
+
     intersection = list(intersection.coords)
+    point1 = intersection[0]
+    point2 = intersection[1]
 
-    point1 = shap.Point(intersection[0])
-    point2 = shap.Point(intersection[1])
-    polygon_exterior = list(polygon.exterior.coords)[:-1]
+    if calculate_distance(start, Coord(point2[0], point2[1])) < calculate_distance(start, Coord(point1[0], point1[1])):
+        point1, point2 = point2, point1
 
-    def get_tour(point1, point2):
-        def get_index(point, liste):
-            # Berechne die Entfernungen und finde den nächsten Eckpunkt
-            nearest_point = min(
-                liste, key=lambda vertex: point.distance(shap.Point(vertex)))
-            return liste.index(nearest_point)
+    vertices = list(polygon.exterior.coords)[:-1]
 
-        points = polygon_exterior.copy()
-        start_index = get_index(point1, points)
-        points = points[start_index:] + points[:start_index]
-        end_index = get_index(point2, points)
-        del points[end_index+1:]
+    edges_of_polygon = [shap.LineString(
+        [vertices[i - 1], vertices[i]]) for i in range(len(vertices))]
 
-        tour = CONST.to_coord(points)
+    tour_up_first = None
+    tour_up_last = None
+    tour_down_first = None
+    tour_down_last = None
 
-        if start_index < end_index:
-            return tour
+    for edge in edges_of_polygon:
+        inter = edge.intersection(line)
+        if not inter.is_empty:
+            if inter.coords[0] == intersection[0]:
+                tour_up_first = edge.coords[1]
+                tour_down_first = edge.coords[0]
+            elif inter.coords[0] == intersection[1]:
+                tour_up_last = edge.coords[0]
+                tour_down_last = edge.coords[1]
+
+    if tour_up_first == None or tour_up_last == None:
+        return None
+    if tour_down_first == None or tour_down_last == None:
+        return None
+
+    tour_up = []
+    first_up_index = vertices.index(tour_up_first)
+    for i in range(len(vertices)):
+        tour_up.append(vertices[(first_up_index + i) % len(vertices)])
+        if vertices[(first_up_index + i) % len(vertices)] == tour_up_last:
+            break
+
+    tour_down = []
+    first_down_index = vertices.index(tour_down_first)
+    for i in range(len(vertices)):
+        tour_down.append(vertices[first_down_index - i])
+        if vertices[first_down_index - i] == tour_down_last:
+            break
+
+    '''delete useless points'''
+    while True:
+        if len(tour_up) <= 1:
+            break
+        start_line = shap.LineString([tuple(start), tour_up[1]])
+        inter = polygon.intersection(start_line)
+        if inter.geom_type == 'Point':
+            del tour_up[0]
         else:
-            return list(reversed(tour))
-
-    tour1 = get_tour(point1, point2)
-    tour2 = get_tour(point2, point1)
-
-    tour = tour1
-    if calculate_tour_distance(tour1) > calculate_tour_distance(tour2):
-        tour = tour2
-
-    for _ in range(len(tour)-2):
-        if len(tour) <= 2:
             break
-        line = shap.LineString([tuple(start), tuple(tour[1])])
-        intersection = polygon.intersection(line)
-        if intersection.geom_type == 'Point':
-            del tour[0]
+
+    while True:
+        if len(tour_up) <= 1:
+            break
+        end_line = shap.LineString([tuple(end), tour_up[-2]])
+        inter = polygon.intersection(end_line)
+        if inter.geom_type == 'Point':
+            del tour_up[-1]
         else:
             break
 
-    if len(tour) <= 1:
-        return tour
-
-    for _ in range(len(tour)-1):
-        if len(tour) <= 1:
+    while True:
+        if len(tour_down) <= 1:
             break
-        line = shap.LineString([tuple(end), tuple(tour[-2])])
-        intersection = polygon.intersection(line)
-        if intersection.geom_type == 'Point':
-            del tour[-1]
+        start_line = shap.LineString([tuple(start), tour_down[1]])
+        inter = polygon.intersection(start_line)
+        if inter.geom_type == 'Point':
+            del tour_down[0]
         else:
             break
+
+    while True:
+        if len(tour_down) <= 1:
+            break
+        end_line = shap.LineString([tuple(end), tour_down[-2]])
+        inter = polygon.intersection(end_line)
+        if inter.geom_type == 'Point':
+            del tour_down[-1]
+        else:
+            break
+
+    '''check if another polygon is in between'''
+    line_start_up = shap.LineString([tuple(start), tour_up[0]])
+    for obstacle in other_obstacles:
+        if obstacle.intersects(line_start_up):
+            new_other_obstacles = other_obstacles.copy()
+            new_other_obstacles.remove(obstacle)
+            bypass_points = bypass_polygon_for_found_obstacle(
+                obstacle, start, Coord(tour_up[0][0], tour_up[0][1]), new_other_obstacles)
+            if bypass_points == None:
+                break
+            tour_up = bypass_points + tour_up
+            break
+    del line_start_up
+
+    line_end_up = shap.LineString([tour_up[-1], end])
+    for obstacle in other_obstacles:
+        if obstacle.intersects(line_end_up):
+            new_other_obstacles = other_obstacles.copy()
+            new_other_obstacles.remove(obstacle)
+            bypass_points = bypass_polygon_for_found_obstacle(obstacle, Coord(
+                tour_up[-1][0], tour_up[-1][1]), end, new_other_obstacles)
+            if bypass_points == None:
+                break
+            tour_down = tour_up + bypass_points
+            break
+    del line_end_up
+
+    line_start_down = shap.LineString([tuple(start), tour_down[0]])
+    for obstacle in other_obstacles:
+        if obstacle.intersects(line_start_down):
+            new_other_obstacles = other_obstacles.copy()
+            new_other_obstacles.remove(obstacle)
+            bypass_points = bypass_polygon_for_found_obstacle(
+                obstacle, start, Coord(tour_down[0][0], tour_down[0][1]), new_other_obstacles)
+            if bypass_points == None:
+                break
+            tour_down = bypass_points + tour_down
+            break
+    del line_start_down
+
+    line_end_down = shap.LineString([tour_down[-1], end])
+    for obstacle in other_obstacles:
+        if obstacle.intersects(line_end_down):
+            new_other_obstacles = other_obstacles.copy()
+            new_other_obstacles.remove(obstacle)
+            bypass_points = bypass_polygon_for_found_obstacle(obstacle, Coord(
+                tour_down[-1][0], tour_down[-1][1]), end, new_other_obstacles)
+            if bypass_points == None:
+                break
+            tour_down = tour_down + bypass_points
+            break
+    del line_end_down
+
+    '''check which tour is better'''
+    tour_up_with_start_end = [tuple(start)]
+    for point in tour_up:
+        tour_up_with_start_end.append(point)
+    tour_up_with_start_end.append(tuple(end))
+
+    tour_down_with_start_end = [tuple(start)]
+    for point in tour_down:
+        tour_down_with_start_end.append(point)
+    tour_down_with_start_end.append(tuple(end))
+
+    sum_up = 0
+    for i in range(len(tour_up_with_start_end) - 1):
+        sum_up += calculate_distance(Coord(tour_up_with_start_end[i][0], tour_up_with_start_end[i][1]),
+                                     Coord(tour_up_with_start_end[i + 1][0], tour_up_with_start_end[i + 1][1]))
+
+    sum_down = 0
+    for i in range(len(tour_down_with_start_end) - 1):
+        sum_down += calculate_distance(Coord(tour_down_with_start_end[i][0], tour_down_with_start_end[i][1]),
+                                       Coord(tour_down_with_start_end[i + 1][0], tour_down_with_start_end[i + 1][1]))
+
+    tour = tour_up
+    if sum_down < sum_up:
+        tour = tour_down
 
     return tour
 
@@ -291,7 +414,7 @@ def change_point_in_obstacle(tour: list[Coord], obstacles_list: list[Polygon], p
                 loop = 1
                 while (loop):
                     for k in range(10):
-                        print("loop")
+                        # print("loop")
                         point1 = generate.random_coord_local(point, 100*l, 6)
                         # while obstacle.contains(shap.Point(point1.x, point1.y)) or obstacle.boundary.contains(shap.Point(point1.x, point1.y)):
                         # point1 = random_coord_local(point, 100*l, 6)
@@ -306,17 +429,59 @@ def change_point_in_obstacle(tour: list[Coord], obstacles_list: list[Polygon], p
                             kom = 1
                         else:
                             res.append(point)
+
+                    if l >= 5:
+                        for pointt in list(polygons[poly].exterior.coords):
+                            if (not obstacle.contains(shap.Point(pointt[0], pointt[1]))) and (not obstacle.boundary.contains(shap.Point(pointt[0], pointt[1]))):
+                                res.append(Coord(pointt[0], pointt[1]))
                     if res == []:
                         l += 1
-                        print("no change")
+                        # print("no change")
                     else:
-                        print("change")
+                        # print("change")
                         loop = 0
                 # break
         if points != []:
-            print("change happened")
+            # print("change happened")
             tour[j] = res[0]
             points = []
             res = []
 
     return tour
+
+
+def delete_possible_points(tour, polygons, obstacles):
+    polygons = [shap.Polygon([(coord.x, coord.y)
+                             for coord in polygon.hull]) for polygon in polygons]
+    obstacles = [shap.Polygon([(coord.x, coord.y)
+                              for coord in obstacle.hull]) for obstacle in obstacles]
+    points = tour.copy()[:-1]
+    lines = [shap.LineString([points[i - 1], points[i]])
+             for i in range(len(points))]
+    while True:
+        for point in points:
+            point_index = points.index(point)
+            line_without_point = shap.LineString(
+                [points[point_index - 1], points[(point_index + 1) % len(points)]])
+            for obstacle in obstacles:
+                inter = obstacle.intersection(line_without_point)
+                if not inter.is_empty and inter.geom_type != 'Point':
+                    break
+            else:
+                tour_without_point = points.copy()
+                tour_without_point.remove(point)
+                lines = [shap.LineString([tour_without_point[i - 1], tour_without_point[i]])
+                         for i in range(len(tour_without_point))]
+                for polygon in polygons:
+                    for line in lines:
+                        if polygon.distance(line) < 1:
+                            break
+                    else:
+                        break
+                else:
+                    points.remove(point)
+                    break
+        else:
+            break
+    points.append(points[0])
+    return points
