@@ -178,11 +178,34 @@ class GraphEditorApp:
         polygon_list: list[CONST.Polygon] = generate.generate_polygons(
             20, width, height, True)
         polys_tuple = get_poly_tupel(polygon_list)
-        self.polygons.append(polys_tuple)
+        self.polygons += polys_tuple
         for poly in polys_tuple:
             self.draw_polygon(poly)
 
     def generate(self):
+
+        polygon_list = []
+        for poly in self.polygons:
+            poly_coord: list[CONST.Coord] = []
+            for point in poly:
+                poly_coord.append(CONST.Coord(point[0], point[1]))
+            polygon_list.append(CONST.Polygon(poly_coord))
+
+        obst_list = []
+        if len(self.obsticles) >= 1:
+            for poly in self.obsticles:
+                poly_coord: list[CONST.Coord] = []
+                for point in poly:
+                    poly_coord.append(CONST.Coord(point[0], point[1]))
+                obst_list.append(CONST.Polygon(poly_coord))
+
+        best_polygon_list = generate.find_best_polygon_list_2(
+            polygon_list, obst_list)
+
+        if len(best_polygon_list) <= 2:
+            self.show_popup("Error", "Mindestens drei Polygone")
+            return
+
         self.drawing_mode = False
         self.draw_polygon_btn.config(state="disabled")
         self.remove_btn.config(state="disabled")
@@ -191,33 +214,13 @@ class GraphEditorApp:
         self.random_btn.config(state="disabled")
         self.draw_obstacle_btn.config(state="disabled")
 
-        polygon_list = []
-        polygon_list = self.polygons
-
-        if self.drawP:
-            polygon_list = []
-            for poly in self.polygons:
-                poly_coord: list[CONST.Coord] = []
-                for point in poly:
-                    poly_coord.append(CONST.Coord(point[0], point[1]))
-                polygon_list.append(CONST.Polygon(poly_coord))
-        if self.drawO:
-            obs_list = []
-            for poly in self.obsticles:
-                poly_coord: list[CONST.Coord] = []
-                for point in poly:
-                    poly_coord.append(CONST.Coord(point[0], point[1]))
-                obs_list.append(CONST.Polygon(poly_coord))
-            self.obsticles = obs_list
-
         self.instes.append(
-            Instanze("Blank", polygon_list, obsticales=self.obsticles))
+            Instanze("Blank", polygon_list, obsticales=obst_list))
         self.listbox.insert(tk.END, self.instes[0].name)
         self.print_stats(0, 0)
 
-        best_polygon_list = generate.find_best_polygon_list_2(polygon_list)
         self.instes.append(
-            Instanze("überschneidung", poly=best_polygon_list, obsticales=self.obsticles))
+            Instanze("überschneidung", poly=best_polygon_list, obsticales=obst_list))
         self.listbox.insert(tk.END, self.instes[-1].name)
         self.print_stats(0, 0)
 
@@ -231,7 +234,7 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("farthest_insertion", poly=polygon_list, obsticales=self.obsticles, points=points))
+            Instanze("farthest_insertion", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         points = cpp_wrapper.ruin_and_recreate(
@@ -240,7 +243,7 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("ruin and recreate", poly=polygon_list, obsticales=self.obsticles, points=points))
+            Instanze("ruin and recreate", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
@@ -248,14 +251,14 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("two opt", poly=polygon_list, obsticales=self.obsticles, points=points))
+            Instanze("two opt", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         points = solver.gurobi_solver(all_points, points)
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("Gurobi", poly=polygon_list, obsticales=self.obsticles, points=points))
+            Instanze("Gurobi", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         for _ in range(6):
@@ -269,24 +272,24 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("second run and recreate", poly=polygon_list, obsticales=self.obsticles, points=points))
+            Instanze("second run and recreate", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
-        points = solver.move_points(polygon_list, points)
-        dis, angle = solver.calculate_dis_angle(points)
-        self.print_stats(dis, angle)
-        self.instes.append(
-            Instanze("move points", poly=polygon_list, obsticales=self.obsticles, points=points))
-        self.listbox.insert(tk.END, self.instes[-1].name)
+        # points = solver.move_points(polygon_list, points)
+        # dis, angle = solver.calculate_dis_angle(points)
+        # self.print_stats(dis, angle)
+        # self.instes.append(
+        #     Instanze("move points", poly=polygon_list, obsticales=self.obsticles, points=points))
+        # self.listbox.insert(tk.END, self.instes[-1].name)
 
-        points = solver.change_point_in_obstacle(
-            points, self.obsticles, best_polygon_list)
-        points = solver.find_obstacle_plus_bypass(points, self.obsticles)
-        dis, angle = solver.calculate_dis_angle(points)
-        self.print_stats(dis, angle)
-        self.instes.append(
-            Instanze("move around obstacles", poly=polygon_list, obsticales=self.obsticles, points=points))
-        self.listbox.insert(tk.END, self.instes[-1].name)
+        # points = solver.change_point_in_obstacle(
+        #     points, self.obsticles, best_polygon_list)
+        # points = solver.find_obstacle_plus_bypass(points, self.obsticles)
+        # dis, angle = solver.calculate_dis_angle(points)
+        # self.print_stats(dis, angle)
+        # self.instes.append(
+        #     Instanze("move around obstacles", poly=polygon_list, obsticales=self.obsticles, points=points))
+        # self.listbox.insert(tk.END, self.instes[-1].name)
 
     def reset(self):
         self.canvas.delete("all")
