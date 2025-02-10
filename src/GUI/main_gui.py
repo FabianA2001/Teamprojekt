@@ -7,6 +7,7 @@ import cpp_wrapper
 import solver
 from reconnect_folder import reconnect
 import file
+import threading
 # from Formatted_listbox import EditableFormattedListbox
 
 
@@ -224,6 +225,11 @@ class GraphEditorApp:
         self.load_btn.config(state="disabled")
         # self.save_btn.config(state="disabled")
 
+        # Starte die langlaufende Berechnung in einem eigenen Thread
+        threading.Thread(target=self.run_generation, args=(
+            polygon_list, obst_list, best_polygon_list), daemon=True).start()
+
+    def run_generation(self, polygon_list, obst_list, best_polygon_list):
         self.instes.append(
             Instanze("Blank", polygon_list, obsticales=obst_list))
         self.listbox.insert(tk.END, self.instes[0].name)
