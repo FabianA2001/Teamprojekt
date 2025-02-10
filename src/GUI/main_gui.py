@@ -282,14 +282,26 @@ class GraphEditorApp:
             Instanze("move points", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
-        # points = solver.change_point_in_obstacle(
-        #     points, self.obsticles, best_polygon_list)
-        # points = solver.find_obstacle_plus_bypass(points, self.obsticles)
-        # dis, angle = solver.calculate_dis_angle(points)
-        # self.print_stats(dis, angle)
-        # self.instes.append(
-        #     Instanze("move around obstacles", poly=polygon_list, obsticales=self.obsticles, points=points))
-        # self.listbox.insert(tk.END, self.instes[-1].name)
+        # self.dis_box.insert(tk.END, "-"*30 + "  ")
+        # self.angle_box.insert(tk.END, "-" * 30 + "  ")
+
+        points = solver.change_point_in_obstacle(
+            points, obst_list, best_polygon_list)
+        points = solver.find_obstacle_plus_bypass(points, obst_list)
+        dis, angle = solver.calculate_dis_angle(points)
+        self.print_stats(dis, angle)
+        self.instes.append(
+            Instanze("move around obstacles", poly=polygon_list, obsticales=obst_list, points=points))
+        self.listbox.insert(tk.END, self.instes[-1].name)
+
+        points = solver.delete_possible_points(
+            [tuple(i) for i in points], polygon_list, obst_list)
+        points = CONST.to_coord(points)
+        dis, angle = solver.calculate_dis_angle(points)
+        self.print_stats(dis, angle)
+        self.instes.append(
+            Instanze("delete Points", poly=polygon_list, obsticales=obst_list, points=points))
+        self.listbox.insert(tk.END, self.instes[-1].name)
 
     def reset(self):
         self.canvas.delete("all")
@@ -329,11 +341,11 @@ class GraphEditorApp:
             self.angle_box.selection_set(index + 2)
 
     def draw_instanze(self, inst: Instanze) -> None:
-        for poly in inst.polygone_tuple:
-            self.draw_polygon(poly)
-
         for obs in inst.obsticales_tuple:
             self.draw_obstacle(obs)
+
+        for poly in inst.polygone_tuple:
+            self.draw_polygon(poly)
 
         if len(inst.points_tuple) >= 3:
             self.canvas.create_polygon(
