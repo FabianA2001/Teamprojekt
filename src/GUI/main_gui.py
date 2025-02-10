@@ -222,7 +222,7 @@ class GraphEditorApp:
         self.random_btn.config(state="disabled")
         self.draw_obstacle_btn.config(state="disabled")
         self.load_btn.config(state="disabled")
-        self.save_btn.config(state="disabled")
+        # self.save_btn.config(state="disabled")
 
         self.instes.append(
             Instanze("Blank", polygon_list, obsticales=obst_list))
