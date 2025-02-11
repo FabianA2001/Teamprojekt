@@ -360,7 +360,7 @@ class GraphEditorApp:
         for poly in self.polygons:
             self.draw_polygon(poly)
         for obst in self.obsticles:
-            self.draw_obstacle(poly)
+            self.draw_obstacle(obst)
 
     # Funktion, die ausgeführt wird, wenn ein Element angeklickt wird
 
