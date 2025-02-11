@@ -116,20 +116,18 @@ def run_algo(polygon_list: list[Polygon],
         points = cpp_wrapper.ruin_and_recreate(
             [tuple(i) for i in points], 3000, 0.3, 1.2)
         points = CONST.to_coord(points)
-        # print(points)
         if save:
             img = Img(polygon_list, obstacle_list,
                       points, args.height, args.width)
             img.save(args.name+"02_ruin&recreate")
         dis, angle = solver.calculate_dis_angle(points)
-        # result.append(Stats(dis, angle))
+        result.append(Stats(dis, angle))
         if print_st:
             CONST.prints_stats(name + " ruin & recreate", dis, angle)
 
     if args.opt >= 3:
         points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
         points = CONST.to_coord(points)
-        # print(points)
         if save:
             img = Img(polygon_list, obstacle_list,
                       points, args.height, args.width)
@@ -141,7 +139,6 @@ def run_algo(polygon_list: list[Polygon],
 
     if args.opt >= 4:
         points = solver.gurobi_solver(all_points, points)
-        # print(points)
         if save:
             img = Img(polygon_list, obstacle_list,
                       points, args.height, args.width)
@@ -268,8 +265,8 @@ if __name__ == "__main__":
         # Select the active worksheet (or specify by name: workbook["SheetName"])
         sheet = workbook.active
         ROW = 8
-        COLUME_DIS = ["C", "E", "G", "I", "K"]
-        COLUME_ANGLE = ["D", "F", "H", "J", "L"]
+        COLUME_DIS = ["C", "E", "G", "I", "K", "M", "O", "Q"]
+        COLUME_ANGLE = ["D", "F", "H", "J", "L", "N", "P", "R"]
 
         for i in range(20):
             polygon_list = file.read_polygons(f"standard_test_{i}")
