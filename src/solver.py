@@ -450,7 +450,12 @@ def change_point_in_obstacle(tour: list[Coord], obstacles_list: list[Polygon], p
                 # break
         if points != []:
             # print("change happened")
-            tour[j] = res[0]
+            for c, p in enumerate(res):
+                min = 800
+                if caluculate_angle(tour[(j-1) % len(tour)], res[c], tour[(j+1) % len(tour)]) < min:
+                    tour[j] = res[c]
+                    min = caluculate_angle(
+                        tour[(j-1) % len(tour)], res[c], tour[(j+1) % len(tour)])
             points = []
             res = []
 
