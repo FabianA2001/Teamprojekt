@@ -460,7 +460,7 @@ def delete_possible_points(tour, polygons, obstacles):
                               for coord in obstacle.hull]) for obstacle in obstacles]
     points = tour.copy()[:-1]
     lines = [shap.LineString([points[i - 1], points[i]])
-             for i in range(len(points))]
+             for i in range(len(points)) if points[i - 1] != points[i]]
     while True:
         for point in points:
             point_index = points.index(point)
@@ -474,7 +474,7 @@ def delete_possible_points(tour, polygons, obstacles):
                 tour_without_point = points.copy()
                 tour_without_point.remove(point)
                 lines = [shap.LineString([tour_without_point[i - 1], tour_without_point[i]])
-                         for i in range(len(tour_without_point))]
+                         for i in range(len(tour_without_point)) if tour_without_point[i - 1] != tour_without_point[i]]
                 for polygon in polygons:
                     for line in lines:
                         if polygon.distance(line) < 1:
