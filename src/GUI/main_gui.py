@@ -223,6 +223,7 @@ class GraphEditorApp:
         self.random_btn.config(state="disabled")
         self.draw_obstacle_btn.config(state="disabled")
         self.load_btn.config(state="disabled")
+        self.reset_btn.config(state="disabled")
         # self.save_btn.config(state="disabled")
 
         # Starte die langlaufende Berechnung in einem eigenen Thread
@@ -318,6 +319,7 @@ class GraphEditorApp:
         self.instes.append(
             Instanze("delete Points", poly=polygon_list, obsticales=obst_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
+        self.reset_btn.config(state="normal")
 
     def reset(self):
         self.canvas.delete("all")

@@ -150,7 +150,7 @@ def move_points(polygon_list, points):
             k = 0
             while k < 5:
                 new_point = generate.random_coord_local(
-                    points[i], 100-(10*j), 6)
+                    points[i], 50-(5*j), 6)
                 # if generate.is_point_inside_polygon(new_point, polygon_list[poly],):
                 #     new_points.append(new_point)
                 #     k += 1
@@ -162,6 +162,7 @@ def move_points(polygon_list, points):
                 #     points[i-1], point, points[i+1])
                 new_angle = sum(calculate_turn_angles(
                     points[:i] + [point] + points[i+1:]))
+
                 if new_angle <= current_angle-1:
                     current_angle = new_angle
                     points[i] = point
