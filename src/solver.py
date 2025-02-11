@@ -220,9 +220,12 @@ def find_obstacle_plus_bypass(tour: list[Coord], obstacles_list: list[Polygon]):
 def bypass_polygon_for_found_obstacle(polygon: shap.Polygon, start: Coord, end: Coord, other_obstacles: list[shap.Polygon]):
     line = shap.LineString([tuple(start), tuple(end)])
     intersection = polygon.intersection(line)
-    assert (not intersection.is_empty)
-    assert (intersection.geom_type == 'LineString')
-
+    # assert (not intersection.is_empty)
+    # assert (intersection.geom_type == 'LineString')
+    if intersection.is_empty:
+        return None
+    if intersection.geom_type != 'LineString':
+        return None
     if polygon.contains(shap.Point(start.x, start.y)) or polygon.contains(shap.Point(end.x, end.y)):
         return None
 
@@ -336,7 +339,7 @@ def bypass_polygon_for_found_obstacle(polygon: shap.Polygon, start: Coord, end: 
                 tour_up[-1][0], tour_up[-1][1]), end, new_other_obstacles)
             if bypass_points == None:
                 break
-            tour_down = tour_up + bypass_points
+            tour_up = tour_up + bypass_points
             break
     del line_end_up
 
