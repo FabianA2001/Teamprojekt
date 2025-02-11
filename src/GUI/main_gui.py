@@ -376,6 +376,7 @@ class GraphEditorApp:
             self.angle_box.selection_set(index + 2)
 
     def draw_instanze(self, index: int) -> None:
+        self.canvas.delete("all")
         inst = self.instes[index]
         if index >= 1:
             prev_inst = self.instes[index-1]
