@@ -379,10 +379,8 @@ def find_best_polygon_list_2(own_polygon_list: list[Polygon], own_obstacle_list:
         for x, y in itertools.combinations(range(len(polygon_list)), 2):
             # Berechne die Schnittmenge
             intersection = polygon_list[x].intersection(polygon_list[y])
-            if isinstance(intersection, shap.Point):
-                continue
-            if isinstance(intersection, shap.LineString):
-                continue
+            assert (isinstance(intersection, shap.Point))
+            assert (isinstance(intersection, shap.LineString))
 
             # Prüfen, ob eine Schnittmenge existiert
             if not intersection.is_empty:

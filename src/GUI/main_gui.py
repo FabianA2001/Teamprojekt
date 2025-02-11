@@ -214,8 +214,13 @@ class GraphEditorApp:
         if len(self.obsticles) >= 1:
             obst_list = get_poly_from_tuple(self.obsticles)
 
-        best_polygon_list = generate.find_best_polygon_list_2(
-            polygon_list, obst_list)
+        try:
+            best_polygon_list = generate.find_best_polygon_list_2(
+                polygon_list, obst_list)
+        except:
+            self.show_popup(
+                "Error", "Fehler bei den Überschneidungen, vlt gibt es überschneidungen nur in einem Punkt")
+            return
 
         if len(best_polygon_list) <= 2:
             self.show_popup("Error", "Mindestens drei Polygone")
@@ -348,14 +353,17 @@ class GraphEditorApp:
         self.dis_box.delete(2, tk.END)
 
     def remove(self):
-        if len(self.polygons) == 0:
+        if len(self.obsticles) == 0:
             return
         self.canvas.delete("all")
         del self.obsticles[-1]
         for poly in self.polygons:
             self.draw_polygon(poly)
+        for obst in self.obsticles:
+            self.draw_obstacle(poly)
 
     # Funktion, die ausgeführt wird, wenn ein Element angeklickt wird
+
     def on_item_selected(self, event):
         # Ausgewählte Elemente abrufen
         selected_indices = self.listbox.curselection()  # Index der ausgewählten Elemente
@@ -410,7 +418,7 @@ class GraphEditorApp:
                        window_height}+{position_right}+{position_top}')
 
         # Add a label in the popup window
-        label = tk.Label(popup, text=text)
+        label = tk.Label(popup, text=text, wraplength=window_width)
         label.pack(pady=20)
 
         # Add a button to close the popup
