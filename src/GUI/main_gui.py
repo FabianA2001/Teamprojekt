@@ -54,6 +54,8 @@ class GraphEditorApp:
         self.SCREEN_HEIGHT = int(self.root.winfo_screenheight() * 0.8)
         # self.SCREEN_WIDTH = 2000
         # self.SCREEN_HEIGHT = 1000
+        self.outline = False
+        self.index = 0
 
         # Hauptvariablen
         # Liste der Polygone (jeweils als Liste von Punkten)
@@ -86,6 +88,8 @@ class GraphEditorApp:
             self.button_frame, text="save", command=self.save)
         self.load_btn = tk.Button(
             self.button_frame, text="load", command=self.load)
+        self.draw_outline_btn = tk.Button(
+            self.button_frame, text="outline", command=self.outline_fun)
 
         self.draw_polygon_btn.pack(side='left')
         self.draw_obstacle_btn.pack(side='left')
@@ -96,6 +100,8 @@ class GraphEditorApp:
         self.reset_btn.pack(side='left')
         self.save_btn.pack(side='left')
         self.load_btn.pack(side='left')
+        self.draw_outline_btn.pack(side='left')
+        self.draw_outline_btn.config(state="disabled")
 
         self.lower_frame = tk.Frame(
             self.root)
@@ -224,6 +230,7 @@ class GraphEditorApp:
         self.draw_obstacle_btn.config(state="disabled")
         self.load_btn.config(state="disabled")
         self.reset_btn.config(state="disabled")
+        self.draw_outline_btn.config(state="normal")
         # self.save_btn.config(state="disabled")
 
         # Starte die langlaufende Berechnung in einem eigenen Thread
@@ -335,6 +342,7 @@ class GraphEditorApp:
         self.save_btn.config(state="normal")
         self.draw_obstacle_btn.config(state="normal")
         self.load_btn.config(state="normal")
+        self.draw_outline_btn.config(state="disabled")
         self.listbox.delete(0, tk.END)
         self.angle_box.delete(2, tk.END)
         self.dis_box.delete(2, tk.END)
@@ -353,14 +361,23 @@ class GraphEditorApp:
         selected_indices = self.listbox.curselection()  # Index der ausgewählten Elemente
         if selected_indices:
             index = selected_indices[0]
-            inst = self.instes[index]
             # Text des ausgewählten Elements
             self.canvas.delete("all")
-            self.draw_instanze(inst)
+            self.draw_instanze(index)
             self.dis_box.selection_set(index + 2)
             self.angle_box.selection_set(index + 2)
 
-    def draw_instanze(self, inst: Instanze) -> None:
+    def draw_instanze(self, index: int) -> None:
+        inst = self.instes[index]
+        if index >= 1:
+            prev_inst = self.instes[index-1]
+        self.index = index
+
+        if index >= 1:
+            if len(prev_inst.points_tuple) >= 3:
+                self.canvas.create_polygon(
+                    prev_inst.points_tuple, outline="lightgreen", fill="", width=1)
+
         for obs in inst.obsticales_tuple:
             self.draw_obstacle(obs)
 
@@ -415,6 +432,9 @@ class GraphEditorApp:
     def save(self):
         file.write_polygons(get_poly_from_tuple(self.polygons), "GUI_POLYS")
         file.write_polygons(get_poly_from_tuple(self.obsticles), "GUI_OBST")
+
+    def outline_fun(self):
+        self.outline = not self.outline
 
 
 def main():

@@ -129,9 +129,9 @@ def move_points(polygon_list, points):
         polygon_list_neu.append(shap.Polygon(
             [(coord.x, coord.y) for coord in old_poly.hull]))
     for i in range(1, len(points)-2):
-        # current_angle = caluculate_angle(
-        #     points[i-1], points[i], points[i+1])
-        current_angle = sum(calculate_turn_angles(points))
+        current_angle = caluculate_angle(
+            points[i-1], points[i], points[i+1])
+        # current_angle = sum(calculate_turn_angles(points))
         poly = -1
         for p, polygon in enumerate(polygon_list_neu):
             # print(points[i])
@@ -158,12 +158,12 @@ def move_points(polygon_list, points):
                     new_points.append(new_point)
                     k += 1
             for point in new_points:
-                # new_angle = caluculate_angle(
-                #     points[i-1], point, points[i+1])
-                new_angle = sum(calculate_turn_angles(
-                    points[:i] + [point] + points[i+1:]))
+                new_angle = caluculate_angle(
+                    points[i-1], point, points[i+1])
+                # new_angle = sum(calculate_turn_angles(
+                #     points[:i] + [point] + points[i+1:]))
 
-                if new_angle <= current_angle-1:
+                if new_angle <= current_angle-1 and new_angle > 40:
                     current_angle = new_angle
                     points[i] = point
     # for point in points:
