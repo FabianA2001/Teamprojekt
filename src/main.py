@@ -78,8 +78,6 @@ def parse_args():
         raise argparse.ArgumentTypeError("Bitte eine größere Breite")
     if args.count <= 2:
         raise argparse.ArgumentTypeError("Bitte mehr als 2 Punkte")
-    if args.name == "":
-        raise argparse.ArgumentTypeError("Bitte keinene leeren Namen")
     if args.file != None and args.file == "":
         raise argparse.ArgumentTypeError("Bitte keinene leeren file Namen")
 
@@ -104,9 +102,9 @@ def run_algo(polygon_list: list[Polygon],
         points = cpp_wrapper.farthest_insertion([tuple(i) for i in points])
         points = CONST.to_coord(points)
         if save:
-            img = Img(polygon_list, obstacle_list,
+            img = Img(polygon_list, [],
                       points, args.height, args.width)
-            img.save(args.name+"01_farthest_insertion")
+            img.save(args.name+"1_farthest_insertion")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
@@ -117,9 +115,9 @@ def run_algo(polygon_list: list[Polygon],
             [tuple(i) for i in points], 3000, 0.3, 1.2)
         points = CONST.to_coord(points)
         if save:
-            img = Img(polygon_list, obstacle_list,
+            img = Img(polygon_list, [],
                       points, args.height, args.width)
-            img.save(args.name+"02_ruin&recreate")
+            img.save(args.name+"2_ruin&recreate")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
@@ -129,9 +127,9 @@ def run_algo(polygon_list: list[Polygon],
         points = cpp_wrapper.two_opt([tuple(i) for i in points], 1.5)
         points = CONST.to_coord(points)
         if save:
-            img = Img(polygon_list, obstacle_list,
+            img = Img(polygon_list, [],
                       points, args.height, args.width)
-            img.save(args.name+"03_two_opt")
+            img.save(args.name+"3_two_opt")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
@@ -140,9 +138,9 @@ def run_algo(polygon_list: list[Polygon],
     if args.opt >= 4:
         points = solver.gurobi_solver(all_points, points)
         if save:
-            img = Img(polygon_list, obstacle_list,
+            img = Img(polygon_list, [],
                       points, args.height, args.width)
-            img.save(args.name+"04_gurobi")
+            img.save(args.name+"4_gurobi")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
@@ -158,10 +156,10 @@ def run_algo(polygon_list: list[Polygon],
         center_point = Coord(center_point[0], center_point[1])
         points = CONST.to_coord(points)
         if save:
-            img = Img(polygon_list, obstacle_list,
+            img = Img(polygon_list, [],
                       points, args.height, args.width)
             img._draw_point_debugg(center_point.x, center_point.y, "red")
-            img.save(args.name+"05_reconnect_area")
+            img.save(args.name+"5_reconnect_area")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
@@ -169,9 +167,9 @@ def run_algo(polygon_list: list[Polygon],
     if args.opt >= 6:
         points = solver.move_points(best_polygon_list, points)
         if save:
-            img = Img(polygon_list, obstacle_list,
+            img = Img(polygon_list, [],
                       points, args.height, args.width)
-            img.save(args.name+"06_move_points")
+            img.save(args.name+"6_move_points")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
@@ -184,7 +182,7 @@ def run_algo(polygon_list: list[Polygon],
         if save:
             img = Img(polygon_list, obstacle_list,
                       points, args.height, args.width)
-            img.save(args.name+"07_around_obstacles")
+            img.save(args.name+"7_around_obstacles")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
@@ -197,7 +195,7 @@ def run_algo(polygon_list: list[Polygon],
         if save:
             img = Img(polygon_list, obstacle_list,
                       points, args.height, args.width)
-            img.save(args.name+"08_deleted_points")
+            img.save(args.name+"8_deleted_points")
         dis, angle = solver.calculate_dis_angle(points)
         result.append(Stats(dis, angle))
         if print_st:
