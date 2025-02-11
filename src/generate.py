@@ -65,7 +65,7 @@ def generate_polygons(count: int, height: int, width: int, overlap: bool, poly_l
             hull = create_convex_hull(
                 random_cluster(center, CONST.CLUSTER_SIZE))
             polygon = Polygon(hull)
-            if overlap == False and poly_list == []:
+            if overlap == False:
                 i = 0
                 for polygon_l in polygon_list:
                     if do_bounding_boxes_overlap(polygon_l, polygon):
