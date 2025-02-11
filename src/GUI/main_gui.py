@@ -381,7 +381,7 @@ class GraphEditorApp:
             prev_inst = self.instes[index-1]
         self.index = index
 
-        if index >= 1:
+        if index >= 1 and self.outline:
             if len(prev_inst.points_tuple) >= 3:
                 self.canvas.create_polygon(
                     prev_inst.points_tuple, outline="lightgreen", fill="", width=1)
@@ -443,6 +443,7 @@ class GraphEditorApp:
 
     def outline_fun(self):
         self.outline = not self.outline
+        self.draw_instanze(self.index)
 
 
 def main():
