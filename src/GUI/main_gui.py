@@ -10,6 +10,9 @@ import file
 import threading
 # from Formatted_listbox import EditableFormattedListbox
 
+FONT_SIZE = 20
+WIDGET_WIDTH = 20
+
 
 def get_tuple_from_poly(polys: list[CONST.Polygon]):
     result = []
@@ -50,11 +53,11 @@ class GraphEditorApp:
         self.root = tk.Tk()
         self.root.title("Graph Editor")
         # Bildschirmbreite abrufen
-        self.SCREEN_WIDTH = int(self.root.winfo_screenwidth() * 0.8)
-        self.SCREEN_HEIGHT = int(self.root.winfo_screenheight() * 0.8)
+        self.SCREEN_WIDTH = int(self.root.winfo_screenwidth() * 0.95)
+        self.SCREEN_HEIGHT = int(self.root.winfo_screenheight() * 0.9)
         # self.SCREEN_WIDTH = 2000
         # self.SCREEN_HEIGHT = 1000
-        self.outline = False
+        self.outline = True
         self.index = 0
 
         # Hauptvariablen
@@ -111,7 +114,7 @@ class GraphEditorApp:
         self.listbox_frame.pack(side='left', fill="y", padx=4)
         # Listbox erstellen
         self.listbox = tk.Listbox(self.listbox_frame, font=(
-            "Arial", 12), selectmode=tk.SINGLE, width=30)
+            "Arial", FONT_SIZE), selectmode=tk.SINGLE, width=WIDGET_WIDTH)
         # sticky sorgt dafür, dass die Listbox den Frame füllt
         self.listbox.pack(fill="both", expand=True, pady=3)
         # Ereignisbindung für die Auswahl
@@ -123,24 +126,26 @@ class GraphEditorApp:
         # self.dis_box = EditableFormattedListbox
 
         self.dis_box = tk.Listbox(self.stats_frame, font=(
-            "Arial", 12), justify="right")
+            "Arial", FONT_SIZE), justify="right")
         self.dis_box.pack(fill="both", side="left",
                           expand=True, pady=3, padx=2)
 
         self.angle_box = tk.Listbox(self.stats_frame, font=(
-            "Arial", 12), justify="right")
+            "Arial", FONT_SIZE), justify="right")
         # sticky sorgt dafür, dass die Listbox den Frame füllt
         self.angle_box.pack(fill="both", side="left",
                             expand=True, pady=3, padx=2)
 
         self.dis_box.insert(tk.END, "Distanze ")
-        self.dis_box.insert(tk.END, "-"*30 + "  ")
+        self.dis_box.insert(tk.END, "-"*WIDGET_WIDTH + "  ")
         self.angle_box.insert(tk.END, "Winkel ")
-        self.angle_box.insert(tk.END, "-" * 30 + "  ")
+        self.angle_box.insert(tk.END, "-" * WIDGET_WIDTH + "  ")
+
+        self.root.update()
 
         # Canvas für Graph
         self.canvas = tk.Canvas(
-            self.lower_frame, height=self.SCREEN_HEIGHT-self.button_frame.winfo_height(), width=self.SCREEN_WIDTH - self.listbox.winfo_width(), bg="white")
+            self.lower_frame, height=self.SCREEN_HEIGHT-self.button_frame.winfo_height(), width=self.SCREEN_WIDTH - self.listbox_frame.winfo_width(), bg="white")
         self.canvas.pack(side='left')
         self.canvas.bind("<Button-1>", self.on_canvas_click)
 
@@ -197,8 +202,8 @@ class GraphEditorApp:
         self.current_polygon.clear()
 
     def random(self):
-        height = self.SCREEN_HEIGHT  # * CONST.ANTIALIAS_FACTOR
-        width = self.SCREEN_WIDTH  # * CONST.ANTIALIAS_FACTOR
+        height = self.canvas.winfo_height()
+        width = self.canvas.winfo_width()
         polygon_list: list[CONST.Polygon] = generate.generate_polygons(
             20, width, height, True)
         polys_tuple = get_tuple_from_poly(polygon_list)
@@ -214,6 +219,7 @@ class GraphEditorApp:
         if len(self.obsticles) >= 1:
             obst_list = get_poly_from_tuple(self.obsticles)
 
+        print(obst_list)
         try:
             best_polygon_list = generate.find_best_polygon_list_2(
                 polygon_list, obst_list)
