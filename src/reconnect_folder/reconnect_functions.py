@@ -9,12 +9,12 @@ def get_distance(point0, point1):
 
 
 def caluculate_angle(p1, p2, p3):
-    assert ((p1 != p2) and (p1 != p3) and (p2 != p3))
     vec_a = (p2.x - p1.x, p2.y - p1.y)
     vec_b = (p3.x - p2.x, p3.y - p2.y)
     mag_a = math.sqrt(vec_a[0] ** 2 + vec_a[1] ** 2)
     mag_b = math.sqrt(vec_b[0] ** 2 + vec_b[1] ** 2)
-    assert (mag_a != 0 and mag_b != 0)
+    if mag_a == 0 or mag_b == 0:
+        return 0
     dot_product = vec_a[0] * vec_b[0] + vec_a[1] * vec_b[1]
     cos_theta = dot_product / (mag_a * mag_b)
     cos_theta = max(-1, min(1, cos_theta))
@@ -39,7 +39,11 @@ def get_angle(edges_of_point):
 def get_angels_distance(tour):
     angles = caluculate_angle(tour[-2], tour[0], tour[1])
     for i in range(1, len(tour) - 1):
-        angles += caluculate_angle(tour[i - 1], tour[i], tour[i + 1])
+        p1, p2, p3 = tour[i - 1], tour[i], tour[i + 1]
+        angle = caluculate_angle(p1, p2, p3)
+        if p1.x == p2.x and p1.y == p2.y:
+            angle = caluculate_angle(tour[i - 2], p2, p3)
+        angles += angle
     distance = 0
     for i in range(len(tour) - 1):
         distance += get_distance(tour[i], tour[i + 1])
