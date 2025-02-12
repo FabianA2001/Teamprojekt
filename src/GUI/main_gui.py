@@ -136,7 +136,7 @@ class GraphEditorApp:
         self.angle_box.pack(fill="both", side="left",
                             expand=True, pady=3, padx=2)
 
-        self.dis_box.insert(tk.END, "Distanze ")
+        self.dis_box.insert(tk.END, "Distanz ")
         self.dis_box.insert(tk.END, "-"*WIDGET_WIDTH + "  ")
         self.angle_box.insert(tk.END, "Winkel ")
         self.angle_box.insert(tk.END, "-" * WIDGET_WIDTH + "  ")
@@ -406,7 +406,7 @@ class GraphEditorApp:
         if index >= 1 and self.outline:
             if len(prev_inst.points_tuple) >= 3:
                 self.canvas.create_polygon(
-                    prev_inst.points_tuple, outline="lightgreen", fill="", width=1)
+                    prev_inst.points_tuple, outline="lightgreen", fill="", width=2)
 
         for obs in inst.obsticales_tuple:
             self.draw_obstacle(obs)
