@@ -293,7 +293,7 @@ class GraphEditorApp:
         dis, angle = solver.calculate_dis_angle(points)
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("Gurobi", poly=polygon_list, points=points))
+            Instanze("Check Corners", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
         old_points = points.copy()
