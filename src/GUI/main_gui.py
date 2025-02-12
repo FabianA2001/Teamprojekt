@@ -296,6 +296,10 @@ class GraphEditorApp:
             Instanze("Gurobi", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
 
+        old_points = points.copy()
+        old_dis = dis
+        old_angle = angle
+
         for _ in range(6):
             center_point = cpp_wrapper.get_point_with_max_angle(
                 [tuple(i) for i in points])
@@ -305,10 +309,15 @@ class GraphEditorApp:
         center_point = CONST.Coord(center_point[0], center_point[1])
         points = CONST.to_coord(points)
         dis, angle = solver.calculate_dis_angle(points)
+
         self.print_stats(dis, angle)
         self.instes.append(
-            Instanze("second run and recreate", poly=polygon_list, points=points))
+            Instanze("Reconnect", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
+
+        old_points = points.copy()
+        old_dis = dis
+        old_angle = angle
 
         points = solver.move_points(best_polygon_list, points)
         dis, angle = solver.calculate_dis_angle(points)
@@ -316,6 +325,11 @@ class GraphEditorApp:
         self.instes.append(
             Instanze("move points", poly=polygon_list, points=points))
         self.listbox.insert(tk.END, self.instes[-1].name)
+
+        if old_dis < dis and old_angle < angle:
+            dis = old_dis
+            angle = old_angle
+            points = old_points.copy()
 
         # self.dis_box.insert(tk.END, "-"*30 + "  ")
         # self.angle_box.insert(tk.END, "-" * 30 + "  ")
@@ -342,6 +356,7 @@ class GraphEditorApp:
     def reset(self):
         self.canvas.delete("all")
         self.polygons.clear()
+        self.obsticles.clear()
         self.drawing_mode = True  # Zeichnen aktivieren/deaktivieren
         self.current_polygon.clear()
         self.instes.clear()
