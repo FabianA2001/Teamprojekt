@@ -1,26 +1,29 @@
 # Teamprojekt
 
 ## Inhalt
-Dieses Temaprojekt beinhaltet einen Algorithmus für das Close-Enough
-Area Travelling Salesman Problem inklusiver Turn-Costs. Der Algorithmus erhält
+Dieses Teamprojekt beinhaltet einen Algorithmus für das Close-Enough
+Area Travelling Salesman Problem inklusive Turn-Costs. Der Algorithmus erhält
 eine Menge an Flächen und muss in möglichst kurzer Zeit eine möglichst kurze
 Rundreise finden, die alle Flächen besucht und dabei möglichst kleine
 Abbiegewinkel nutzt.
 
 ## Installation
-
-auf MacOS und Linux ist es sinnvoll ein virtuelles environment zu haben um pip
-zu nutzen. Diese kann mit `python3 -m venv .` im aktuzellen Ordner erzeugt
-werden.
-
-Aktiviert werden für die aktuelle Konsole, kann das environment mit folgendem
-befehl `source bin/active`. sollte die Konsole neugestartet werden, muss das
-environment erneut aktiviert werden.
-
-alle benötigeten Pakete sind in der requirements.txt definiert dieses kann mit
+Alle benötigten Pakete sind in der requirements.txt definiert. Diese können mit
 `pip install -r requirements.txt` genutzt werden
 
-das Programm kann standarmäßig mit `python3 src/main.py` gestartet werden, dann
-werden eine jpg mit den Koordinaten und eine csv datei mit den Koordiaten
-erstellt mit `python3 main.py -h` kann eine hilfe für die möglichen Arugmente
+Das Programm kann standardmäßig mit `python3 src/main.py` gestartet werden. Dann
+werden eine JPG-Datei mit den Koordinaten und eine CSV-Datei mit den Koordinaten
+erstellt. Mit `python3 main.py -h` kann eine Hilfe für die möglichen Argumente
 angezeigt werden.
+
+## Solver Ablauf
+Eine beispielhafte Instanz, wo jede Fläche durchlaufen werden muss und die grauen Flächen nicht durchkreuzt werden dürfen.
+![alt text](readme_data/00_all_polygons.jpg)
+![alt text](readme_data/1_farthest_insertion.jpg)
+![alt text](readme_data/2_ruin&recreate.jpg)
+![alt text](readme_data/3_two_opt.jpg)
+![alt text](readme_data/4_gurobi.jpg)
+![alt text](readme_data/5_reconnect_area.jpg)
+![alt text](readme_data/6_move_points.jpg)
+![alt text](readme_data/7_around_obstacles.jpg)
+![alt text](readme_data/8_deleted_points.jpg)

@@ -31,6 +31,8 @@ pyvenv.cfg
 lib64
 
 *.jpg
+
+!readme_data/*
 *.png
 *.csv
 !instances/standard_test_*.csv
